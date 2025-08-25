@@ -1,0 +1,26 @@
+name: vigorbloom
+description: "Transform your fitness journey into an epic adventure with this interactive health app, blending gamified workouts and smart diet tracking to help you conquer your goals and climb the leaderboards!"
+publish_to: "none"
+version: 1.0.0
+
+environment:
+  sdk: ^3.5.4
+
+dependencies:
+  animations: ^2.0.0
+  injectable: ^2.0.0
+  get_it: ^8.0.0
+  flutter_riverpod: ^2.6.1
+  go_router: ^15.1.2
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  google_fonts: ^6.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
