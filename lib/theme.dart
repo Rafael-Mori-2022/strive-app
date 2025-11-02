@@ -105,17 +105,17 @@ ThemeData get lightTheme => ThemeData(
         foregroundColor: LightModeColors.lightOnPrimaryContainer,
         elevation: 0,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: LightModeColors.lightSurface,
         elevation: 0.5,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(RadiusTokens.lg)),
         margin: const EdgeInsets.all(0),
       ),
-      dialogTheme: const DialogTheme(
+      dialogTheme: const DialogThemeData(
         elevation: 0,
       ),
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         indicatorSize: TabBarIndicatorSize.label,
         labelColor: LightModeColors.lightOnPrimaryContainer,
         unselectedLabelColor: Colors.grey,
@@ -215,15 +215,15 @@ ThemeData get darkTheme => ThemeData(
         foregroundColor: DarkModeColors.darkOnPrimaryContainer,
         elevation: 0,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: DarkModeColors.darkSurface,
         elevation: 0.5,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(RadiusTokens.lg)),
         margin: const EdgeInsets.all(0),
       ),
-      dialogTheme: const DialogTheme(elevation: 0),
-      tabBarTheme: TabBarTheme(
+      dialogTheme: const DialogThemeData(elevation: 0),
+      tabBarTheme: TabBarThemeData(
         indicatorSize: TabBarIndicatorSize.label,
         labelColor: DarkModeColors.darkOnSurface,
         unselectedLabelColor: Colors.grey,
