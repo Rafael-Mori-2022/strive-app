@@ -95,8 +95,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
             const _CalendarCard(),
             const SizedBox(height: 16),
             // 7. Barra de Navegação (a mesma do Dashboard)
-            const _CustomBottomNavBar(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 84),
           ],
         ),
       ),
@@ -239,7 +238,7 @@ class _PlanCard extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 15),
             // Lista de Exercícios (usando Column pois está dentro de um PageView)
             Column(
               children: exercises // Use plan.exercises aqui

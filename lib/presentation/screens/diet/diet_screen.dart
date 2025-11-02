@@ -37,15 +37,22 @@ class DietScreen extends ConsumerWidget {
 
             // 7. Lista de Refeições
             meals.when(
-              data: (list) => Column(
-                  children: list
-                      .map((m) =>
-                          _MealCard(meal: m)) // 8. Usando o novo _MealCard
-                      .toList()),
+              data: (list) => ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: list.length,
+                itemBuilder: (context, index) {
+                  final meal = list[index];
+                  return _MealCard(meal: meal);
+                },
+                separatorBuilder: (context, index) {
+                  return const SizedBox(height: 16);
+                },
+              ),
               loading: () => const LinearProgressIndicator(),
               error: (e, st) => const Text('Erro ao carregar refeições'),
             ),
-            const SizedBox(height: 16), // Espaço para a bottom nav
+            const SizedBox(height: 72), // Espaço para a bottom nav
           ],
         ),
       ),

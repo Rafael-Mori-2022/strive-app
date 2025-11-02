@@ -11,27 +11,26 @@ class HomeDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return RefreshIndicator(
-      onRefresh: () async {
-        ref.refresh(userProfileProvider);
-        ref.refresh(availableStatsProvider);
-      },
-      child: ListView(
-        // <<< CORREÇÃO AQUI
-        // Força o ListView a ser scrollável mesmo se o conteúdo for curto
-        physics: const AlwaysScrollableScrollPhysics(),
-        //
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-        children: [
-          const SizedBox(height: 16),
-          const _TopBar(),
-          const SizedBox(height: 24),
-          const _Greeting(),
-          const SizedBox(height: 24),
-          const _ClassificationCard(),
-          const SizedBox(height: 24),
-          const _StatisticsCard(),
-        ],
+    // Adicione o SafeArea ao redor do RefreshIndicator
+    return SafeArea(
+      child: RefreshIndicator(
+        onRefresh: () async {
+          ref.refresh(userProfileProvider);
+          ref.refresh(availableStatsProvider);
+        },
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+          children: [
+            const _TopBar(),
+            const SizedBox(height: 24),
+            const _Greeting(),
+            const SizedBox(height: 24),
+            const _ClassificationCard(),
+            const SizedBox(height: 24),
+            const _StatisticsCard(),
+          ],
+        ),
       ),
     );
   }
@@ -250,6 +249,8 @@ class _StatisticsCard extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          // Garante que a coluna não ocupe mais espaço do que o necessário
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -265,7 +266,8 @@ class _StatisticsCard extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            // O SizedBox(height: 4) foi REMOVIDO daqui
+
             availableStats.when(
               data: (list) {
                 final selectedIds = selectedStats.valueOrNull ?? [];
@@ -274,7 +276,22 @@ class _StatisticsCard extends ConsumerWidget {
                     .take(4)
                     .toList();
 
+                // Caso não haja nenhuma estatística selecionada
+                if (statCards.isEmpty) {
+                  return Container(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Edite para adicionar estatísticas.',
+                      style: textTheme.bodyMedium
+                          ?.copyWith(color: colors.onSurfaceVariant),
+                    ),
+                  );
+                }
+
                 return GridView.builder(
+                  // Adicionado padding aqui para controlar o espaço
+                  padding: const EdgeInsets.only(top: 16.0),
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -289,16 +306,21 @@ class _StatisticsCard extends ConsumerWidget {
                     return _StatGridItem(
                       text: stat.value,
                       icon: stat.icon,
-                      iconColor: _getColorForStat(stat.id), // Mapeia a cor
+                      iconColor: _getColorForStat(stat.id),
                     );
                   },
                 );
               },
-              loading: () => const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: CircularProgressIndicator(),
+              loading: () => const SizedBox(
+                // Altura fixa para evitar pulos de layout
+                height: 150,
+                child: Center(child: CircularProgressIndicator()),
               ),
-              error: (e, st) => const Text('Erro ao carregar estatísticas'),
+              error: (e, st) => Container(
+                padding: const EdgeInsets.only(top: 16.0),
+                alignment: Alignment.center,
+                child: const Text('Erro ao carregar estatísticas'),
+              ),
             ),
           ],
         ),

@@ -145,21 +145,60 @@ class _CategoryRow extends StatelessWidget {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface, // Cor de card
-          borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: () {
+          // Navega para a tela de placeholder usando o Navigator padrão.
+          // O GoRouter ainda gerencia a pilha de navegação (como o botão "voltar").
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => _PlaceholderScreen(title: title),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface, // Cor de card
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: iconColor, size: 28),
+              const SizedBox(width: 16),
+              Text(title, style: theme.textTheme.titleMedium),
+              const Spacer(),
+              Icon(Icons.chevron_right,
+                  color: theme.colorScheme.onSurfaceVariant),
+            ],
+          ),
         ),
-        child: Row(
-          children: [
-            Icon(icon, color: iconColor, size: 28),
-            const SizedBox(width: 16),
-            Text(title, style: theme.textTheme.titleMedium),
-            const Spacer(),
-            Icon(Icons.chevron_right,
-                color: theme.colorScheme.onSurfaceVariant),
-          ],
+      ),
+    );
+  }
+}
+
+class _PlaceholderScreen extends StatelessWidget {
+  final String title;
+  const _PlaceholderScreen({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        backgroundColor: Theme.of(context).colorScheme.background,
+        elevation: 0,
+      ),
+      backgroundColor: Theme.of(context).colorScheme.background,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Text(
+            'Página "$title" ainda não implementada.',
+            style: Theme.of(context).textTheme.titleMedium,
+            textAlign: TextAlign.center,
+          ),
         ),
       ),
     );
