@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "463026262223",
+    "project_id": "strive-saude-app",
+    "storage_bucket": "strive-saude-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:463026262223:android:c1f248a02165f5296c27ba",
+        "android_client_info": {
+          "package_name": "com.mycompany.CounterApp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "463026262223-ii2qrbmpvotub4c748hmgslq6aft9lho.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mycompany.CounterApp",
+            "certificate_hash": "71dfe11551dc01fdc1340b7ae341a50843f62421"
+          }
+        },
+        {
+          "client_id": "463026262223-eou32d0f60v70ugi40ljkfvstrgplf2d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMrVsGgUbIAuXqtmc4-oXNaqdfKQPXp3M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "463026262223-eou32d0f60v70ugi40ljkfvstrgplf2d.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "463026262223-0qb8vrrf7704m1rl4pqtcsajt9mhhd0h.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mycompany.CounterApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
