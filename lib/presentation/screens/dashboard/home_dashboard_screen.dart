@@ -3,96 +3,386 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vigorbloom/presentation/state/profile_providers.dart';
 import 'package:vigorbloom/presentation/state/stats_provider.dart';
-import 'package:vigorbloom/presentation/widgets/common_widgets.dart';
+import 'package:vigorbloom/domain/entities/user_profile.dart';
+import 'package:vigorbloom/domain/entities/stat_item.dart';
 
 class HomeDashboardScreen extends ConsumerWidget {
   const HomeDashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profile = ref.watch(userProfileProvider);
-    final availableStats = ref.watch(availableStatsProvider);
-    final selected = ref.watch(selectedStatsProvider);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('VigorBloom'),
-        actions: [
-          IconButton(
-              icon: const Icon(Icons.explore_outlined, color: Colors.blue),
-              onPressed: () => context.push('/dashboard/explore')),
-          IconButton(
-              icon: const Icon(Icons.emoji_events, color: Colors.amber),
-              onPressed: () => context.push('/dashboard/leaderboard')),
-          IconButton(
-              icon: const Icon(Icons.tune, color: Colors.deepPurple),
-              onPressed: () => context.push('/dashboard/edit-stats')),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async {},
+    // Adicione o SafeArea ao redor do RefreshIndicator
+    return SafeArea(
+      child: RefreshIndicator(
+        onRefresh: () async {
+          ref.refresh(userProfileProvider);
+          ref.refresh(availableStatsProvider);
+        },
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
           children: [
-            profile.when(
-              data: (p) => Text('Olá, ${p.name} 👋',
-                  style: Theme.of(context).textTheme.headlineMedium),
-              loading: () =>
-                  const SizedBox(height: 28, child: LinearProgressIndicator()),
-              error: (e, st) => const Text('Olá!'),
+            const _TopBar(),
+            const SizedBox(height: 24),
+            const _Greeting(),
+            const SizedBox(height: 24),
+            const _ClassificationCard(),
+            const SizedBox(height: 24),
+            const _StatisticsCard(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ... (O restante do seu arquivo - _TopBar, _Greeting, etc. - continua igual)
+// <<< 1. Widget convertido para ConsumerWidget
+class _TopBar extends ConsumerWidget {
+  const _TopBar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final textTheme = Theme.of(context).textTheme;
+    final colors = Theme.of(context).colorScheme;
+    final profile = ref.watch(userProfileProvider);
+
+    return profile.when(
+      data: (p) {
+        final level = (p.xp / 5000).floor() + 1;
+        final currentXp = p.xp % 5000;
+        const goalXp = 5000;
+
+        return Row(
+          children: [
+            SizedBox(
+              width: 50,
+              height: 50,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  CircularProgressIndicator(
+                    value: currentXp / goalXp,
+                    strokeWidth: 5,
+                    backgroundColor: colors.surfaceVariant,
+                    valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+                  ),
+                  Center(
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        style: textTheme.labelSmall
+                            ?.copyWith(color: colors.primary),
+                        children: [
+                          const TextSpan(text: 'nvl. '),
+                          TextSpan(
+                            text: '$level',
+                            style: textTheme.titleMedium
+                                ?.copyWith(color: colors.primary, height: 1.1),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
-            const XPBar(
-                progress: 0.65, label: 'Faltam 350 XP para o próximo nível'),
-            const SizedBox(height: 16),
-            LeagueCard(
-                tier: 'Prata II',
-                rank: 12,
-                onTap: () => context.push('/dashboard/leaderboard')),
-            const SizedBox(height: 16),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text('Seus destaques',
-                  style: Theme.of(context).textTheme.titleLarge),
-              TextButton.icon(
+            const SizedBox(width: 12),
+            Text(
+              '$currentXp/$goalXp',
+              style: textTheme.bodyMedium
+                  ?.copyWith(color: colors.onSurfaceVariant),
+            ),
+            const Spacer(),
+            InkWell(
+              onTap: () => context.push('/profile'),
+              borderRadius: BorderRadius.circular(24),
+              child: CircleAvatar(
+                radius: 24,
+                backgroundColor: colors.surfaceVariant,
+                child: Icon(
+                  Icons.person,
+                  size: 30,
+                  color: colors.onSurfaceVariant.withOpacity(0.8),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => const SizedBox(
+        height: 50,
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 16.0),
+          child: LinearProgressIndicator(),
+        ),
+      ),
+      error: (e, st) => const SizedBox(
+        height: 50,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error, color: Colors.red),
+            SizedBox(width: 8),
+            Text('Erro ao carregar perfil'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Greeting extends ConsumerWidget {
+  const _Greeting();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final textTheme = Theme.of(context).textTheme;
+    final profile = ref.watch(userProfileProvider);
+
+    final greetingName = profile.when(
+      data: (p) => 'Olá, ${p.name.split(' ')[0]}!',
+      loading: () => 'Olá!',
+      error: (e, st) => 'Olá!',
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          greetingName,
+          style:
+              textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        Text(
+          'Vamos juntos alcançar suas metas de saúde!',
+          style:
+              textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w600),
+        ),
+      ],
+    );
+  }
+}
+
+class _ClassificationCard extends StatelessWidget {
+  const _ClassificationCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colors = Theme.of(context).colorScheme;
+
+    return InkWell(
+      onTap: () => context.push('/dashboard/leaderboard'),
+      borderRadius: BorderRadius.circular(16),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '⭐ Classificação',
+                style: textTheme.titleLarge,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Icon(
+                    Icons.shield,
+                    color: colors.primary,
+                    size: 100,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        _InfoChip(
+                          text: 'restam 4 dias',
+                          icon: Icons.access_time_filled_rounded,
+                        ),
+                        const SizedBox(height: 8),
+                        _InfoChip(
+                          text: '3º Lugar',
+                          icon: Icons.emoji_events_rounded,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StatisticsCard extends ConsumerWidget {
+  const _StatisticsCard();
+
+  Color _getColorForStat(String id) {
+    switch (id) {
+      case 'water':
+        return const Color(0xFF53A9FF);
+      case 'calories':
+        return const Color(0xFFFF8A65);
+      case 'steps':
+        return const Color(0xFFFF8A65);
+      case 'heartRate':
+        return Colors.redAccent;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final textTheme = Theme.of(context).textTheme;
+    final colors = Theme.of(context).colorScheme;
+
+    final availableStats = ref.watch(availableStatsProvider);
+    final selectedStats = ref.watch(selectedStatsProvider);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          // Garante que a coluna não ocupe mais espaço do que o necessário
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Estatísticas',
+                  style: textTheme.titleLarge,
+                ),
+                IconButton(
+                  icon:
+                      Icon(Icons.edit_outlined, color: colors.onSurfaceVariant),
                   onPressed: () => context.push('/dashboard/edit-stats'),
-                  icon: const Icon(Icons.edit_outlined),
-                  label: const Text('Editar')),
-            ]),
-            const SizedBox(height: 8),
+                ),
+              ],
+            ),
+            // O SizedBox(height: 4) foi REMOVIDO daqui
+
             availableStats.when(
               data: (list) {
-                final selectedIds = selected.valueOrNull ?? [];
+                final selectedIds = selectedStats.valueOrNull ?? [];
                 final statCards = list
                     .where((s) => selectedIds.contains(s.id))
                     .take(4)
                     .toList();
+
+                // Caso não haja nenhuma estatística selecionada
+                if (statCards.isEmpty) {
+                  return Container(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Edite para adicionar estatísticas.',
+                      style: textTheme.bodyMedium
+                          ?.copyWith(color: colors.onSurfaceVariant),
+                    ),
+                  );
+                }
+
                 return GridView.builder(
+                  // Adicionado padding aqui para controlar o espaço
+                  padding: const EdgeInsets.only(top: 16.0),
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: statCards.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisExtent: 120,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12),
-                  itemBuilder: (_, i) {
-                    final s = statCards[i];
-                    return StatCard(
-                        title: s.title,
-                        value: s.value,
-                        icon: s.icon,
-                        onTap: () {});
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 1.8,
+                  ),
+                  itemCount: statCards.length,
+                  itemBuilder: (context, index) {
+                    final stat = statCards[index];
+                    return _StatGridItem(
+                      text: stat.value,
+                      icon: stat.icon,
+                      iconColor: _getColorForStat(stat.id),
+                    );
                   },
                 );
               },
-              loading: () => const Center(
-                  child: Padding(
-                      padding: EdgeInsets.all(24),
-                      child: CircularProgressIndicator())),
-              error: (e, st) => const Text('Erro ao carregar stats'),
+              loading: () => const SizedBox(
+                // Altura fixa para evitar pulos de layout
+                height: 150,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (e, st) => Container(
+                padding: const EdgeInsets.only(top: 16.0),
+                alignment: Alignment.center,
+                child: const Text('Erro ao carregar estatísticas'),
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  const _InfoChip({required this.text, required this.icon});
+  final String text;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colors = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: colors.surfaceVariant,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 20, color: colors.onSurface),
+          const SizedBox(width: 8),
+          Text(text, style: textTheme.bodyMedium),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatGridItem extends StatelessWidget {
+  const _StatGridItem(
+      {required this.text, required this.icon, required this.iconColor});
+  final String text;
+  final IconData icon;
+  final Color iconColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colors = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colors.surfaceVariant,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 24, color: iconColor),
+          const SizedBox(height: 8),
+          Text(text, style: textTheme.titleSmall),
+        ],
       ),
     );
   }

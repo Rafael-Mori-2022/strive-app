@@ -25,104 +25,135 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/onboarding',
         name: 'onboarding',
-        pageBuilder: (context, state) => const NoTransitionPage(child: ProfileSetupScreen()),
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: ProfileSetupScreen()),
       ),
       GoRoute(
         path: '/success',
         name: 'success',
-        pageBuilder: (context, state) => const NoTransitionPage(child: SuccessScreen(message: 'Tudo Certo! Seus dados foram cadastrados!')),
+        pageBuilder: (context, state) => const NoTransitionPage(
+            child: SuccessScreen(
+                message: 'Tudo Certo! Seus dados foram cadastrados!')),
       ),
+
+      // --- NAVEGAÇÃO PRINCIPAL (COM ABAS) ---
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) => AppShell(navigationShell: navigationShell),
+        builder: (context, state, navigationShell) =>
+            AppShell(navigationShell: navigationShell),
         branches: [
+          // --- ABA 1: DASHBOARD ---
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/dashboard',
               name: 'dashboard',
-              pageBuilder: (context, state) => const NoTransitionPage(child: HomeDashboardScreen()),
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: HomeDashboardScreen()),
               routes: [
                 GoRoute(
                   path: 'leaderboard',
                   name: 'leaderboard',
-                  pageBuilder: (context, state) => const NoTransitionPage(child: LeaderboardScreen()),
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: LeaderboardScreen()),
                 ),
                 GoRoute(
                   path: 'edit-stats',
                   name: 'edit-stats',
-                  pageBuilder: (context, state) => const NoTransitionPage(child: EditStatsScreen()),
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: EditStatsScreen()),
                 ),
-                GoRoute(
-                  path: 'explore',
-                  name: 'explore',
-                  pageBuilder: (context, state) => const NoTransitionPage(child: ExploreScreen()),
-                ),
+                // ROTA 'explore' REMOVIDA DAQUI
               ],
             ),
           ]),
+
+          // --- ABA 2: DIETA ---
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/diet',
               name: 'diet',
-              pageBuilder: (context, state) => const NoTransitionPage(child: DietScreen()),
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: DietScreen()),
               routes: [
                 GoRoute(
                   path: 'add-food',
                   name: 'add-food',
-                  pageBuilder: (context, state) => const NoTransitionPage(child: AddFoodScreen()),
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: AddFoodScreen()),
                 ),
                 GoRoute(
                   path: 'meal/:id',
                   name: 'meal-detail',
                   pageBuilder: (context, state) {
                     final id = state.pathParameters['id']!;
-                    return NoTransitionPage(child: MealDetailScreen(mealId: id));
+                    return NoTransitionPage(
+                        child: MealDetailScreen(mealId: id));
                   },
                 ),
               ],
             ),
           ]),
+
+          // --- ABA 3: TREINO ---
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/workout',
               name: 'workout',
-              pageBuilder: (context, state) => const NoTransitionPage(child: WorkoutScreen()),
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: WorkoutScreen()),
               routes: [
                 GoRoute(
                   path: 'editor',
                   name: 'workout-editor',
-                  pageBuilder: (context, state) => const NoTransitionPage(child: WorkoutEditorScreen()),
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: WorkoutEditorScreen()),
                 ),
                 GoRoute(
                   path: 'create',
                   name: 'workout-create',
-                  pageBuilder: (context, state) => const NoTransitionPage(child: WorkoutCreateScreen()),
+                  pageBuilder: (context, state) =>
+                      const NoTransitionPage(child: WorkoutCreateScreen()),
                 ),
                 GoRoute(
                   path: 'add-exercise',
                   name: 'add-exercise',
                   pageBuilder: (context, state) {
-                    final muscle = state.uri.queryParameters['muscle'] ?? 'Bíceps';
-                    return NoTransitionPage(child: AddExerciseScreen(muscleGroup: muscle));
+                    final muscle =
+                        state.uri.queryParameters['muscle'] ?? 'Bíceps';
+                    return NoTransitionPage(
+                        child: AddExerciseScreen(muscleGroup: muscle));
                   },
                 ),
               ],
             ),
           ]),
+
+          // --- ABA 4: EXPLORAR (CORRIGIDO) ---
           StatefulShellBranch(routes: [
             GoRoute(
-              path: '/profile',
-              name: 'profile',
-              pageBuilder: (context, state) => const NoTransitionPage(child: ProfileScreen()),
+              path: '/explore',
+              name: 'explore',
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: ExploreScreen()),
             ),
           ]),
         ],
       ),
+
+      GoRoute(
+        path: '/profile',
+        name: 'profile',
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: ProfileScreen()),
+      ),
+
       GoRoute(
         path: '/404',
         name: 'under-construction',
-        pageBuilder: (context, state) => const NoTransitionPage(child: UnderConstructionScreen()),
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: UnderConstructionScreen()),
       ),
     ],
-    errorPageBuilder: (context, state) => const NoTransitionPage(child: UnderConstructionScreen()),
+    errorPageBuilder: (context, state) =>
+        const NoTransitionPage(child: UnderConstructionScreen()),
   );
 });
