@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>463026262223-0qb8vrrf7704m1rl4pqtcsajt9mhhd0h.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.463026262223-0qb8vrrf7704m1rl4pqtcsajt9mhhd0h</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>463026262223-ii2qrbmpvotub4c748hmgslq6aft9lho.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBWEFywWYzVvYMwEaM3MyoyVHaCGHbYfBQ</string>
+	<key>GCM_SENDER_ID</key>
+	<string>463026262223</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.mycompany.CounterApp</string>
+	<key>PROJECT_ID</key>
+	<string>strive-saude-app</string>
+	<key>STORAGE_BUCKET</key>
+	<string>strive-saude-app.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:463026262223:ios:e3ad4439b25e15286c27ba</string>
+</dict>
+</plist>
