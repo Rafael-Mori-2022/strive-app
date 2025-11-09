@@ -7,7 +7,7 @@ class MockStatsRepository implements StatsRepository {
   List<String> _selected = ['calories', 'water', 'steps', 'sleep'];
 
   @override
-  Future<List<StatItem>> getAvailableStats() async => const [
+  Future<List<StatItem>> getAvailableStats(String uid) async => const [
         StatItem(id: 'calories', title: 'Calorias', value: '1,420 kcal', icon: Icons.local_fire_department),
         StatItem(id: 'protein', title: 'Proteína', value: '95 g', icon: Icons.egg),
         StatItem(id: 'carbs', title: 'Carbo', value: '180 g', icon: Icons.breakfast_dining),
@@ -18,10 +18,9 @@ class MockStatsRepository implements StatsRepository {
       ];
 
   @override
-  Future<List<String>> getSelectedStatIds() async => _selected;
-
+  Future<List<String>> getSelectedStatIds(String uid) async => _selected;
   @override
-  Future<void> setSelectedStatIds(List<String> ids) async {
+  Future<void> setSelectedStatIds(String uid, List<String> ids) async {
     _selected = ids;
   }
 }

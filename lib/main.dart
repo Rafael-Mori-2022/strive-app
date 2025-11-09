@@ -1,12 +1,21 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vigorbloom/theme.dart';
 import 'package:vigorbloom/routes/app_router.dart';
 import 'package:vigorbloom/di/service_locator.dart';
+import 'firebase_options.dart'; 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Inicialização do Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
   await setupServiceLocator();
+  
   runApp(const ProviderScope(child: VigorBloomApp()));
 }
 

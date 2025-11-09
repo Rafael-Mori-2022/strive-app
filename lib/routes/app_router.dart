@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vigorbloom/providers/auth_providers.dart';
 import 'package:vigorbloom/presentation/shell/app_shell.dart';
 import 'package:vigorbloom/presentation/screens/onboarding/profile_setup_screen.dart';
 import 'package:vigorbloom/presentation/screens/common/success_screen.dart';
@@ -17,11 +18,38 @@ import 'package:vigorbloom/presentation/screens/explore/explore_screen.dart';
 import 'package:vigorbloom/presentation/screens/config/edit_stats_screen.dart';
 import 'package:vigorbloom/presentation/screens/common/under_construction_screen.dart';
 import 'package:vigorbloom/presentation/screens/profile/profile_screen.dart';
+import 'package:vigorbloom/presentation/screens/basic/login_screen.dart';
+import 'package:vigorbloom/presentation/screens/basic/loading_screen.dart';
+
+// Define as rotas como enums 
+enum AppRoute {
+  loading,
+  login,
+  home,
+}
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  // Observa o provider que notifica o GoRouter sobre mudanças na autenticação
+  final refreshNotifier = ref.watch(goRouterRefreshStreamProvider.notifier);
+
+  // Observa o estado de autenticação (AsyncValue<User?>)
+  final authState = ref.watch(authStateStreamProvider);
+
   return GoRouter(
-    initialLocation: '/dashboard',
+    refreshListenable: refreshNotifier,
+
+    initialLocation: '/login',
     routes: [
+      GoRoute(
+        path: '/loading',
+        name: AppRoute.loading.name,
+        builder: (context, state) => const LoadingScreen(),
+      ),
+      GoRoute(
+        path: '/login',
+        name: AppRoute.login.name,
+        builder: (context, state) => const LoginScreen(),
+      ),
       GoRoute(
         path: '/onboarding',
         name: 'onboarding',
@@ -153,6 +181,34 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             const NoTransitionPage(child: UnderConstructionScreen()),
       ),
     ],
+    
+    // Lógica de Redirecionamento 
+    redirect: (BuildContext context, GoRouterState state) {
+      
+      if (authState.isLoading || !authState.hasValue) {
+        return '/loading';
+      }
+
+      final user = authState.valueOrNull;
+
+      final isLoggedIn = user != null;
+
+      final isGoingToLogin = state.matchedLocation == '/login';
+      final isGoingToLoading = state.matchedLocation == '/loading';
+
+      //Usuário deslogado
+      if (!isLoggedIn) {
+        return isGoingToLogin ? null : '/login';
+      }
+
+      // Usuário logado
+      if (isGoingToLogin || isGoingToLoading) {
+        return '/dashboard';
+      }
+      
+      return null;
+    },
+
     errorPageBuilder: (context, state) =>
         const NoTransitionPage(child: UnderConstructionScreen()),
   );

@@ -127,17 +127,17 @@ ThemeData get lightTheme {
       foregroundColor: colorScheme.onBackground,
       elevation: 0,
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: colorScheme.surface,
       elevation: 0.5,
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(RadiusTokens.lg)),
       margin: const EdgeInsets.all(0),
     ),
-    dialogTheme: const DialogTheme(
+    dialogTheme: const DialogThemeData(
       elevation: 0,
     ),
-    tabBarTheme: TabBarTheme(
+    tabBarTheme: TabBarThemeData(
       indicatorSize: TabBarIndicatorSize.label,
       labelColor: colorScheme.primary,
       unselectedLabelColor: colorScheme.onSurfaceVariant,
@@ -245,15 +245,15 @@ ThemeData get darkTheme {
       foregroundColor: colorScheme.onBackground,
       elevation: 0,
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: colorScheme.surface,
       elevation: 0.5,
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(RadiusTokens.lg)),
       margin: const EdgeInsets.all(0),
     ),
-    dialogTheme: const DialogTheme(elevation: 0),
-    tabBarTheme: TabBarTheme(
+    dialogTheme: const DialogThemeData(elevation: 0),
+    tabBarTheme: TabBarThemeData(
       indicatorSize: TabBarIndicatorSize.label,
       labelColor: colorScheme.primary,
       unselectedLabelColor: colorScheme.onSurfaceVariant,
