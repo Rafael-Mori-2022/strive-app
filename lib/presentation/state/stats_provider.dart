@@ -2,28 +2,62 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vigorbloom/di/service_locator.dart';
 import 'package:vigorbloom/domain/entities/stat_item.dart';
 import 'package:vigorbloom/domain/repositories/stats_repository.dart';
+import 'package:vigorbloom/providers/auth_providers.dart';
 
 final statsRepositoryProvider =
     Provider<StatsRepository>((ref) => sl<StatsRepository>());
 
-final availableStatsProvider = FutureProvider<List<StatItem>>(
-    (ref) async => ref.read(statsRepositoryProvider).getAvailableStats());
+final availableStatsProvider = FutureProvider<List<StatItem>>((ref) async {
+  // Assiste ao estado de autenticação do Firebase
+  final firebaseUser = await ref.watch(authStateStreamProvider.future);
+
+  // Se não houver usuário, retorna uma lista vazia
+  if (firebaseUser == null) {
+    return [];
+  }
+  
+  // Usa o UID para buscar as estatísticas
+  return ref.read(statsRepositoryProvider).getAvailableStats(firebaseUser.uid);
+});
 
 class SelectedStatsNotifier extends AsyncNotifier<List<String>> {
+  // Helper para pegar o UID de forma segura nos métodos de ação
+  String _getUid() {
+    final firebaseUser = ref.read(authStateStreamProvider).valueOrNull;
+    if (firebaseUser == null) {
+      throw Exception("Usuário não autenticado. Não é possível realizar a ação.");
+    }
+    return firebaseUser.uid;
+  }
+
   @override
   Future<List<String>> build() async {
-    // CORREÇÃO: Buscamos os dados do repositório.
-    final selectedIds =
-        await ref.read(statsRepositoryProvider).getSelectedStatIds();
+    // Aguarda o auth resolver
+    final firebaseUser = await ref.watch(authStateStreamProvider.future);
 
-    // GARANTIMOS O TIPO: Convertemos a lista para List<String> explicitamente.
-    // Isso resolve o erro original e o erro em cascata na linha 30.
+    if (firebaseUser == null) {
+      return []; // Retorna lista vazia se deslogado
+    }
+
+    // Busca os dados do repositório usando o uid
+    final selectedIds = await ref
+        .read(statsRepositoryProvider)
+        .getSelectedStatIds(firebaseUser.uid);
+
     return List<String>.from(selectedIds);
   }
 
   Future<void> toggle(String id) async {
-    // Agora 'state.value' será corretamente um List<String>?,
-    // então 'current' também será um List<String>.
+    // Pega o UID atual
+    final String uid;
+    try {
+      uid = _getUid();
+    } catch (e) {
+      // Se o usuário tentar clicar no toggle antes da auth carregar
+      state = AsyncError(e, StackTrace.current);
+      return;
+    }
+
     final current = List<String>.from(state.value ?? const <String>[]);
     if (current.contains(id)) {
       current.remove(id);
@@ -32,10 +66,11 @@ class SelectedStatsNotifier extends AsyncNotifier<List<String>> {
     }
     state = const AsyncLoading();
 
-    // Esta chamada agora funcionará, pois 'current' tem o tipo correto.
-    await ref.read(statsRepositoryProvider).setSelectedStatIds(current);
+    await ref.read(statsRepositoryProvider).setSelectedStatIds(uid, current);
+    
     state = AsyncData(current);
   }
+
 }
 
 final selectedStatsProvider =
