@@ -1,5 +1,5 @@
-import 'package:vigorbloom/domain/entities/food_item.dart';
-import 'package:vigorbloom/domain/entities/meal.dart';
+import 'package:strive/domain/entities/food_item.dart';
+import 'package:strive/domain/entities/meal.dart';
 
 abstract class NutritionRepository {
   Future<List<Meal>> getMealsOfDay();

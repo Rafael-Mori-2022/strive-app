@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vigorbloom/domain/entities/meal.dart';
-import 'package:vigorbloom/presentation/state/diet_providers.dart';
+import 'package:strive/domain/entities/meal.dart';
+import 'package:strive/presentation/state/diet_providers.dart';
 // Removi a importação 'common_widgets.dart' pois o ExpandableMealCard
 // foi substituído pelo design do protótipo.
 

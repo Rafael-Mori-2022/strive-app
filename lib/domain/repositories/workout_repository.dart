@@ -1,5 +1,5 @@
-import 'package:vigorbloom/domain/entities/workout.dart';
-import 'package:vigorbloom/domain/entities/exercise.dart';
+import 'package:strive/domain/entities/workout.dart';
+import 'package:strive/domain/entities/exercise.dart';
 
 abstract class WorkoutRepository {
   Future<List<WorkoutPlan>> getWorkoutPlans();

@@ -1,4 +1,4 @@
-package com.mycompany.vigorbloom
+package com.mycompany.strive
 
 import io.flutter.embedding.android.FlutterActivity
 

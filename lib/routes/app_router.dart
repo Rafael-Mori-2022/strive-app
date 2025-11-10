@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vigorbloom/providers/auth_providers.dart';
-import 'package:vigorbloom/presentation/shell/app_shell.dart';
-import 'package:vigorbloom/presentation/screens/onboarding/profile_setup_screen.dart';
-import 'package:vigorbloom/presentation/screens/common/success_screen.dart';
-import 'package:vigorbloom/presentation/screens/dashboard/home_dashboard_screen.dart';
-import 'package:vigorbloom/presentation/screens/diet/diet_screen.dart';
-import 'package:vigorbloom/presentation/screens/diet/add_food_screen.dart';
-import 'package:vigorbloom/presentation/screens/diet/meal_detail_screen.dart';
-import 'package:vigorbloom/presentation/screens/workout/workout_screen.dart';
-import 'package:vigorbloom/presentation/screens/workout/workout_editor_screen.dart';
-import 'package:vigorbloom/presentation/screens/workout/workout_create_screen.dart';
-import 'package:vigorbloom/presentation/screens/workout/add_exercise_screen.dart';
-import 'package:vigorbloom/presentation/screens/gamification/leaderboard_screen.dart';
-import 'package:vigorbloom/presentation/screens/explore/explore_screen.dart';
-import 'package:vigorbloom/presentation/screens/config/edit_stats_screen.dart';
-import 'package:vigorbloom/presentation/screens/common/under_construction_screen.dart';
-import 'package:vigorbloom/presentation/screens/profile/profile_screen.dart';
-import 'package:vigorbloom/presentation/screens/basic/login_screen.dart';
-import 'package:vigorbloom/presentation/screens/basic/loading_screen.dart';
+import 'package:strive/providers/auth_providers.dart';
+import 'package:strive/presentation/shell/app_shell.dart';
+import 'package:strive/presentation/screens/onboarding/profile_setup_screen.dart';
+import 'package:strive/presentation/screens/common/success_screen.dart';
+import 'package:strive/presentation/screens/dashboard/home_dashboard_screen.dart';
+import 'package:strive/presentation/screens/diet/diet_screen.dart';
+import 'package:strive/presentation/screens/diet/add_food_screen.dart';
+import 'package:strive/presentation/screens/diet/meal_detail_screen.dart';
+import 'package:strive/presentation/screens/workout/workout_screen.dart';
+import 'package:strive/presentation/screens/workout/workout_editor_screen.dart';
+import 'package:strive/presentation/screens/workout/workout_create_screen.dart';
+import 'package:strive/presentation/screens/workout/add_exercise_screen.dart';
+import 'package:strive/presentation/screens/gamification/leaderboard_screen.dart';
+import 'package:strive/presentation/screens/explore/explore_screen.dart';
+import 'package:strive/presentation/screens/config/edit_stats_screen.dart';
+import 'package:strive/presentation/screens/common/under_construction_screen.dart';
+import 'package:strive/presentation/screens/profile/profile_screen.dart';
+import 'package:strive/presentation/screens/basic/login_screen.dart';
+import 'package:strive/presentation/screens/basic/loading_screen.dart';
 
-// Define as rotas como enums 
+// Define as rotas como enums
 enum AppRoute {
   loading,
   login,
@@ -181,10 +181,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             const NoTransitionPage(child: UnderConstructionScreen()),
       ),
     ],
-    
-    // Lógica de Redirecionamento 
+
+    // Lógica de Redirecionamento
     redirect: (BuildContext context, GoRouterState state) {
-      
       if (authState.isLoading || !authState.hasValue) {
         return '/loading';
       }
@@ -205,7 +204,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (isGoingToLogin || isGoingToLoading) {
         return '/dashboard';
       }
-      
+
       return null;
     },
 

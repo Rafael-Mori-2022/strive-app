@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vigorbloom/providers/auth_providers.dart';
+import 'package:strive/providers/auth_providers.dart';
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
@@ -11,7 +11,7 @@ class LoginScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("VigorBloom Login"),
+        title: const Text("Strive Login"),
       ),
       body: Center(
         child: authState.isLoading
@@ -20,7 +20,8 @@ class LoginScreen extends ConsumerWidget {
                 icon: const Icon(Icons.login),
                 label: const Text("Entrar com Google"),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                   textStyle: const TextStyle(fontSize: 18),
                 ),
                 onPressed: () {

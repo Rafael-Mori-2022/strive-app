@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vigorbloom/di/service_locator.dart';
-import 'package:vigorbloom/services/auth_service.dart';
+import 'package:strive/di/service_locator.dart';
+import 'package:strive/services/auth_service.dart';
 import 'package:flutter/foundation.dart';
 
 // 1. Provider para o AuthService
@@ -26,7 +26,8 @@ final currentUserProvider = Provider<User?>((ref) {
 });
 
 // 4. Helper para GoRouter (você vai precisar disso na Fase 7.5)
-class GoRouterRefreshStream extends AutoDisposeStreamNotifier<void> implements Listenable {
+class GoRouterRefreshStream extends AutoDisposeStreamNotifier<void>
+    implements Listenable {
   late final StreamSubscription<dynamic> _subscription;
   VoidCallback? _listener;
 
@@ -55,7 +56,7 @@ class GoRouterRefreshStream extends AutoDisposeStreamNotifier<void> implements L
 }
 
 // Provider para o GoRouterRefreshStream
-final goRouterRefreshStreamProvider = 
+final goRouterRefreshStreamProvider =
     AutoDisposeStreamNotifierProvider<GoRouterRefreshStream, void>(
   GoRouterRefreshStream.new,
 );

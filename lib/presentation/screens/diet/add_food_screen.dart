@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vigorbloom/presentation/state/diet_providers.dart';
-import 'package:vigorbloom/presentation/widgets/common_widgets.dart';
+import 'package:strive/presentation/state/diet_providers.dart';
+import 'package:strive/presentation/widgets/common_widgets.dart';
 
 class AddFoodScreen extends ConsumerStatefulWidget {
   const AddFoodScreen({super.key});
@@ -10,7 +10,8 @@ class AddFoodScreen extends ConsumerStatefulWidget {
   ConsumerState<AddFoodScreen> createState() => _AddFoodScreenState();
 }
 
-class _AddFoodScreenState extends ConsumerState<AddFoodScreen> with SingleTickerProviderStateMixin {
+class _AddFoodScreenState extends ConsumerState<AddFoodScreen>
+    with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   String _query = '';
 
@@ -38,9 +39,15 @@ class _AddFoodScreenState extends ConsumerState<AddFoodScreen> with SingleTicker
       body: Column(children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-          child: SearchInput(hint: 'Buscar alimentos', onChanged: (v) => setState(() => _query = v)),
+          child: SearchInput(
+              hint: 'Buscar alimentos',
+              onChanged: (v) => setState(() => _query = v)),
         ),
-        TabBar(controller: _tabController, tabs: const [Tab(text: 'Frequentes'), Tab(text: 'Recentes'), Tab(text: 'Favoritos')]),
+        TabBar(controller: _tabController, tabs: const [
+          Tab(text: 'Frequentes'),
+          Tab(text: 'Recentes'),
+          Tab(text: 'Favoritos')
+        ]),
         Expanded(
           child: TabBarView(controller: _tabController, children: [
             _FoodList(provider: frequentes),
@@ -49,7 +56,8 @@ class _AddFoodScreenState extends ConsumerState<AddFoodScreen> with SingleTicker
           ]),
         ),
         if (_query.isNotEmpty)
-          Expanded(child: search.when(
+          Expanded(
+              child: search.when(
             data: (list) => _Results(list: list),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, st) => const Center(child: Text('Erro na busca')),
@@ -74,7 +82,9 @@ class _FoodList extends StatelessWidget {
             leading: const Icon(Icons.fastfood, color: Colors.orange),
             title: Text(item.name),
             subtitle: Text('${item.calories.toStringAsFixed(0)} kcal'),
-            trailing: IconButton(icon: const Icon(Icons.add_circle, color: Colors.green), onPressed: () {}),
+            trailing: IconButton(
+                icon: const Icon(Icons.add_circle, color: Colors.green),
+                onPressed: () {}),
           );
         },
         separatorBuilder: (_, __) => const Divider(height: 8),
@@ -100,7 +110,9 @@ class _Results extends StatelessWidget {
           leading: const Icon(Icons.search, color: Colors.blue),
           title: Text(item.name),
           subtitle: Text('${item.calories.toStringAsFixed(0)} kcal'),
-          trailing: IconButton(icon: const Icon(Icons.add_circle, color: Colors.green), onPressed: () {}),
+          trailing: IconButton(
+              icon: const Icon(Icons.add_circle, color: Colors.green),
+              onPressed: () {}),
         );
       },
     );

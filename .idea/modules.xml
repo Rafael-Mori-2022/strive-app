@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/vigorbloom.iml" filepath="$PROJECT_DIR$/vigorbloom.iml" />
-      <module fileurl="file://$PROJECT_DIR$/android/vigorbloom_android.iml" filepath="$PROJECT_DIR$/android/vigorbloom_android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/strive.iml" filepath="$PROJECT_DIR$/strive.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/strive_android.iml" filepath="$PROJECT_DIR$/android/strive_android.iml" />
     </modules>
   </component>
 </project>
