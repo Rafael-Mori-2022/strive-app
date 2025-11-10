@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vigorbloom/presentation/state/profile_providers.dart';
 import 'package:vigorbloom/presentation/widgets/common_widgets.dart';
+import 'package:vigorbloom/providers/auth_providers.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -29,7 +30,17 @@ class ProfileScreen extends ConsumerWidget {
             ListTile(leading: const Icon(Icons.person), title: const Text('Atualizar perfil'), trailing: const Icon(Icons.chevron_right), onTap: () => context.push('/onboarding')),
             const SizedBox(height: 24),
             PrimaryButton(label: 'Ver Leaderboard', leadingIcon: Icons.emoji_events, onPressed: () => context.push('/dashboard/leaderboard'), isExpanded: true),
+            
+            const SizedBox(height: 24),
+            SecondaryButton(
+              label: 'Sair (Logout)',
+              leadingIcon: Icons.logout,
+              onPressed: () {
+                ref.read(authServiceProvider).signOut();
+              },
+            ),
           ],
+          
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(
