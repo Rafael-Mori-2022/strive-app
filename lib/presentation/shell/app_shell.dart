@@ -54,7 +54,6 @@ class _AppShellState extends State<AppShell> {
 }
 
 // --- NOSSO WIDGET DE NAVEGAÇÃO CUSTOMIZADO ---
-// (Agora vivendo permanentemente no AppShell)
 
 class _CustomBottomNavBar extends StatelessWidget {
   const _CustomBottomNavBar({

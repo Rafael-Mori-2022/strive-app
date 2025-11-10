@@ -7,25 +7,21 @@ import 'package:strive/services/auth_service.dart';
 import 'package:flutter/foundation.dart';
 
 // 1. Provider para o AuthService
-//    Ele lê o AuthService que foi registrado no GetIt (sl)
 final authServiceProvider = Provider<AuthService>((ref) {
-  // sl<AuthService>() funciona porque o main.dart chama
-  // 'await setupServiceLocator()' ANTES do runApp()
   return sl<AuthService>();
 });
 
 // 2. Provider para o Stream de Estado de Autenticação
-//    Este é o provider que sua LoginScreen precisa
 final authStateStreamProvider = StreamProvider<User?>((ref) {
   return ref.watch(authServiceProvider).authStateChanges;
 });
 
-// 3. (Opcional, mas útil) Provider para o Usuário Atual
+// 3. Provider para o Usuário Atual
 final currentUserProvider = Provider<User?>((ref) {
   return ref.watch(authServiceProvider).getCurrentUser();
 });
 
-// 4. Helper para GoRouter (você vai precisar disso na Fase 7.5)
+// 4. Helper para GoRouter
 class GoRouterRefreshStream extends AutoDisposeStreamNotifier<void>
     implements Listenable {
   late final StreamSubscription<dynamic> _subscription;
