@@ -18,36 +18,55 @@ class ProfileScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           children: [
             Row(children: [
-              CircleAvatar(radius: 28, child: Text(p.name.isNotEmpty ? p.name[0] : '?')),
+              CircleAvatar(
+                  radius: 28, child: Text(p.name.isNotEmpty ? p.name[0] : '?')),
               const SizedBox(width: 12),
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(p.name, style: Theme.of(context).textTheme.titleLarge),
-                Text('${p.age} anos • ${p.heightCm.toStringAsFixed(0)} cm • ${p.weightKg.toStringAsFixed(1)} kg'),
+                Text(
+                    '${p.age} anos • ${p.heightCm.toStringAsFixed(0)} cm • ${p.weightKg.toStringAsFixed(1)} kg'),
               ])
             ]),
             const SizedBox(height: 16),
-            ListTile(leading: const Icon(Icons.tune), title: const Text('Editar destaques do Dashboard'), trailing: const Icon(Icons.chevron_right), onTap: () => context.push('/dashboard/edit-stats')),
-            ListTile(leading: const Icon(Icons.person), title: const Text('Atualizar perfil'), trailing: const Icon(Icons.chevron_right), onTap: () => context.push('/onboarding')),
+            ListTile(
+                leading: const Icon(Icons.tune),
+                title: const Text('Editar destaques do Dashboard'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push('/dashboard/edit-stats')),
+            ListTile(
+                leading: const Icon(Icons.person),
+                title: const Text('Atualizar perfil'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push('/onboarding')),
             const SizedBox(height: 24),
-            PrimaryButton(label: 'Ver Leaderboard', leadingIcon: Icons.emoji_events, onPressed: () => context.push('/dashboard/leaderboard'), isExpanded: true),
-            
+            PrimaryButton(
+                label: 'Ver Leaderboard',
+                leadingIcon: Icons.emoji_events,
+                onPressed: () => context.push('/dashboard/leaderboard'),
+                isExpanded: true),
             const SizedBox(height: 24),
-            SecondaryButton(
-              label: 'Sair (Logout)',
-              leadingIcon: Icons.logout,
+            OutlinedButton.icon(
+              icon: Icon(Icons.logout),
+              label: Text('Sair (Logout)'),
               onPressed: () {
                 ref.read(authServiceProvider).signOut();
               },
-            ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.red,
+                side: BorderSide(color: Colors.red),
+              ),
+            )
           ],
-          
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             const Text('Perfil não encontrado'),
             const SizedBox(height: 12),
-            SecondaryButton(label: 'Criar perfil', leadingIcon: Icons.person_add, onPressed: () => context.push('/onboarding')),
+            SecondaryButton(
+                label: 'Criar perfil',
+                leadingIcon: Icons.person_add,
+                onPressed: () => context.push('/onboarding')),
           ]),
         ),
       ),
