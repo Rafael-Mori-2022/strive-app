@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:vigorbloom/domain/entities/leaderboard_entry.dart';
-import 'package:vigorbloom/domain/repositories/leaderboard_repository.dart';
+import 'package:strive/domain/entities/leaderboard_entry.dart';
+import 'package:strive/domain/repositories/leaderboard_repository.dart';
 
 class MockLeaderboardRepository implements LeaderboardRepository {
   @override

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vigorbloom/presentation/state/diet_providers.dart';
+import 'package:strive/presentation/state/diet_providers.dart';
 
 class MealDetailScreen extends ConsumerWidget {
   final String mealId;
@@ -17,9 +17,14 @@ class MealDetailScreen extends ConsumerWidget {
           children: [
             Text(m.name, style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 8),
-            Text('${m.calories.toStringAsFixed(0)} kcal • P ${m.protein.toStringAsFixed(0)}g • C ${m.carbs.toStringAsFixed(0)}g • G ${m.fat.toStringAsFixed(0)}g'),
+            Text(
+                '${m.calories.toStringAsFixed(0)} kcal • P ${m.protein.toStringAsFixed(0)}g • C ${m.carbs.toStringAsFixed(0)}g • G ${m.fat.toStringAsFixed(0)}g'),
             const SizedBox(height: 12),
-            ...m.items.map((item) => Card(child: ListTile(title: Text(item.name), subtitle: Text('${item.calories.toStringAsFixed(0)} kcal - P ${item.protein}g C ${item.carbs}g G ${item.fat}g')))),
+            ...m.items.map((item) => Card(
+                child: ListTile(
+                    title: Text(item.name),
+                    subtitle: Text(
+                        '${item.calories.toStringAsFixed(0)} kcal - P ${item.protein}g C ${item.carbs}g G ${item.fat}g')))),
           ],
         ),
         loading: () => const Center(child: CircularProgressIndicator()),

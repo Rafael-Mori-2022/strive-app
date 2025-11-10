@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vigorbloom/presentation/state/profile_providers.dart';
-import 'package:vigorbloom/presentation/state/stats_provider.dart';
-import 'package:vigorbloom/domain/entities/user_profile.dart';
-import 'package:vigorbloom/domain/entities/stat_item.dart';
+import 'package:strive/presentation/state/profile_providers.dart';
+import 'package:strive/presentation/state/stats_provider.dart';
+import 'package:strive/domain/entities/user_profile.dart';
+import 'package:strive/domain/entities/stat_item.dart';
 
 class HomeDashboardScreen extends ConsumerWidget {
   const HomeDashboardScreen({super.key});

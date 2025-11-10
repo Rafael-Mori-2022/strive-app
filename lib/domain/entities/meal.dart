@@ -1,4 +1,4 @@
-import 'package:vigorbloom/domain/entities/food_item.dart';
+import 'package:strive/domain/entities/food_item.dart';
 
 class Meal {
   final String id;
@@ -11,5 +11,6 @@ class Meal {
   double get carbs => items.fold(0, (p, e) => p + e.carbs);
   double get fat => items.fold(0, (p, e) => p + e.fat);
 
-  Meal copyWith({String? name, List<FoodItem>? items}) => Meal(id: id, name: name ?? this.name, items: items ?? this.items);
+  Meal copyWith({String? name, List<FoodItem>? items}) =>
+      Meal(id: id, name: name ?? this.name, items: items ?? this.items);
 }

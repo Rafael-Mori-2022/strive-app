@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 // Removidas as providers não utilizadas, você pode adicionar de volta se precisar
-// import 'package:vigorbloom/presentation/state/explore_provider.dart';
-// import 'package:vigorbloom/presentation/widgets/common_widgets.dart';
+// import 'package:strive/presentation/state/explore_provider.dart';
+// import 'package:strive/presentation/widgets/common_widgets.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});

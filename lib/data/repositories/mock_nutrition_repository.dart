@@ -1,13 +1,25 @@
 import 'dart:async';
-import 'package:vigorbloom/domain/entities/food_item.dart';
-import 'package:vigorbloom/domain/entities/meal.dart';
-import 'package:vigorbloom/domain/repositories/nutrition_repository.dart';
+import 'package:strive/domain/entities/food_item.dart';
+import 'package:strive/domain/entities/meal.dart';
+import 'package:strive/domain/repositories/nutrition_repository.dart';
 
 class MockNutritionRepository implements NutritionRepository {
   final Map<String, Meal> _meals = {
     'm1': Meal(id: 'm1', name: 'Café da manhã', items: [
-      const FoodItem(id: 'f1', name: 'Ovos mexidos (2)', calories: 180, protein: 12, carbs: 2, fat: 14),
-      const FoodItem(id: 'f2', name: 'Pão integral (2 fatias)', calories: 130, protein: 7, carbs: 22, fat: 2.5),
+      const FoodItem(
+          id: 'f1',
+          name: 'Ovos mexidos (2)',
+          calories: 180,
+          protein: 12,
+          carbs: 2,
+          fat: 14),
+      const FoodItem(
+          id: 'f2',
+          name: 'Pão integral (2 fatias)',
+          calories: 130,
+          protein: 7,
+          carbs: 22,
+          fat: 2.5),
     ]),
     'm2': const Meal(id: 'm2', name: 'Almoço', items: []),
     'm3': const Meal(id: 'm3', name: 'Lanche', items: []),
@@ -15,11 +27,41 @@ class MockNutritionRepository implements NutritionRepository {
   };
 
   final List<FoodItem> _catalog = const [
-    FoodItem(id: 'c1', name: 'Peito de frango grelhado 100g', calories: 165, protein: 31, carbs: 0, fat: 3.6),
-    FoodItem(id: 'c2', name: 'Arroz integral 100g', calories: 111, protein: 2.6, carbs: 23, fat: 0.9),
-    FoodItem(id: 'c3', name: 'Banana', calories: 96, protein: 1.2, carbs: 27, fat: 0.3),
-    FoodItem(id: 'c4', name: 'Iogurte natural 170g', calories: 100, protein: 10, carbs: 12, fat: 0),
-    FoodItem(id: 'c5', name: 'Aveia 40g', calories: 150, protein: 5, carbs: 27, fat: 3),
+    FoodItem(
+        id: 'c1',
+        name: 'Peito de frango grelhado 100g',
+        calories: 165,
+        protein: 31,
+        carbs: 0,
+        fat: 3.6),
+    FoodItem(
+        id: 'c2',
+        name: 'Arroz integral 100g',
+        calories: 111,
+        protein: 2.6,
+        carbs: 23,
+        fat: 0.9),
+    FoodItem(
+        id: 'c3',
+        name: 'Banana',
+        calories: 96,
+        protein: 1.2,
+        carbs: 27,
+        fat: 0.3),
+    FoodItem(
+        id: 'c4',
+        name: 'Iogurte natural 170g',
+        calories: 100,
+        protein: 10,
+        carbs: 12,
+        fat: 0),
+    FoodItem(
+        id: 'c5',
+        name: 'Aveia 40g',
+        calories: 150,
+        protein: 5,
+        carbs: 27,
+        fat: 3),
   ];
 
   @override
@@ -39,7 +81,8 @@ class MockNutritionRepository implements NutritionRepository {
   Future<List<Meal>> getMealsOfDay() async => _meals.values.toList();
 
   @override
-  Future<List<FoodItem>> frequentFoods() async => _catalog.reversed.take(3).toList();
+  Future<List<FoodItem>> frequentFoods() async =>
+      _catalog.reversed.take(3).toList();
 
   @override
   Future<List<FoodItem>> recentFoods() async => _catalog;
@@ -48,7 +91,8 @@ class MockNutritionRepository implements NutritionRepository {
   Future<void> removeFoodFromMeal(String mealId, String foodId) async {
     final m = _meals[mealId];
     if (m == null) return;
-    _meals[mealId] = m.copyWith(items: m.items.where((e) => e.id != foodId).toList());
+    _meals[mealId] =
+        m.copyWith(items: m.items.where((e) => e.id != foodId).toList());
   }
 
   @override

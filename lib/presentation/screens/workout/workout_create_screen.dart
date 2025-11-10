@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vigorbloom/presentation/widgets/common_widgets.dart';
+import 'package:strive/presentation/widgets/common_widgets.dart';
 
 class WorkoutCreateScreen extends StatefulWidget {
   const WorkoutCreateScreen({super.key});
@@ -25,11 +25,20 @@ class _WorkoutCreateScreenState extends State<WorkoutCreateScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          TextField(controller: _nameCtrl, decoration: const InputDecoration(labelText: 'Nome do treino')),
+          TextField(
+              controller: _nameCtrl,
+              decoration: const InputDecoration(labelText: 'Nome do treino')),
           const SizedBox(height: 12),
-          SecondaryButton(label: 'Adicionar +', leadingIcon: Icons.add, onPressed: () => context.push('/workout/add-exercise?muscle=Bíceps')),
+          SecondaryButton(
+              label: 'Adicionar +',
+              leadingIcon: Icons.add,
+              onPressed: () =>
+                  context.push('/workout/add-exercise?muscle=Bíceps')),
           const Spacer(),
-          PrimaryButton(label: 'Salvar', leadingIcon: Icons.check, onPressed: () => Navigator.of(context).pop()),
+          PrimaryButton(
+              label: 'Salvar',
+              leadingIcon: Icons.check,
+              onPressed: () => Navigator.of(context).pop()),
         ]),
       ),
     );

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vigorbloom/presentation/state/workout_providers.dart';
-import 'package:vigorbloom/presentation/widgets/common_widgets.dart';
+import 'package:strive/presentation/state/workout_providers.dart';
+import 'package:strive/presentation/widgets/common_widgets.dart';
 
 class AddExerciseScreen extends ConsumerStatefulWidget {
   final String muscleGroup;
@@ -21,7 +21,11 @@ class _AddExerciseScreenState extends ConsumerState<AddExerciseScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.muscleGroup),
-        actions: [TextButton(onPressed: () => context.pop(_selected.toList()), child: const Text('OK'))],
+        actions: [
+          TextButton(
+              onPressed: () => context.pop(_selected.toList()),
+              child: const Text('OK'))
+        ],
       ),
       body: ex.when(
         data: (list) => ListView.builder(
@@ -36,7 +40,8 @@ class _AddExerciseScreenState extends ConsumerState<AddExerciseScreen> {
                 title: Text(e.name),
                 subtitle: Text(e.details),
                 trailing: IconButton(
-                  icon: Icon(checked ? Icons.check_circle : Icons.add_circle, color: checked ? Colors.green : Colors.blue),
+                  icon: Icon(checked ? Icons.check_circle : Icons.add_circle,
+                      color: checked ? Colors.green : Colors.blue),
                   onPressed: () {
                     setState(() {
                       if (checked) {
@@ -61,7 +66,8 @@ class _AddExerciseScreenState extends ConsumerState<AddExerciseScreen> {
           },
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => const Center(child: Text('Erro ao listar exercícios')),
+        error: (e, st) =>
+            const Center(child: Text('Erro ao listar exercícios')),
       ),
     );
   }

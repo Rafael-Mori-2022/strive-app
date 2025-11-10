@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.mycompany" "\0"
-            VALUE "FileDescription", "vigorbloom" "\0"
+            VALUE "FileDescription", "strive" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "vigorbloom" "\0"
+            VALUE "InternalName", "strive" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.mycompany. All rights reserved." "\0"
-            VALUE "OriginalFilename", "vigorbloom.exe" "\0"
-            VALUE "ProductName", "vigorbloom" "\0"
+            VALUE "OriginalFilename", "strive.exe" "\0"
+            VALUE "ProductName", "strive" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

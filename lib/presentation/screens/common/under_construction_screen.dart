@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vigorbloom/presentation/widgets/common_widgets.dart';
+import 'package:strive/presentation/widgets/common_widgets.dart';
 
 class UnderConstructionScreen extends StatelessWidget {
   const UnderConstructionScreen({super.key});
@@ -16,11 +16,19 @@ class UnderConstructionScreen extends StatelessWidget {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Icon(Icons.directions_run, color: scheme.primary, size: 72),
             const SizedBox(height: 16),
-            Text('Essa página ainda está em construção!', style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.center),
+            Text('Essa página ainda está em construção!',
+                style: Theme.of(context).textTheme.titleLarge,
+                textAlign: TextAlign.center),
             const SizedBox(height: 8),
-            Text('Estava fazendo seu cardio e se perdeu?', style: Theme.of(context).textTheme.headlineSmall, textAlign: TextAlign.center),
+            Text('Estava fazendo seu cardio e se perdeu?',
+                style: Theme.of(context).textTheme.headlineSmall,
+                textAlign: TextAlign.center),
             const SizedBox(height: 24),
-            PrimaryButton(label: 'Voltar', leadingIcon: Icons.arrow_back, onPressed: () => context.pop(), isExpanded: true),
+            PrimaryButton(
+                label: 'Voltar',
+                leadingIcon: Icons.arrow_back,
+                onPressed: () => context.pop(),
+                isExpanded: true),
           ]),
         ),
       ),

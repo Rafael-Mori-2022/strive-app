@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vigorbloom/theme.dart';
+import 'package:strive/theme.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String label;

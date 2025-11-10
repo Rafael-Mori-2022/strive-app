@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vigorbloom/di/service_locator.dart';
-import 'package:vigorbloom/domain/entities/stat_item.dart';
-import 'package:vigorbloom/domain/repositories/stats_repository.dart';
-import 'package:vigorbloom/providers/auth_providers.dart';
+import 'package:strive/di/service_locator.dart';
+import 'package:strive/domain/entities/stat_item.dart';
+import 'package:strive/domain/repositories/stats_repository.dart';
+import 'package:strive/providers/auth_providers.dart';
 
 final statsRepositoryProvider =
     Provider<StatsRepository>((ref) => sl<StatsRepository>());
@@ -15,7 +15,7 @@ final availableStatsProvider = FutureProvider<List<StatItem>>((ref) async {
   if (firebaseUser == null) {
     return [];
   }
-  
+
   // Usa o UID para buscar as estatísticas
   return ref.read(statsRepositoryProvider).getAvailableStats(firebaseUser.uid);
 });
@@ -25,7 +25,8 @@ class SelectedStatsNotifier extends AsyncNotifier<List<String>> {
   String _getUid() {
     final firebaseUser = ref.read(authStateStreamProvider).valueOrNull;
     if (firebaseUser == null) {
-      throw Exception("Usuário não autenticado. Não é possível realizar a ação.");
+      throw Exception(
+          "Usuário não autenticado. Não é possível realizar a ação.");
     }
     return firebaseUser.uid;
   }
@@ -67,10 +68,9 @@ class SelectedStatsNotifier extends AsyncNotifier<List<String>> {
     state = const AsyncLoading();
 
     await ref.read(statsRepositoryProvider).setSelectedStatIds(uid, current);
-    
+
     state = AsyncData(current);
   }
-
 }
 
 final selectedStatsProvider =

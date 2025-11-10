@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vigorbloom/presentation/state/leaderboard_provider.dart';
+import 'package:strive/presentation/state/leaderboard_provider.dart';
 
 class LeaderboardScreen extends ConsumerWidget {
   const LeaderboardScreen({super.key});
@@ -26,7 +26,8 @@ class LeaderboardScreen extends ConsumerWidget {
           },
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => const Center(child: Text('Erro ao carregar leaderboard')),
+        error: (e, st) =>
+            const Center(child: Text('Erro ao carregar leaderboard')),
       ),
     );
   }

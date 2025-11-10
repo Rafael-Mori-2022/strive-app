@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vigorbloom/presentation/state/stats_provider.dart';
+import 'package:strive/presentation/state/stats_provider.dart';
 
 class EditStatsScreen extends ConsumerWidget {
   const EditStatsScreen({super.key});
