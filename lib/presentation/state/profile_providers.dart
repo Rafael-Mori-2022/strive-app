@@ -41,7 +41,6 @@ final userProfileProvider = FutureProvider<UserProfile>((ref) async {
     throw Exception("Usuário não autenticado.");
   }
 
-  // ⬇️ USA A NOVA LÓGICA ⬇️
   // Chama a função helper que definimos acima
   return _fetchOrCreateProfile(ref, firebaseUser.uid, firebaseUser.displayName);
 });
@@ -56,7 +55,6 @@ class ProfileUpdateNotifier extends AsyncNotifier<UserProfile> {
       throw Exception("Usuário não autenticado.");
     }
 
-    // ⬇️ USA A NOVA LÓGICA ⬇️
     // Chama a função helper que definimos acima
     return _fetchOrCreateProfile(
         ref, firebaseUser.uid, firebaseUser.displayName);

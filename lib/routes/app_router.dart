@@ -32,7 +32,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   // Observa o provider que notifica o GoRouter sobre mudanças na autenticação
   final refreshNotifier = ref.watch(goRouterRefreshStreamProvider.notifier);
 
-  // Observa o estado de autenticação (AsyncValue<User?>)
+  // Observa o estado de autenticação
   final authState = ref.watch(authStateStreamProvider);
 
   return GoRouter(
@@ -155,7 +155,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ]),
 
-          // --- ABA 4: EXPLORAR (CORRIGIDO) ---
+          // --- ABA 4: EXPLORAR ---
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/explore',
