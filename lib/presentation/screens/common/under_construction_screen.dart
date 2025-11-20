@@ -27,7 +27,7 @@ class UnderConstructionScreen extends StatelessWidget {
             PrimaryButton(
                 label: 'Voltar',
                 leadingIcon: Icons.arrow_back,
-                onPressed: () => context.pop(),
+                onPressed: () => context.go('/dashboard'),
                 isExpanded: true),
           ]),
         ),

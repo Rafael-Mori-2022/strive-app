@@ -29,11 +29,6 @@ class ProfileScreen extends ConsumerWidget {
             ]),
             const SizedBox(height: 16),
             ListTile(
-                leading: const Icon(Icons.tune),
-                title: const Text('Editar destaques do Dashboard'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push('/dashboard/edit-stats')),
-            ListTile(
                 leading: const Icon(Icons.person),
                 title: const Text('Atualizar perfil'),
                 trailing: const Icon(Icons.chevron_right),
