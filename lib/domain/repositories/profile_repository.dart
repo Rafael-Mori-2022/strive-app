@@ -1,6 +1,6 @@
 import 'package:strive/domain/entities/user_profile.dart';
 
 abstract class ProfileRepository {
-  Future<UserProfile> getProfile(String uid);
+  Future<UserProfile?> getProfile(String uid);
   Future<void> saveProfile(UserProfile profile);
 }

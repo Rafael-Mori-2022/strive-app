@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:strive/providers/auth_providers.dart';
+import 'package:strive/providers/auth_providers.dart'; 
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
@@ -8,26 +8,174 @@ class LoginScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateStreamProvider);
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Strive Login"),
-      ),
-      body: Center(
-        child: authState.isLoading
-            ? const CircularProgressIndicator()
-            : ElevatedButton.icon(
-                icon: const Icon(Icons.login),
-                label: const Text("Entrar com Google"),
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  textStyle: const TextStyle(fontSize: 18),
+      backgroundColor: colors.background,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.network(
+              'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1000&auto=format&fit=crop',
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                    color: colors.background); 
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return Container(color: colors.background); 
+              },
+            ),
+          ),
+
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    colors.background.withOpacity(0.3), 
+                    colors.background.withOpacity(0.8), 
+                    colors.background, 
+                  ],
+                  stops: const [0.0, 0.6, 1.0],
                 ),
-                onPressed: () {
-                  ref.read(authServiceProvider).signInWithGoogle();
-                },
               ),
+            ),
+          ),
+
+          SafeArea(
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Spacer(flex: 3), 
+
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: colors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border:
+                          Border.all(color: colors.primary.withOpacity(0.2)),
+                    ),
+                    child: Icon(
+                      Icons.shield_rounded, 
+                      size: 48,
+                      color: colors.primary, 
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  Text(
+                    "Strive",
+                    style: theme.textTheme.displayLarge?.copyWith(
+                      color: colors.onBackground,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -1.5,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Text(
+                    "Your effort, your data,\nyour results.",
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      color: colors.onSurfaceVariant, 
+                      height: 1.3,
+                    ),
+                  ),
+
+                  const Spacer(flex: 2), 
+
+                  if (authState.isLoading)
+                    Center(
+                      child: CircularProgressIndicator(color: colors.primary),
+                    )
+                  else
+                    _GoogleSignInButton(
+                      onPressed: () {
+                        ref.read(authServiceProvider).signInWithGoogle();
+                      },
+                    ),
+
+                  const SizedBox(height: 32),
+
+                  Center(
+                    child: Text(
+                      "Ao continuar, você concorda com nossos Termos.",
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colors.onSurfaceVariant.withOpacity(0.6),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GoogleSignInButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _GoogleSignInButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return SizedBox(
+      width: double.infinity, 
+      height: 56, 
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: colors.primary, 
+          foregroundColor: colors.onPrimary, 
+          elevation: 4,
+          shadowColor: colors.primary.withOpacity(0.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.g_mobiledata_rounded, 
+                color: Colors.black,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              "Entrar com Google",
+              style: textTheme.titleMedium?.copyWith(
+                color: colors.onPrimary,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
