@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-// Removidas as providers não utilizadas, você pode adicionar de volta se precisar
-// import 'package:strive/presentation/state/explore_provider.dart';
-// import 'package:strive/presentation/widgets/common_widgets.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -13,60 +10,60 @@ class ExploreScreen extends ConsumerStatefulWidget {
 }
 
 class _ExploreScreenState extends ConsumerState<ExploreScreen> {
-  // final String _query = ''; // Você pode reativar isso para o filtro
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
-    // final categories = ref.watch(exploreCategoriesProvider); // Você pode reativar
     final theme = Theme.of(context);
 
-    // Lista de itens hardcoded para bater com o protótipo
+    // Lista de itens
     final exploreItems = [
       {
         'title': 'Atividade',
         'icon': Icons.local_fire_department,
-        'color': const Color(0xFFFF8A65)
+        'color': const Color(0xFFFF8A65),
+        'route': '/workout'
       },
       {
         'title': 'Alimentação',
         'icon': Icons.restaurant_rounded,
-        'color': const Color(0xFFFACC15)
-      },
-      {
-        'title': 'Bem-estar Mental',
-        'icon': Icons.psychology,
-        'color': Colors.green.shade300
+        'color': const Color(0xFFFACC15),
+        'route': '/diet'
       },
       {
         'title': 'Sono',
         'icon': Icons.bed_rounded,
-        'color': Colors.blue.shade300
+        'color': Colors.blue.shade300,
+        'route': '/sleep'
       },
       {
         'title': 'Medicamentos',
         'icon': Icons.medication_rounded,
-        'color': Colors.cyan.shade300
+        'color': Colors.cyan.shade300,
+        'route': '/medicine'
       },
       {
         'title': 'Medidas Corporais',
         'icon': Icons.accessibility_new_rounded,
-        'color': Colors.red.shade300
+        'color': Colors.red.shade300,
+        'route': '/body'
       },
       {
         'title': 'Mobilidade',
         'icon': Icons.directions_walk_rounded,
-        'color': const Color(0xFFFACC15)
-      },
-      {
-        'title': 'Controle de Ciclo',
-        'icon': Icons.water_drop_outlined,
-        'color': Colors.pink.shade300
+        'color': const Color(0xFFFACC15),
+        'route': '/activity'
       },
     ];
 
+    // Lógica de Filtragem
+    final filteredItems = exploreItems.where((item) {
+      final title = item['title'] as String;
+      return title.toLowerCase().contains(_searchQuery.toLowerCase());
+    }).toList();
+
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
-      // 1. Sem AppBar
       body: SafeArea(
         bottom: false,
         child: ListView(
@@ -74,7 +71,13 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
           children: [
             const SizedBox(height: 16),
             // 2. Barra de Busca
-            const _SearchBar(),
+            _SearchBar(
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+            ),
             const SizedBox(height: 24),
             // 3. Título "Explorar"
             Text(
@@ -83,20 +86,33 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                   ?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 16),
-            // 4. Lista de Categorias
-            // Substituí seu ListView.separated por isto:
-            Column(
-              children: exploreItems
-                  .map((item) => _CategoryRow(
-                        title: item['title'] as String,
-                        icon: item['icon'] as IconData,
-                        iconColor: item['color'] as Color,
-                      ))
-                  .toList(),
-            ),
-            const SizedBox(height: 16),
-            // 5. A BARRA DE NAVEGAÇÃO CORRIGIDA
-            const SizedBox(height: 16),
+            // 4. Renderização da Lista Filtrada
+            if (filteredItems.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 32.0),
+                child: Center(
+                  child: Text(
+                    'Nenhuma funcionalidade encontrada.',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              )
+            else
+              Column(
+                children: filteredItems
+                    .map((item) => _CategoryRow(
+                          title: item['title'] as String,
+                          icon: item['icon'] as IconData,
+                          iconColor: item['color'] as Color,
+                          // Passamos a rota para o widget
+                          onTap: () => context.go(item['route'] as String),
+                        ))
+                    .toList(),
+              ),
+
+            const SizedBox(height: 100), // Espaço extra para o final da lista
           ],
         ),
       ),
@@ -104,24 +120,26 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   }
 }
 
-// --- WIDGETS PRIVADOS DA TELA EXPLORAR ---
+// --- WIDGETS PRIVADOS ---
 
-// 2. Barra de Busca
 class _SearchBar extends StatelessWidget {
-  const _SearchBar();
+  // Adicionamos o parâmetro onChanged
+  final ValueChanged<String> onChanged;
+
+  const _SearchBar({required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return TextField(
-      // onChanged: (v) => setState(() => _query = v), // Reative para o filtro
+      onChanged: onChanged, // Conecta o input à função
       decoration: InputDecoration(
-        hintText: 'Buscar',
+        hintText: 'Buscar funcionalidade',
         hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
         prefixIcon:
             Icon(Icons.search, color: theme.colorScheme.onSurfaceVariant),
         filled: true,
-        fillColor: theme.colorScheme.surfaceVariant, // Cor de fundo do tema
+        fillColor: theme.colorScheme.surfaceContainerHighest, // Cor mais adequada para input
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
@@ -132,13 +150,18 @@ class _SearchBar extends StatelessWidget {
   }
 }
 
-// 4. Linha de Categoria (Estilo do protótipo)
 class _CategoryRow extends StatelessWidget {
-  const _CategoryRow(
-      {required this.title, required this.icon, required this.iconColor});
+  const _CategoryRow({
+    required this.title,
+    required this.icon,
+    required this.iconColor,
+    required this.onTap,
+  });
+
   final String title;
   final IconData icon;
   final Color iconColor;
+  final VoidCallback onTap; // Recebe a função de navegação
 
   @override
   Widget build(BuildContext context) {
@@ -146,58 +169,44 @@ class _CategoryRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: InkWell(
-        onTap: () {
-          // Navega para a tela de placeholder usando o Navigator padrão.
-          // O GoRouter ainda gerencia a pilha de navegação (como o botão "voltar").
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => _PlaceholderScreen(title: title),
-            ),
-          );
-        },
+        onTap: onTap, // Executa a navegação
         borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface, // Cor de card
+            color: theme.colorScheme.surfaceContainerLow, // Cor de card
             borderRadius: BorderRadius.circular(16),
+            // Opcional: adicionar sombra leve
+            // boxShadow: [
+            //   BoxShadow(
+            //     color: Colors.black.withOpacity(0.05),
+            //     blurRadius: 4,
+            //     offset: const Offset(0, 2),
+            //   ),
+            // ],
           ),
           child: Row(
             children: [
-              Icon(icon, color: iconColor, size: 28),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: iconColor, size: 24),
+              ),
               const SizedBox(width: 16),
-              Text(title, style: theme.textTheme.titleMedium),
-              const Spacer(),
+              Expanded(
+                child: Text(
+                  title, 
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w500
+                  )
+                ),
+              ),
               Icon(Icons.chevron_right,
                   color: theme.colorScheme.onSurfaceVariant),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PlaceholderScreen extends StatelessWidget {
-  final String title;
-  const _PlaceholderScreen({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: Theme.of(context).colorScheme.background,
-        elevation: 0,
-      ),
-      backgroundColor: Theme.of(context).colorScheme.background,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Text(
-            'Página "$title" ainda não implementada.',
-            style: Theme.of(context).textTheme.titleMedium,
-            textAlign: TextAlign.center,
           ),
         ),
       ),
