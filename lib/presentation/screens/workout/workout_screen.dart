@@ -3,7 +3,32 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:strive/domain/entities/workout.dart'; // Mantive sua entidade
 import 'package:strive/presentation/state/workout_providers.dart';
-import 'dart:math' as math; // Para o PageView
+
+// Provider para o calendário
+// Gerencia o conjunto de datas que o usuário marcou como treinadas
+final completedDatesProvider =
+    NotifierProvider<CompletedDatesNotifier, Set<DateTime>>(
+        CompletedDatesNotifier.new);
+
+class CompletedDatesNotifier extends Notifier<Set<DateTime>> {
+  @override
+  Set<DateTime> build() {
+    return {};
+  }
+
+  void toggleDate(DateTime date) {
+    // Normaliza a data para ignorar horas/minutos (dia/mês/ano)
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+
+    final newState = Set<DateTime>.from(state);
+    if (newState.contains(normalizedDate)) {
+      newState.remove(normalizedDate);
+    } else {
+      newState.add(normalizedDate);
+    }
+    state = newState;
+  }
+}
 
 class WorkoutScreen extends ConsumerStatefulWidget {
   const WorkoutScreen({super.key});
@@ -13,7 +38,7 @@ class WorkoutScreen extends ConsumerStatefulWidget {
 }
 
 class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
-  // Controller para o PageView dos cards de treino (ex: Full-body)
+  // Controller para o PageView dos cards de treino 
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
@@ -42,19 +67,19 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
-      // 1. Sem AppBar
+      // Sem AppBar
       body: SafeArea(
         bottom: false,
         child: ListView(
-          // 2. Padding geral da tela
+          // Padding geral da tela
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           children: [
             const _Header(),
             const SizedBox(height: 16),
-            // 3. Card de estatísticas "Hoje"
+            // Card de estatísticas "Hoje"
             const _TodaySummary(),
             const SizedBox(height: 16),
-            // 4. Pager dos treinos (Full-body, etc.)
+            // Pager dos treinos (Full-body, etc.)
             plans.when(
               data: (list) {
                 // Se não houver planos, mostre algo
@@ -91,10 +116,10 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                   const Center(child: Text('Erro ao carregar treinos')),
             ),
             const SizedBox(height: 16),
-            // 6. Card do Calendário
+            // Card do Calendário
             const _CalendarCard(),
             const SizedBox(height: 16),
-            // 7. Barra de Navegação (a mesma do Dashboard)
+            // Barra de Navegação (a mesma do Dashboard)
             const SizedBox(height: 84),
           ],
         ),
@@ -103,9 +128,8 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
   }
 }
 
-// --- WIDGETS PRIVADOS QUE REPLICAM A IMAGEM ---
+// --- WIDGETS PRIVADOS ---
 
-// 1. Header "Treino"
 class _Header extends StatelessWidget {
   const _Header();
   @override
@@ -123,7 +147,6 @@ class _Header extends StatelessWidget {
   }
 }
 
-// 3. Card "Hoje"
 class _TodaySummary extends StatelessWidget {
   const _TodaySummary();
 
@@ -180,7 +203,7 @@ class _SummaryItem extends StatelessWidget {
   }
 }
 
-// 4. Card do Plano de Treino (ex: "Full-body")
+// Card do Plano de Treino 
 class _PlanCard extends ConsumerWidget {
   final WorkoutPlan plan;
   const _PlanCard({required this.plan});
@@ -230,7 +253,7 @@ class _PlanCard extends ConsumerWidget {
             Row(
               children: [
                 Text(plan.name,
-                    style: theme.textTheme.headlineSmall), // "Full-body"
+                    style: theme.textTheme.headlineSmall), 
                 const Spacer(),
                 Icon(
                   Icons.edit_outlined,
@@ -239,9 +262,9 @@ class _PlanCard extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 15),
-            // Lista de Exercícios (usando Column pois está dentro de um PageView)
+            // Lista de Exercícios 
             Column(
-              children: exercises // Use plan.exercises aqui
+              children: exercises 
                   .map((ex) => _ExerciseRow(
                         icon: ex['icon'] as IconData,
                         name: ex['name'] as String,
@@ -273,7 +296,7 @@ class _PlanCard extends ConsumerWidget {
   }
 }
 
-// Linha de Exercício (ex: "Rosca Alternada")
+// Linha de Exercício
 class _ExerciseRow extends StatelessWidget {
   const _ExerciseRow({
     required this.icon,
@@ -340,7 +363,7 @@ class _ExerciseRow extends StatelessWidget {
   }
 }
 
-// 5. Indicador de Página (os pontinhos)
+// Indicador de Página (pontinhos)
 class _PageIndicator extends StatelessWidget {
   const _PageIndicator({required this.pageCount, required this.currentPage});
   final int pageCount;
@@ -368,63 +391,55 @@ class _PageIndicator extends StatelessWidget {
   }
 }
 
-// 6. Card do Calendário
-class _CalendarCard extends StatelessWidget {
+// Card do Calendário
+class _CalendarCard extends ConsumerWidget {
   const _CalendarCard();
 
+  static const _months = [
+    '', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    
+    // Dados do provider
+    final completedDates = ref.watch(completedDatesProvider);
 
-    // Dias da semana (hardcoded)
+    // Lógica de Datas
+    final now = DateTime.now();
+    final year = now.year;
+    final month = now.month;
+    
+    // Quantidade de dias no mês atual 
+    final daysInMonth = DateTime(year, month + 1, 0).day;
+    
+    final firstDayOfMonth = DateTime(year, month, 1);
+    final firstWeekday = firstDayOfMonth.weekday;
+    final offsetDays = firstWeekday % 7;
+
     final daysOfWeek = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
-    // Dias do mês (hardcoded para bater com a imagem)
-    final days = [
-      null,
-      null,
-      '1',
-      '2',
-      '3',
-      '4',
-      '5',
-      '6',
-      '7',
-      '8',
-      '9',
-      '10',
-      '11',
-      '12',
-      '13',
-      '14',
-      '15',
-      '16',
-      '17',
-      '18',
-      '19',
-      '20',
-      '21',
-      '22',
-      '23',
-      '24',
-      '25',
-      '26',
-      '27',
-      '28',
-      '29',
-      null,
-      null,
-      null,
-      null,
-    ];
-    // Dias treinados (hardcoded da imagem)
-    final trainedDays = {'7', '8', '9', '11'};
 
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            // Título do Mês
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "${_months[month]} $year",
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                Icon(Icons.calendar_today, size: 20, color: colors.primary),
+              ],
+            ),
+            const SizedBox(height: 16),
+            
             // Dias da semana
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -432,11 +447,12 @@ class _CalendarCard extends StatelessWidget {
                   .map((day) => Text(
                         day,
                         style: theme.textTheme.labelMedium
-                            ?.copyWith(color: colors.primary),
+                            ?.copyWith(color: colors.primary, fontWeight: FontWeight.bold),
                       ))
                   .toList(),
             ),
             const SizedBox(height: 12),
+            
             // Grid dos dias
             GridView.builder(
               shrinkWrap: true,
@@ -446,34 +462,44 @@ class _CalendarCard extends StatelessWidget {
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
               ),
-              itemCount: days.length,
+              // Total de células = dias do mês + offset inicial
+              itemCount: daysInMonth + offsetDays,
               itemBuilder: (context, index) {
-                final day = days[index];
-                if (day == null) {
-                  // Dia vazio
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: colors.background, // Cor de fundo da tela
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  );
+                // Células vazias antes do dia 1
+                if (index < offsetDays) {
+                  return Container();
                 }
 
-                final isTrained = trainedDays.contains(day);
+                final day = index - offsetDays + 1;
+                final dateToCheck = DateTime(year, month, day);
+                
+                // Verifica se esta data está no set de completas
+                final isTrained = completedDates.contains(dateToCheck);
+                final isToday = day == now.day;
 
-                return Container(
-                  decoration: BoxDecoration(
-                    color: isTrained
-                        ? const Color(0xFF3B8E42) // Verde
-                        : colors.surfaceVariant, // Cinza
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Center(
-                    child: Text(
-                      day,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: isTrained ? Colors.white : colors.onSurface,
+                return InkWell(
+                  onTap: () {
+                    // Chama o provider para marcar/desmarcar
+                    ref.read(completedDatesProvider.notifier).toggleDate(dateToCheck);
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isTrained
+                          ? const Color(0xFF3B8E42) // Verde (Treinado)
+                          : colors.surfaceVariant, // Cinza (Padrão)
+                      borderRadius: BorderRadius.circular(8),
+                      border: isToday && !isTrained
+                          ? Border.all(color: colors.primary, width: 2) // Borda para hoje se não treinado
+                          : null,
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$day',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: isTrained ? Colors.white : colors.onSurface,
+                        ),
                       ),
                     ),
                   ),
@@ -482,70 +508,6 @@ class _CalendarCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// 7. Barra de Navegação (copiada da HomeDashboardScreen)
-class _CustomBottomNavBar extends StatelessWidget {
-  const _CustomBottomNavBar();
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-
-    return Card(
-      color: colors.surface,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _BottomNavItem(
-              icon: Icons.home_filled,
-              onTap: () => context.go('/dashboard'), // Rota da Dashboard
-            ),
-            _BottomNavItem(
-              icon: Icons.restaurant_menu_rounded,
-              onTap: () => context.go('/diet'), // Rota da Dieta
-            ),
-            _BottomNavItem(
-              icon: Icons.fitness_center_rounded,
-              isActive: true, // Ativo nesta tela
-              onTap: () {}, // Já estamos aqui
-            ),
-            _BottomNavItem(
-              icon: Icons.grid_view_rounded,
-              onTap: () => context.go('/explore'), // Rota da Explorar
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _BottomNavItem extends StatelessWidget {
-  const _BottomNavItem({
-    required this.icon,
-    this.isActive = false,
-    this.onTap,
-  });
-  final IconData icon;
-  final bool isActive;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(100),
-      child: Icon(
-        icon,
-        size: 30,
-        color: isActive ? colors.primary : colors.onSurfaceVariant,
       ),
     );
   }
