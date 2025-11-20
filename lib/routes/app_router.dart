@@ -20,6 +20,7 @@ import 'package:strive/presentation/screens/common/under_construction_screen.dar
 import 'package:strive/presentation/screens/profile/profile_screen.dart';
 import 'package:strive/presentation/screens/basic/login_screen.dart';
 import 'package:strive/presentation/screens/basic/loading_screen.dart';
+import 'package:strive/presentation/screens/profile/profile_providers.dart';
 
 // Define as rotas como enums
 enum AppRoute {
@@ -29,11 +30,11 @@ enum AppRoute {
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  // Observa o provider que notifica o GoRouter sobre mudanças na autenticação
   final refreshNotifier = ref.watch(goRouterRefreshStreamProvider.notifier);
 
-  // Observa o estado de autenticação
+  // Observamos AMBOS: autenticação e o perfil do banco de dados
   final authState = ref.watch(authStateStreamProvider);
+  final profileState = ref.watch(userProfileStreamProvider);
 
   return GoRouter(
     refreshListenable: refreshNotifier,
@@ -189,10 +190,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       final user = authState.valueOrNull;
+      final profile = profileState.valueOrNull;
 
       final isLoggedIn = user != null;
+      final hasProfile = profile != null;
 
       final isGoingToLogin = state.matchedLocation == '/login';
+      final isGoingToOnboarding = state.matchedLocation == '/onboarding';
       final isGoingToLoading = state.matchedLocation == '/loading';
 
       //Usuário deslogado
@@ -200,9 +204,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return isGoingToLogin ? null : '/login';
       }
 
-      // Usuário logado
-      if (isGoingToLogin || isGoingToLoading) {
-        return '/dashboard';
+      if (isLoggedIn && !hasProfile) {
+        return isGoingToOnboarding ? null : '/onboarding';
+      }
+
+      if (isLoggedIn && hasProfile) {
+        if (isGoingToLogin || isGoingToLoading || isGoingToOnboarding) {
+          return '/dashboard';
+        }
       }
 
       return null;

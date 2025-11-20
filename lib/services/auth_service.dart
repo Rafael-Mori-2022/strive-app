@@ -4,15 +4,10 @@ import 'package:google_sign_in/google_sign_in.dart';
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
-  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
-  
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
   Future<void> init() async {
-    try {
-      await _googleSignIn.initialize();
-      print("GoogleSignIn inicializado com sucesso.");
-    } catch (e) {
-      print("Erro ao inicializar GoogleSignIn: $e");
-    }
+    print("AuthService pronto.");
   }
 
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
@@ -20,30 +15,26 @@ class AuthService {
   // Login com Google
   Future<User?> signInWithGoogle() async {
     try {
-      
-      final GoogleSignInAccount? googleUser = await _googleSignIn.authenticate();
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
         print("Login com Google cancelado pelo usuário.");
         return null;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-      if (googleAuth.idToken == null) {
-        print("Erro: Google idToken está nulo.");
-        return null;
-      }
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken, 
         idToken: googleAuth.idToken,
       );
 
-      final UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
-      
+      final UserCredential userCredential =
+          await _firebaseAuth.signInWithCredential(credential);
+
       print("Usuário logado: ${userCredential.user?.displayName}");
       return userCredential.user;
-
     } on FirebaseAuthException catch (e) {
       print("Erro no login com Google (Firebase): ${e.message}");
       return null;
@@ -53,7 +44,6 @@ class AuthService {
     }
   }
 
-  // Método de Logout
   Future<void> signOut() async {
     try {
       await _googleSignIn.signOut();

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:strive/theme.dart';
 import 'package:strive/routes/app_router.dart';
 import 'package:strive/di/service_locator.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -28,6 +29,15 @@ class StriveApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'Strive',
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('pt', 'BR'), // Português Brasil
+        Locale('en', 'US'), // Inglês Americano
+      ],
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: ThemeMode.dark,
