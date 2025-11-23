@@ -22,7 +22,6 @@ import 'package:strive/presentation/screens/basic/login_screen.dart';
 import 'package:strive/presentation/screens/basic/loading_screen.dart';
 import 'package:strive/presentation/screens/profile/profile_providers.dart';
 
-// Define as rotas como enums
 enum AppRoute {
   loading,
   login,
@@ -32,24 +31,25 @@ enum AppRoute {
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshNotifier = ref.watch(goRouterRefreshStreamProvider.notifier);
 
-  // Observamos AMBOS: autenticação e o perfil do banco de dados
+  // Observamos os estados
   final authState = ref.watch(authStateStreamProvider);
-  final profileState = ref.watch(userProfileStreamProvider);
+  final profileState = ref.watch(userProfileStreamProvider.select(
+  (value) => value.whenData((profile) => profile != null)
+  ));
 
   return GoRouter(
     refreshListenable: refreshNotifier,
-
     initialLocation: '/login',
     routes: [
       GoRoute(
         path: '/loading',
         name: AppRoute.loading.name,
-        builder: (context, state) => const LoadingScreen(),
+        pageBuilder: (context, state) => const NoTransitionPage(child: LoadingScreen()),
       ),
       GoRoute(
         path: '/login',
         name: AppRoute.login.name,
-        builder: (context, state) => const LoginScreen(),
+        pageBuilder: (context, state) => const NoTransitionPage(child: LoginScreen()),
       ),
       GoRoute(
         path: '/onboarding',
@@ -90,7 +90,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   pageBuilder: (context, state) =>
                       const NoTransitionPage(child: EditStatsScreen()),
                 ),
-                // ROTA 'explore' REMOVIDA DAQUI
               ],
             ),
           ]),
@@ -130,11 +129,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               pageBuilder: (context, state) =>
                   const NoTransitionPage(child: WorkoutScreen()),
               routes: [
+                // Rota do Editor (Agora recebe o ID do plano na URL)
                 GoRoute(
-                  path: 'editor',
+                  path: 'editor/:planId', 
                   name: 'workout-editor',
-                  pageBuilder: (context, state) =>
-                      const NoTransitionPage(child: WorkoutEditorScreen()),
+                  pageBuilder: (context, state) {
+                    final planId = state.pathParameters['planId']!;
+                    return NoTransitionPage(
+                        child: WorkoutEditorScreen(planId: planId));
+                  },
                 ),
                 GoRoute(
                   path: 'create',
@@ -142,14 +145,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   pageBuilder: (context, state) =>
                       const NoTransitionPage(child: WorkoutCreateScreen()),
                 ),
+                // Rota de Adicionar Exercício (Captura muscle e planId)
                 GoRoute(
                   path: 'add-exercise',
                   name: 'add-exercise',
                   pageBuilder: (context, state) {
                     final muscle =
-                        state.uri.queryParameters['muscle'] ?? 'Bíceps';
+                        state.uri.queryParameters['muscle'] ?? 'Peito';
+                    final planId = 
+                        state.uri.queryParameters['planId'] ?? '';
                     return NoTransitionPage(
-                        child: AddExerciseScreen(muscleGroup: muscle));
+                        child: AddExerciseScreen(muscleGroup: muscle, planId: planId));
                   },
                 ),
               ],
@@ -173,6 +179,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'profile',
         pageBuilder: (context, state) =>
             const NoTransitionPage(child: ProfileScreen()),
+        routes: [
+          GoRoute(
+            path: 'edit',
+            name: 'edit-profile',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: ProfileSetupScreen()),
+          ),
+        ],
       ),
 
       GoRoute(
@@ -183,37 +197,44 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
     ],
 
-    // Lógica de Redirecionamento
+    // --- LÓGICA DE REDIRECIONAMENTO BLINDADA ---
     redirect: (BuildContext context, GoRouterState state) {
-      if (authState.isLoading || !authState.hasValue) {
-        return '/loading';
-      }
+      
+      final isLoggingIn = state.matchedLocation == '/login';
+      final isOnboarding = state.matchedLocation == '/onboarding';
+      final isLoading = state.matchedLocation == '/loading';
 
-      final user = authState.valueOrNull;
-      final profile = profileState.valueOrNull;
+      // 1. Auth Loading -> Loading (Prioridade Máxima)
+      if (authState.isLoading) return '/loading';
 
-      final isLoggedIn = user != null;
-      final hasProfile = profile != null;
+      final isLoggedIn = authState.valueOrNull != null;
 
-      final isGoingToLogin = state.matchedLocation == '/login';
-      final isGoingToOnboarding = state.matchedLocation == '/onboarding';
-      final isGoingToLoading = state.matchedLocation == '/loading';
-
-      //Usuário deslogado
+      // 2. Não Logado -> Login
       if (!isLoggedIn) {
-        return isGoingToLogin ? null : '/login';
+        return isLoggingIn ? null : '/login';
       }
 
-      if (isLoggedIn && !hasProfile) {
-        return isGoingToOnboarding ? null : '/onboarding';
+      // 3. Perfil Loading -> Loading (Prioridade Alta para evitar flash de onboarding)
+      if (profileState.isLoading) return '/loading';
+
+      final hasProfile = profileState.valueOrNull != null;
+
+      // 4. Logado mas SEM Perfil -> Onboarding
+      // Se ele tentar sair do onboarding, forçamos ele a ficar
+      if (!hasProfile) {
+        return isOnboarding ? null : '/onboarding';
       }
 
-      if (isLoggedIn && hasProfile) {
-        if (isGoingToLogin || isGoingToLoading || isGoingToOnboarding) {
+      // 5. Logado E COM Perfil (Caso Crítico)
+      if (hasProfile) {
+        // Se ele tentar ir para Login, Loading ou Onboarding, mandamos para Dashboard.
+        // CASO CONTRÁRIO (ex: ele está em /diet), deixamos ele quieto (return null).
+        if (isLoggingIn || isLoading || isOnboarding) {
           return '/dashboard';
         }
       }
 
+      // Nenhuma regra de bloqueio se aplica -> Deixa navegar
       return null;
     },
 

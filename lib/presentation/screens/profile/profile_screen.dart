@@ -29,10 +29,10 @@ class ProfileScreen extends ConsumerWidget {
             ]),
             const SizedBox(height: 16),
             ListTile(
-                leading: const Icon(Icons.person),
+                leading: const Icon(Icons.edit), 
                 title: const Text('Atualizar perfil'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push('/onboarding')),
+                onTap: () => context.push('/profile/edit')),
             const SizedBox(height: 24),
             PrimaryButton(
                 label: 'Ver Leaderboard',

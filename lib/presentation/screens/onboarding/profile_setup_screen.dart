@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-// Certifique-se de importar seu modelo de UserProfile corretamente
-// import 'package:strive/domain/entities/user_profile.dart';
+import 'package:strive/presentation/state/profile_providers.dart';
 
 class ProfileSetupScreen extends ConsumerStatefulWidget {
   const ProfileSetupScreen({super.key});
@@ -17,15 +16,15 @@ class ProfileSetupScreen extends ConsumerStatefulWidget {
 class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
+  bool _isEditing = false;
 
   // Controllers
   final _nameCtrl = TextEditingController();
-  // _ageCtrl REMOVIDO. Substituído pela data abaixo.
   final _dobCtrl = TextEditingController();
   final _heightCtrl = TextEditingController();
   final _weightCtrl = TextEditingController();
 
-  DateTime? _selectedDateOfBirth; // Variável para guardar a data real
+  DateTime? _selectedDateOfBirth;
   String? _selectedGoal;
   String? _selectedGender;
 
@@ -39,6 +38,50 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   final List<String> _genders = ['Masculino', 'Feminino', 'Outro'];
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkExistingProfile();
+    });
+  }
+
+  // <<< CORREÇÃO PRINCIPAL AQUI >>>
+  void _checkExistingProfile() {
+    final profileState = ref.read(userProfileProvider);
+
+    if (profileState.hasValue && profileState.value != null) {
+      final user = profileState.value!;
+      setState(() {
+        _isEditing = true;
+
+        // 1. Textos Simples
+        _nameCtrl.text = user.name;
+        _heightCtrl.text = user.heightCm.toStringAsFixed(0);
+        _weightCtrl.text = user.weightKg.toStringAsFixed(1).replaceAll('.', ',');
+
+        // 2. Dropdown de Objetivo
+        if (_goals.contains(user.goal)) {
+          _selectedGoal = user.goal;
+        }
+
+        // 3. Dropdown de Gênero (CORRIGIDO)
+        if (user.gender != null && _genders.contains(user.gender)) {
+          _selectedGender = user.gender;
+        }
+
+        // 4. Data de Nascimento (CORRIGIDO)
+        // Agora usamos o campo birthDate que adicionamos na Entidade
+        if (user.birthDate != null) {
+          _selectedDateOfBirth = user.birthDate;
+          _dobCtrl.text = "${user.birthDate!.day.toString().padLeft(2, '0')}/"
+              "${user.birthDate!.month.toString().padLeft(2, '0')}/"
+              "${user.birthDate!.year}";
+        }
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _nameCtrl.dispose();
     _dobCtrl.dispose();
@@ -47,7 +90,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     super.dispose();
   }
 
-  // Função auxiliar para calcular idade
   int _calculateAge(DateTime birthDate) {
     final now = DateTime.now();
     int age = now.year - birthDate.year;
@@ -58,22 +100,19 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     return age;
   }
 
-  // Função para abrir o calendário
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now()
-          .subtract(const Duration(days: 365 * 18)), // Começa em 18 anos atrás
+      initialDate: _selectedDateOfBirth ??
+          DateTime.now().subtract(const Duration(days: 365 * 18)),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
-      locale: const Locale(
-          'pt', 'BR'), // Se tiver suporte a localização configurado
+      locale: const Locale('pt', 'BR'),
     );
 
     if (picked != null && picked != _selectedDateOfBirth) {
       setState(() {
         _selectedDateOfBirth = picked;
-        // Formatação visual simples DD/MM/AAAA
         _dobCtrl.text =
             "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
       });
@@ -85,7 +124,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
     if (_selectedGoal == null ||
         _selectedGender == null ||
-        _selectedDateOfBirth == null) {
+        (_selectedDateOfBirth == null && _dobCtrl.text.isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, preencha todos os campos.')),
       );
@@ -98,30 +137,48 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) throw Exception("Usuário não autenticado");
 
-      final calculatedAge = _calculateAge(_selectedDateOfBirth!);
+      final dateToUse = _selectedDateOfBirth ?? DateTime.now();
+      final calculatedAge = _calculateAge(dateToUse);
 
       final weightString = _weightCtrl.text.replaceAll(',', '.');
-      final heightString = _heightCtrl.text; // Altura mantemos inteiro (cm)
+      final heightString = _heightCtrl.text;
 
       final newProfile = {
         'id': user.uid,
         'email': user.email,
         'name': _nameCtrl.text.trim(),
-        'age': calculatedAge, // Salva a idade calculada
-        'birthDate': Timestamp.fromDate(
-            _selectedDateOfBirth!), // É bom salvar a data original também
+        'age': calculatedAge,
+        'birthDate': Timestamp.fromDate(dateToUse),
         'heightCm': double.parse(heightString),
         'weightKg': double.parse(weightString),
         'gender': _selectedGender,
         'goal': _selectedGoal,
-        'xp': 0,
-        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
       };
+
+      // Se for edição, não mexemos no XP. Se for novo, definimos como 0.
+      if (!_isEditing) {
+        newProfile['createdAt'] = FieldValue.serverTimestamp();
+        newProfile['xp'] = 0; 
+      } else {
+        // Em edição, NÃO enviamos o campo 'xp' para o set com merge,
+        // para garantir que não sobrescreva o valor atual do banco com 0 ou null.
+        // O merge: true cuida de manter o que já existe se não mandarmos a chave.
+      }
 
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
-          .set(newProfile);
+          .set(newProfile, SetOptions(merge: true));
+
+      ref.refresh(userProfileProvider);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Perfil salvo com sucesso!')),
+        );
+        context.pop();
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -140,6 +197,12 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
     return Scaffold(
       backgroundColor: colorScheme.background,
+      appBar: AppBar(
+        title: Text(_isEditing ? "Editar Perfil" : "Criar Perfil"),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -148,22 +211,26 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 20),
-                Text(
-                  "Bem-vindo(a)!",
-                  style: theme.textTheme.displaySmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.primary,
+                if (!_isEditing) ...[
+                  const SizedBox(height: 20),
+                  Text(
+                    "Bem-vindo(a)!",
+                    style: theme.textTheme.displaySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Vamos configurar seu perfil para personalizar sua jornada.",
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+                  const SizedBox(height: 8),
+                  Text(
+                    "Vamos configurar seu perfil para personalizar sua jornada.",
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 32),
+                  const SizedBox(height: 32),
+                ] else ...[
+                  const SizedBox(height: 10),
+                ],
 
                 _buildSectionTitle(context, "Sobre você"),
                 _buildTextField(
@@ -174,17 +241,15 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Linha de Data de Nascimento e Gênero
                 Row(
                   children: [
                     Expanded(
-                      // Campo de Data de Nascimento (Read Only)
                       child: _buildTextField(
                         controller: _dobCtrl,
                         label: "Nascimento",
                         icon: Icons.calendar_today_outlined,
-                        readOnly: true, // Impede digitar texto
-                        onTap: () => _selectDate(context), // Abre o calendário
+                        readOnly: true,
+                        onTap: () => _selectDate(context),
                         validator: (v) => v!.isEmpty ? 'Obrigatório' : null,
                       ),
                     ),
@@ -212,9 +277,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                         icon: Icons.height,
                         keyboardType: TextInputType.number,
                         inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly, // Só números
-                          LengthLimitingTextInputFormatter(
-                              3), // Máximo 3 dígitos (ex: 180)
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(3),
                         ],
                         validator: (v) => v!.isEmpty ? 'Obrigatório' : null,
                       ),
@@ -228,9 +292,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                         keyboardType: const TextInputType.numberWithOptions(
                             decimal: true),
                         inputFormatters: [
-                          // Permite números, ponto e vírgula
                           FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-                          // Aumentamos para 5 para permitir "105.5" (3 digitos + ponto + decimal)
                           LengthLimitingTextInputFormatter(5),
                         ],
                         validator: (v) => v!.isEmpty ? 'Obrigatório' : null,
@@ -266,9 +328,11 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                     ),
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            "Finalizar Cadastro",
-                            style: TextStyle(
+                        : Text(
+                            _isEditing
+                                ? "Salvar Alterações"
+                                : "Finalizar Cadastro",
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
@@ -303,16 +367,16 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     TextInputType keyboardType = TextInputType.text,
     List<TextInputFormatter>? inputFormatters,
     String? Function(String?)? validator,
-    bool readOnly = false, // Novo parâmetro para o campo de data
-    VoidCallback? onTap, // Novo parâmetro para o clique
+    bool readOnly = false,
+    VoidCallback? onTap,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
       validator: validator,
-      readOnly: readOnly, // Impede abrir teclado se for true
-      onTap: onTap, // Ação ao clicar
+      readOnly: readOnly,
+      onTap: onTap,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon),

@@ -1,15 +1,61 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:strive/di/service_locator.dart';
+import 'package:get_it/get_it.dart';
 import 'package:strive/domain/entities/exercise.dart';
 import 'package:strive/domain/entities/workout.dart';
 import 'package:strive/domain/repositories/workout_repository.dart';
 
-final workoutRepositoryProvider =
-    Provider<WorkoutRepository>((ref) => sl<WorkoutRepository>());
+// Acesso ao Repositório
+final workoutRepositoryProvider = Provider<WorkoutRepository>((ref) {
+  return GetIt.instance<WorkoutRepository>();
+});
 
-final workoutPlansProvider = FutureProvider<List<WorkoutPlan>>(
-    (ref) async => ref.read(workoutRepositoryProvider).getWorkoutPlans());
+// Lista de Planos (Stream ou Future que atualiza)
+final workoutPlansProvider = FutureProvider<List<WorkoutPlan>>((ref) async {
+  final repo = ref.watch(workoutRepositoryProvider);
+  return repo.getWorkoutPlans();
+});
 
-final exercisesByMuscleProvider = FutureProvider.family<List<Exercise>, String>(
-    (ref, muscle) async =>
-        ref.read(workoutRepositoryProvider).listExercisesByMuscle(muscle));
+// Lista de Exercícios da API (Por músculo)
+final exercisesByMuscleProvider = FutureProvider.family<List<Exercise>, String>((ref, muscle) async {
+  final repo = ref.watch(workoutRepositoryProvider);
+  return repo.listExercisesByMuscle(muscle);
+});
+
+// Controller para ações (Adicionar, Remover, Toggle)
+final workoutControllerProvider = Provider((ref) => WorkoutController(ref));
+
+class WorkoutController {
+  final Ref _ref;
+  WorkoutController(this._ref);
+
+  Future<void> createPlan(String name) async {
+    await _ref.read(workoutRepositoryProvider).createWorkout(name);
+    _ref.refresh(workoutPlansProvider); // Recarrega a lista
+  }
+
+  Future<void> addExerciseToPlan(String planId, Exercise exercise) async {
+    await _ref.read(workoutRepositoryProvider).addExercise(planId, exercise);
+    _ref.refresh(workoutPlansProvider);
+  }
+
+  Future<void> toggleExercise(String planId, String exerciseId) async {
+    // Otimisticamente atualiza a UI seria o ideal, mas aqui vamos recarregar
+    await _ref.read(workoutRepositoryProvider).toggleExercise(planId, exerciseId);
+    _ref.refresh(workoutPlansProvider);
+  }
+
+  Future<void> deletePlan(String planId) async {
+    await _ref.read(workoutRepositoryProvider).deleteWorkout(planId);
+    _ref.refresh(workoutPlansProvider);
+  }
+
+  Future<void> renamePlan(String planId, String newName) async {
+    await _ref.read(workoutRepositoryProvider).updateWorkoutName(planId, newName);
+    _ref.refresh(workoutPlansProvider);
+  }
+
+  Future<void> removeExerciseFromPlan(String planId, String exerciseId) async {
+    await _ref.read(workoutRepositoryProvider).removeExercise(planId, exerciseId);
+    _ref.refresh(workoutPlansProvider);
+  }
+}

@@ -1,66 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Para input formatter
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:strive/domain/entities/meal.dart';
 import 'package:strive/presentation/state/diet_providers.dart';
-// Removi a importação 'common_widgets.dart' pois o ExpandableMealCard
-// foi substituído pelo design do protótipo.
+import 'package:strive/presentation/state/gamification_provider.dart';
+import 'package:strive/domain/enums/xp_action.dart';
 
 class DietScreen extends ConsumerWidget {
   const DietScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final meals = ref.watch(mealsProvider);
+    // Observa a lista de refeições
+    final mealsAsync = ref.watch(mealsProvider);
 
     return Scaffold(
-      // 1. Removemos a AppBar
-      // 2. Usamos a cor de fundo do tema
       backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
         bottom: false,
-        child: ListView(
-          // 3. Padding ajustado para o layout
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          children: [
-            // 4. Header "Dieta"
-            const _Header(),
-            const SizedBox(height: 16),
+        child: RefreshIndicator(
+          onRefresh: () async {
+            // Recarrega refeições e reseta estados se necessário
+            ref.refresh(mealsProvider);
+          },
+          child: ListView(
+            // Padding inferior grande para não ficar atrás da navbar flutuante
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+            children: [
+              const _Header(),
+              const SizedBox(height: 16),
 
-            // 5. Novo Card de Calorias e Macros (do protótipo)
-            const _CalorieMacroCard(),
-            const SizedBox(height: 16),
-
-            // 6. Novo Card de Água (do protótipo)
-            const _WaterCard(),
-            const SizedBox(height: 16),
-
-            // 7. Lista de Refeições
-            meals.when(
-              data: (list) => ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: list.length,
-                itemBuilder: (context, index) {
-                  final meal = list[index];
-                  return _MealCard(meal: meal);
-                },
-                separatorBuilder: (context, index) {
-                  return const SizedBox(height: 16);
-                },
+              // Card de Calorias (Calculado com base nas refeições)
+              mealsAsync.when(
+                data: (meals) => _CalorieMacroCard(meals: meals),
+                loading: () => const _LoadingCard(height: 150),
+                error: (_, __) => const SizedBox.shrink(),
               ),
-              loading: () => const LinearProgressIndicator(),
-              error: (e, st) => const Text('Erro ao carregar refeições'),
-            ),
-            const SizedBox(height: 72), // Espaço para a bottom nav
-          ],
+              
+              const SizedBox(height: 16),
+              
+              // Card de Água (Agora com Meta Editável)
+              const _WaterCard(),
+              
+              const SizedBox(height: 16),
+
+              // Lista de Refeições
+              mealsAsync.when(
+                data: (list) => ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: list.length,
+                  itemBuilder: (context, index) {
+                    final meal = list[index];
+                    return _MealCard(meal: meal);
+                  },
+                  separatorBuilder: (context, index) => const SizedBox(height: 16),
+                ),
+                loading: () => const LinearProgressIndicator(),
+                error: (e, st) => Center(child: Text('Erro: $e')),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-// 4. Header "Dieta"
 class _Header extends StatelessWidget {
   const _Header();
   @override
@@ -78,26 +85,220 @@ class _Header extends StatelessWidget {
   }
 }
 
-// 5. Card de Calorias e Macros
+// --- CARD DE ÁGUA ATUALIZADO (META EDITÁVEL) ---
+class _WaterCard extends ConsumerWidget {
+  const _WaterCard();
+
+  // Dialog para editar a Meta
+  void _showEditGoalDialog(BuildContext context, WidgetRef ref, int currentGoal) {
+    final controller = TextEditingController(text: (currentGoal / 1000).toString());
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Definir Meta de Água'),
+        content: TextField(
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
+          decoration: const InputDecoration(
+            labelText: 'Litros',
+            suffixText: 'L',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          FilledButton(
+            onPressed: () {
+              final val = double.tryParse(controller.text.replaceAll(',', '.'));
+              if (val != null && val > 0) {
+                ref.read(waterGoalProvider.notifier).state = (val * 1000).toInt();
+              }
+              Navigator.pop(ctx);
+            },
+            child: const Text('Salvar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Dialog para editar o Stepper (Quantidade por clique)
+  void _showEditStepperDialog(BuildContext context, WidgetRef ref, int currentStep) {
+    final controller = TextEditingController(text: currentStep.toString());
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Quantidade por Clique'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: const InputDecoration(
+                labelText: 'Mililitros (ml)',
+                suffixText: 'ml',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          FilledButton(
+            onPressed: () {
+              final val = int.tryParse(controller.text);
+              if (val != null && val > 0) {
+                ref.read(waterStepperProvider.notifier).state = val;
+              }
+              Navigator.pop(ctx);
+            },
+            child: const Text('Salvar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentWater = ref.watch(waterIntakeProvider);
+    final goalWater = ref.watch(waterGoalProvider);
+    final stepperValue = ref.watch(waterStepperProvider); // Lê do provider
+
+    final textTheme = Theme.of(context).textTheme;
+    final colors = Theme.of(context).colorScheme;
+    final progress = (currentWater / goalWater).clamp(0.0, 1.0);
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          Positioned(
+            bottom: 0, left: 0, right: 0, height: 4,
+            child: LinearProgressIndicator(
+              value: progress,
+              backgroundColor: Colors.transparent,
+              valueColor: AlwaysStoppedAnimation(Colors.blue.shade300),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            child: Row(
+              children: [
+                Icon(Icons.water_drop, color: Colors.blue.shade300, size: 32),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${(currentWater / 1000).toStringAsFixed(2)} L',
+                      style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    InkWell(
+                      onTap: () => _showEditGoalDialog(context, ref, goalWater),
+                      borderRadius: BorderRadius.circular(4),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2.0),
+                        child: Row(
+                          children: [
+                            Text(
+                              'Meta: ${(goalWater / 1000).toStringAsFixed(1)} L',
+                              style: textTheme.bodySmall?.copyWith(
+                                color: colors.onSurfaceVariant,
+                                decoration: TextDecoration.underline,
+                                decorationStyle: TextDecorationStyle.dotted,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(Icons.edit, size: 12, color: colors.onSurfaceVariant),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                // Controles
+                Container(
+                  decoration: BoxDecoration(
+                    color: colors.surfaceVariant.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove, size: 20),
+                        onPressed: () {
+                          final newVal = (currentWater - stepperValue).clamp(0, 10000);
+                          ref.read(waterIntakeProvider.notifier).state = newVal;
+                        },
+                      ),
+                      // Valor do stepper agora é clicável para editar
+                      InkWell(
+                        onTap: () => _showEditStepperDialog(context, ref, stepperValue),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text('$stepperValue ml', 
+                            style: textTheme.labelMedium?.copyWith(
+                              decoration: TextDecoration.underline,
+                              decorationStyle: TextDecorationStyle.dotted,
+                            ),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add, size: 20),
+                        onPressed: () {
+                          final newVal = (currentWater + stepperValue).clamp(0, 10000);
+                          ref.read(waterIntakeProvider.notifier).state = newVal;
+                          if (context.mounted) {
+                             ref.read(gamificationControllerProvider).earnXp(context, XpAction.addWater);
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// --- CARD DE CALORIAS E MACROS (Mantido, apenas garantindo imports) ---
 class _CalorieMacroCard extends StatelessWidget {
-  const _CalorieMacroCard();
+  final List<Meal> meals;
+  const _CalorieMacroCard({required this.meals});
 
   @override
   Widget build(BuildContext context) {
-    // Você pode conectar seus providers aqui para
-    // valores dinâmicos de calorias e macros
-    const double caloriasConsumidas = 701;
-    const double carboidratos = 70.1;
-    const double proteinas = 16.7;
-    const double gorduras = 28.6;
+    double totalCalories = 0;
+    double totalCarbs = 0;
+    double totalProtein = 0;
+    double totalFat = 0;
 
-    // Metas (exemplo)
-    const double metaCalorias = 2500;
-    const double metaCarboidratos = 300;
-    const double metaProteinas = 150;
-    const double metaGorduras = 80;
+    for (var meal in meals) {
+      totalCalories += meal.calories;
+      totalCarbs += meal.carbs;
+      totalProtein += meal.protein;
+      totalFat += meal.fat;
+    }
+
+    // Metas fixas para MVP (poderiam vir do userProfile)
+    const double goalCalories = 2500;
+    const double goalCarbs = 300;
+    const double goalProtein = 160;
+    const double goalFat = 70;
 
     final textTheme = Theme.of(context).textTheme;
+    final colors = Theme.of(context).colorScheme;
 
     return Card(
       child: Padding(
@@ -112,28 +313,22 @@ class _CalorieMacroCard extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   CircularProgressIndicator(
-                    value: caloriasConsumidas / metaCalorias,
+                    value: (totalCalories / goalCalories).clamp(0.0, 1.0),
                     strokeWidth: 8,
-                    backgroundColor:
-                        Theme.of(context).colorScheme.surfaceVariant,
-                    valueColor:
-                        const AlwaysStoppedAnimation<Color>(Colors.redAccent),
+                    backgroundColor: colors.surfaceVariant,
+                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.redAccent),
                   ),
                   Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          caloriasConsumidas.toStringAsFixed(0),
-                          style: textTheme.headlineSmall,
+                          totalCalories.toStringAsFixed(0),
+                          style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          'calorias consumidas',
-                          textAlign: TextAlign.center,
-                          style: textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant),
+                          'kcal',
+                          style: textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -141,30 +336,31 @@ class _CalorieMacroCard extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 24),
             // Barras de Macro
             Expanded(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _MacroBar(
                     title: 'Carboidrato',
-                    value: carboidratos,
-                    goal: metaCarboidratos,
-                    color: Colors.blue.shade300,
+                    value: totalCarbs,
+                    goal: goalCarbs,
+                    color: Colors.blue.shade400,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   _MacroBar(
                     title: 'Proteína',
-                    value: proteinas,
-                    goal: metaProteinas,
-                    color: Colors.green.shade300,
+                    value: totalProtein,
+                    goal: goalProtein,
+                    color: Colors.green.shade400,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   _MacroBar(
                     title: 'Gordura',
-                    value: gorduras,
-                    goal: metaGorduras,
-                    color: Colors.red.shade300,
+                    value: totalFat,
+                    goal: goalFat,
+                    color: Colors.orange.shade400,
                   ),
                 ],
               ),
@@ -176,7 +372,6 @@ class _CalorieMacroCard extends StatelessWidget {
   }
 }
 
-// Widget auxiliar para as barras de macro
 class _MacroBar extends StatelessWidget {
   const _MacroBar({
     required this.title,
@@ -193,17 +388,16 @@ class _MacroBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final progress = (goal == 0) ? 0.0 : (value / goal);
+    final progress = (goal == 0) ? 0.0 : (value / goal).clamp(0.0, 1.0);
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(title, style: textTheme.labelMedium),
             Text(
-              '${value.toStringAsFixed(0)} g',
+              '${value.toStringAsFixed(0)} / ${goal.toStringAsFixed(0)} g',
               style: textTheme.labelMedium?.copyWith(color: color),
             ),
           ],
@@ -221,65 +415,7 @@ class _MacroBar extends StatelessWidget {
   }
 }
 
-// 6. Card de Água
-class _WaterCard extends StatelessWidget {
-  const _WaterCard();
-
-  @override
-  Widget build(BuildContext context) {
-    // Você pode conectar seus providers aqui
-    const double aguaConsumida = 0.75;
-    const int stepperValue = 250; // Valor do stepper (ex: 250 ml)
-
-    final textTheme = Theme.of(context).textTheme;
-    final colors = Theme.of(context).colorScheme;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        child: Row(
-          children: [
-            // Ícone e Total
-            Icon(Icons.local_drink, color: Colors.blue.shade300, size: 36),
-            const SizedBox(width: 8),
-            Text('${aguaConsumida.toStringAsFixed(2)} L',
-                style: textTheme.titleMedium),
-            const Spacer(),
-
-            // Stepper
-            Container(
-              decoration: BoxDecoration(
-                color: colors.surfaceVariant,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.remove, color: colors.onSurfaceVariant),
-                    onPressed: () {/* Lógica de remover água */},
-                  ),
-                  Text('${stepperValue} ml', style: textTheme.bodyMedium),
-                  IconButton(
-                    icon: Icon(Icons.add, color: colors.onSurfaceVariant),
-                    onPressed: () {/* Lógica de adicionar stepper */},
-                  ),
-                ],
-              ),
-            ),
-
-            // Botão de Adicionar
-            IconButton(
-              icon: Icon(Icons.add_circle, color: colors.primary, size: 30),
-              onPressed: () {/* Lógica de adicionar valor do stepper */},
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// 8. Card de Refeição (redesenhado)
+// --- CARD DE REFEIÇÃO (Mantido) ---
 class _MealCard extends ConsumerWidget {
   final Meal meal;
   const _MealCard({required this.meal});
@@ -287,65 +423,97 @@ class _MealCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
+    final colors = Theme.of(context).colorScheme;
 
-    // Define os ícones com base no nome da refeição (exemplo)
-    IconData mainIcon = Icons.restaurant_menu;
-    IconData secondIcon = Icons.coffee;
-
-    if (meal.name.toLowerCase().contains('almoço')) {
-      mainIcon = Icons.restaurant;
-      secondIcon = Icons.local_drink;
-    } else if (meal.name.toLowerCase().contains('jantar')) {
-      mainIcon = Icons.dinner_dining;
-      secondIcon = Icons.local_drink;
-    }
+    IconData mainIcon = Icons.restaurant;
+    if (meal.name.toLowerCase().contains('café')) mainIcon = Icons.bakery_dining;
+    if (meal.name.toLowerCase().contains('lanche')) mainIcon = Icons.apple;
+    if (meal.name.toLowerCase().contains('jantar')) mainIcon = Icons.dinner_dining;
 
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Header do Card
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(meal.name, style: textTheme.titleLarge),
-                Text(
-                  '${meal.calories.toStringAsFixed(0)} Kcal',
-                  style: textTheme.titleMedium
-                      ?.copyWith(color: textTheme.bodySmall?.color),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            // Ícones Grandes
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(mainIcon,
-                    size: 100,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant),
-                const SizedBox(width: 24),
-                Icon(secondIcon,
-                    size: 80,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant),
-              ],
-            ),
-            // Botão de expandir (como no protótipo)
-            Align(
-              alignment: Alignment.bottomRight,
-              child: IconButton(
-                icon: Icon(Icons.expand_more,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant),
-                onPressed: () {
-                  // Você pode implementar a lógica de expansão aqui
-                  // ou navegar para a tela de detalhes
-                  context.push('/diet/meal/${meal.id}');
-                },
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => context.push('/diet/add-food?mealId=${meal.id}'),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(mainIcon, color: colors.primary, size: 24),
+                      const SizedBox(width: 12),
+                      Text(meal.name, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: colors.primaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.add, size: 20, color: colors.onPrimaryContainer),
+                  )
+                ],
               ),
-            ),
-          ],
+              if (meal.items.isNotEmpty) ...[
+                const Divider(height: 24),
+                // Lista resumida dos itens
+                ...meal.items.take(3).map((item) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: Row(
+                    children: [
+                      Expanded(child: Text(item.name, style: textTheme.bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                      Text('${item.calories.toStringAsFixed(0)} kcal', 
+                           style: textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant)),
+                    ],
+                  ),
+                )),
+                if (meal.items.length > 3)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      '+ ${meal.items.length - 3} outros itens',
+                      style: textTheme.labelSmall?.copyWith(color: colors.primary),
+                    ),
+                  ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Total: ${meal.calories.toStringAsFixed(0)} kcal',
+                      style: textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ] else 
+                Padding(
+                  padding: const EdgeInsets.only(top: 12.0),
+                  child: Text(
+                    'Nenhum alimento registrado',
+                    style: textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic, color: colors.outline),
+                  ),
+                ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _LoadingCard extends StatelessWidget {
+  final double height;
+  const _LoadingCard({required this.height});
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height,
+      child: Card(
+        child: const Center(child: CircularProgressIndicator()),
       ),
     );
   }

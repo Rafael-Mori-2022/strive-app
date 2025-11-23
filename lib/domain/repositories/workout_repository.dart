@@ -8,4 +8,6 @@ abstract class WorkoutRepository {
   Future<void> removeExercise(String planId, String exerciseId);
   Future<void> toggleExercise(String planId, String exerciseId);
   Future<List<Exercise>> listExercisesByMuscle(String muscleGroup);
+  Future<void> deleteWorkout(String planId);
+  Future<void> updateWorkoutName(String planId, String newName);
 }

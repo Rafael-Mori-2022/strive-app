@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:strive/domain/entities/food_item.dart';
+import 'package:strive/domain/enums/xp_action.dart';
 import 'package:strive/presentation/state/diet_providers.dart';
-import 'package:strive/presentation/widgets/common_widgets.dart';
+import 'package:strive/presentation/state/gamification_provider.dart';
 
 class AddFoodScreen extends ConsumerStatefulWidget {
   const AddFoodScreen({super.key});
@@ -10,111 +13,167 @@ class AddFoodScreen extends ConsumerStatefulWidget {
   ConsumerState<AddFoodScreen> createState() => _AddFoodScreenState();
 }
 
-class _AddFoodScreenState extends ConsumerState<AddFoodScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
+class _AddFoodScreenState extends ConsumerState<AddFoodScreen> {
   String _query = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
+  
+  // Recupera o mealId da rota (query param)
+  // Ex: /diet/add-food?mealId=m1
+  String? get _mealId => GoRouterState.of(context).uri.queryParameters['mealId'];
 
   @override
   Widget build(BuildContext context) {
-    final search = ref.watch(searchFoodsProvider(_query));
-    final frequentes = ref.watch(frequentFoodsProvider);
-    final recentes = ref.watch(recentFoodsProvider);
-    final favoritos = ref.watch(favoriteFoodsProvider);
+    final searchResults = ref.watch(searchFoodsProvider(_query));
+    // Se não veio mealId, usa um fallback ou trata erro. 'm1' é Café da Manhã no mock/repo.
+    final targetMealId = _mealId ?? 'm1'; 
 
     return Scaffold(
       appBar: AppBar(title: const Text('Adicionar Alimento')),
-      body: Column(children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-          child: SearchInput(
-              hint: 'Buscar alimentos',
-              onChanged: (v) => setState(() => _query = v)),
-        ),
-        TabBar(controller: _tabController, tabs: const [
-          Tab(text: 'Frequentes'),
-          Tab(text: 'Recentes'),
-          Tab(text: 'Favoritos')
-        ]),
-        Expanded(
-          child: TabBarView(controller: _tabController, children: [
-            _FoodList(provider: frequentes),
-            _FoodList(provider: recentes),
-            _FoodList(provider: favoritos),
-          ]),
-        ),
-        if (_query.isNotEmpty)
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            // Simplificado para TextField padrão para garantir compatibilidade
+            child: TextField( 
+              autofocus: true, // Abre o teclado automaticamente
+              decoration: const InputDecoration(
+                hintText: 'Busque ex: "Maçã", "Whey"...',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                ),
+                contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+              ),
+              onChanged: (v) => setState(() => _query = v),
+            ),
+          ),
           Expanded(
-              child: search.when(
-            data: (list) => _Results(list: list),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, st) => const Center(child: Text('Erro na busca')),
-          )),
-      ]),
-    );
-  }
-}
-
-class _FoodList extends StatelessWidget {
-  final AsyncValue provider;
-  const _FoodList({required this.provider});
-
-  @override
-  Widget build(BuildContext context) {
-    return provider.when(
-      data: (list) => ListView.separated(
-        padding: const EdgeInsets.all(12),
-        itemBuilder: (_, i) {
-          final item = list[i];
-          return ListTile(
-            leading: const Icon(Icons.fastfood, color: Colors.orange),
-            title: Text(item.name),
-            subtitle: Text('${item.calories.toStringAsFixed(0)} kcal'),
-            trailing: IconButton(
-                icon: const Icon(Icons.add_circle, color: Colors.green),
-                onPressed: () {}),
-          );
-        },
-        separatorBuilder: (_, __) => const Divider(height: 8),
-        itemCount: list.length,
+            child: _query.isEmpty
+                ? _buildEmptyState(context)
+                : searchResults.when(
+                    data: (list) => list.isEmpty
+                        ? const Center(child: Text("Nenhum alimento encontrado"))
+                        : ListView.separated(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: list.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 12),
+                            itemBuilder: (_, i) {
+                              final item = list[i];
+                              return _FoodItemCard(
+                                item: item,
+                                onAdd: () async {
+                                  // 1. Adiciona na dieta
+                                  await ref
+                                      .read(mealsProvider.notifier)
+                                      .addFood(targetMealId, item);
+                                  
+                                  // 2. DA O XP (Gamificação!)
+                                  if (context.mounted) {
+                                    ref
+                                        .read(gamificationControllerProvider)
+                                        .earnXp(context, XpAction.addMeal);
+                                    
+                                    // 3. VOLTA PARA A DIETA (CORREÇÃO CRÍTICA)
+                                    // O pop fecha a tela de Add e volta para DietScreen
+                                    context.pop(); 
+                                  }
+                                },
+                              );
+                            },
+                          ),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (e, st) =>
+                        const Center(child: Text('Erro na conexão com a API')),
+                  ),
+          ),
+        ],
       ),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, st) => const Center(child: Text('Erro')),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.search,
+              size: 64,
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.3)),
+          const SizedBox(height: 16),
+          Text(
+            "Digite para buscar na base de dados global",
+            style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _Results extends StatelessWidget {
-  final List list;
-  const _Results({required this.list});
+class _FoodItemCard extends StatelessWidget {
+  final FoodItem item;
+  final VoidCallback onAdd;
+
+  const _FoodItemCard({required this.item, required this.onAdd});
+
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(12),
-      itemCount: list.length,
-      itemBuilder: (_, i) {
-        final item = list[i];
-        return ListTile(
-          leading: const Icon(Icons.search, color: Colors.blue),
-          title: Text(item.name),
-          subtitle: Text('${item.calories.toStringAsFixed(0)} kcal'),
-          trailing: IconButton(
-              icon: const Icon(Icons.add_circle, color: Colors.green),
-              onPressed: () {}),
-        );
-      },
+    final colors = Theme.of(context).colorScheme;
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onAdd,
+        child: Row(
+          children: [
+            SizedBox(
+              width: 80,
+              height: 80,
+              child: item.imageUrl != null
+                  ? Image.network(
+                      item.imageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          Container(color: colors.surfaceVariant, child: const Icon(Icons.broken_image)),
+                    )
+                  : Container(
+                      color: colors.surfaceVariant,
+                      child: Icon(Icons.fastfood, color: colors.primary),
+                    ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${item.calories.toStringAsFixed(0)} kcal',
+                    style: TextStyle(color: colors.primary, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'P: ${item.protein.toStringAsFixed(1)} C: ${item.carbs.toStringAsFixed(1)} G: ${item.fat.toStringAsFixed(1)}',
+                    style: TextStyle(color: colors.onSurfaceVariant, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Icon(Icons.add_circle, color: colors.secondary, size: 32),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

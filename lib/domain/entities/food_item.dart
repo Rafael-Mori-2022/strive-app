@@ -5,5 +5,15 @@ class FoodItem {
   final double protein;
   final double carbs;
   final double fat;
-  const FoodItem({required this.id, required this.name, required this.calories, required this.protein, required this.carbs, required this.fat});
+  final String? imageUrl; // <--- ADICIONE ISSO
+
+  const FoodItem({
+    required this.id,
+    required this.name,
+    required this.calories,
+    required this.protein,
+    required this.carbs,
+    required this.fat,
+    this.imageUrl, // <--- E ISSO
+  });
 }
