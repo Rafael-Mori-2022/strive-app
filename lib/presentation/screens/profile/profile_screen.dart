@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:strive/presentation/state/profile_providers.dart';
 import 'package:strive/presentation/widgets/common_widgets.dart';
 import 'package:strive/providers/auth_providers.dart';
+import 'package:strive/providers/theme_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -11,6 +12,8 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(userProfileProvider);
+    final currentTheme = ref.watch(themeProvider);
+    final isDarkMode = currentTheme == ThemeMode.dark;
     return Scaffold(
       appBar: AppBar(title: const Text('Perfil')),
       body: profile.when(
@@ -27,9 +30,30 @@ class ProfileScreen extends ConsumerWidget {
                     '${p.age} anos • ${p.heightCm.toStringAsFixed(0)} cm • ${p.weightKg.toStringAsFixed(1)} kg'),
               ])
             ]),
+            const SizedBox(height: 24),
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .surfaceVariant
+                    .withOpacity(0.3),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: SwitchListTile(
+                title: const Text('Modo Escuro'),
+                secondary: Icon(
+                  isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                value: isDarkMode,
+                onChanged: (val) {
+                  ref.read(themeProvider.notifier).toggleTheme(val);
+                },
+              ),
+            ),
             const SizedBox(height: 16),
             ListTile(
-                leading: const Icon(Icons.edit), 
+                leading: const Icon(Icons.edit),
                 title: const Text('Atualizar perfil'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.push('/profile/edit')),
