@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:strive/providers/theme_provider.dart';
 import 'package:strive/theme.dart';
 import 'package:strive/routes/app_router.dart';
 import 'package:strive/di/service_locator.dart';
@@ -26,6 +27,7 @@ class StriveApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
+    final currentThemeMode = ref.watch(themeProvider);
     return MaterialApp.router(
       title: 'Strive',
       debugShowCheckedModeBanner: false,
@@ -40,7 +42,7 @@ class StriveApp extends ConsumerWidget {
       ],
       theme: lightTheme,
       darkTheme: darkTheme,
-      themeMode: ThemeMode.dark,
+      themeMode: currentThemeMode,
       routerConfig: router,
     );
   }
