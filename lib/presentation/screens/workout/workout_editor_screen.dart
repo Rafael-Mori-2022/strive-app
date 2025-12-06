@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:strive/domain/entities/workout.dart';
 import 'package:strive/presentation/state/workout_providers.dart';
+import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
 
 class WorkoutEditorScreen extends ConsumerWidget {
   final String planId;
@@ -17,29 +18,33 @@ class WorkoutEditorScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Editar Treino'),
+        // Título traduzido
+        title: Text(t.workout_editor.title),
         actions: [
           // Botão de atalho para adicionar mais exercícios
           TextButton.icon(
             onPressed: () => context.push(
                 '/workout/add-exercise?planId=$planId&muscle=Peito'), // Default muscle
             icon: const Icon(Icons.add),
-            label: const Text('Adicionar'),
+            label: Text(t.workout_editor.add_button),
           ),
         ],
       ),
       body: plansAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro: $e')),
+        // Erro com parâmetro
+        error: (e, _) =>
+            Center(child: Text(t.workout_editor.error(error: e.toString()))),
         data: (plans) {
           // Encontra o plano que estamos editando
           final plan = plans.firstWhere(
             (p) => p.id == planId,
-            orElse: () => WorkoutPlan(id: 'error', name: 'Não encontrado', exercises: []),
+            orElse: () => WorkoutPlan(
+                id: 'error', name: t.workout_editor.not_found, exercises: []),
           );
 
           if (plan.id == 'error') {
-            return const Center(child: Text("Plano não encontrado."));
+            return Center(child: Text(t.workout_editor.not_found));
           }
 
           if (plan.exercises.isEmpty) {
@@ -51,13 +56,13 @@ class WorkoutEditorScreen extends ConsumerWidget {
                       size: 64, color: colors.surfaceVariant),
                   const SizedBox(height: 16),
                   Text(
-                    "Este treino está vazio.",
+                    t.workout_editor.empty_text,
                     style: TextStyle(color: colors.onSurfaceVariant),
                   ),
                   const SizedBox(height: 16),
                   FilledButton.icon(
                     icon: const Icon(Icons.add),
-                    label: const Text("Adicionar Exercício"),
+                    label: Text(t.workout_editor.add_exercise_button),
                     onPressed: () => context.push(
                         '/workout/add-exercise?planId=$planId&muscle=Peito'),
                   ),
@@ -71,8 +76,8 @@ class WorkoutEditorScreen extends ConsumerWidget {
             itemCount: plan.exercises.length,
             itemBuilder: (context, index) {
               final exercise = plan.exercises[index];
-              
-              // Wrapper Dismissible para permitir deslizar para excluir (UX Premium)
+
+              // Wrapper Dismissible
               return Dismissible(
                 key: Key(exercise.id),
                 direction: DismissDirection.endToStart,
@@ -84,11 +89,15 @@ class WorkoutEditorScreen extends ConsumerWidget {
                 ),
                 onDismissed: (direction) {
                   // Remove do banco
-                  ref.read(workoutControllerProvider).removeExerciseFromPlan(planId, exercise.id);
-                  
-                  // Feedback visual
+                  ref
+                      .read(workoutControllerProvider)
+                      .removeExerciseFromPlan(planId, exercise.id);
+
+                  // Feedback visual traduzido
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('${exercise.name} removido')),
+                    SnackBar(
+                        content: Text(t.workout_editor
+                            .removed_snackbar(name: exercise.name))),
                   );
                 },
                 child: Card(
@@ -114,20 +123,27 @@ class WorkoutEditorScreen extends ConsumerWidget {
                         showDialog(
                           context: context,
                           builder: (ctx) => AlertDialog(
-                            title: const Text('Remover exercício?'),
-                            content: Text('Deseja remover ${exercise.name}?'),
+                            title: Text(t.workout_editor.remove_dialog.title),
+                            content: Text(t.workout_editor.remove_dialog
+                                .content(name: exercise.name)),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(ctx),
-                                child: const Text('Cancelar'),
+                                child: Text(
+                                    t.common.cancel), // Reutilizado de common
                               ),
                               FilledButton(
-                                style: FilledButton.styleFrom(backgroundColor: colors.error),
+                                style: FilledButton.styleFrom(
+                                    backgroundColor: colors.error),
                                 onPressed: () {
-                                  ref.read(workoutControllerProvider).removeExerciseFromPlan(planId, exercise.id);
+                                  ref
+                                      .read(workoutControllerProvider)
+                                      .removeExerciseFromPlan(
+                                          planId, exercise.id);
                                   Navigator.pop(ctx);
                                 },
-                                child: const Text('Remover'),
+                                child: Text(
+                                    t.workout_editor.remove_dialog.confirm),
                               ),
                             ],
                           ),

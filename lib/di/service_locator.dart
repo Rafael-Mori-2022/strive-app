@@ -21,7 +21,8 @@ Future<void> setupServiceLocator() async {
   await authService.init();
 
   sl.registerSingleton<AuthService>(authService);
-  sl.registerLazySingleton<ProfileRepository>(() => FirestoreProfileRepository());
+  sl.registerLazySingleton<ProfileRepository>(
+      () => FirestoreProfileRepository());
   sl.registerLazySingleton<NutritionRepository>(
       () => NutritionRepositoryImpl());
   sl.registerLazySingleton<WorkoutRepository>(() => WorkoutRepositoryImpl());

@@ -6,6 +6,7 @@ import 'package:strive/domain/entities/exercise.dart';
 import 'package:strive/presentation/state/workout_providers.dart';
 import 'package:strive/presentation/state/gamification_provider.dart';
 import 'package:strive/domain/enums/xp_action.dart';
+import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
 
 // --- PROVIDER DO CALENDÁRIO ---
 final completedDatesProvider =
@@ -21,7 +22,7 @@ class CompletedDatesNotifier extends Notifier<Set<DateTime>> {
   void toggleDate(DateTime date) {
     final normalizedDate = DateTime(date.year, date.month, date.day);
     final newState = Set<DateTime>.from(state);
-    
+
     if (newState.contains(normalizedDate)) {
       newState.remove(normalizedDate);
     } else {
@@ -63,12 +64,11 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Observa a lista de planos vinda do Repositório (Firebase)
     final plansAsync = ref.watch(workoutPlansProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: theme.colorScheme.surface, // Atualizado para surface
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(
@@ -76,15 +76,14 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
             ref.refresh(workoutPlansProvider);
           },
           child: ListView(
-            // Padding inferior para não conflitar com a Navbar Flutuante
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
             children: [
               const _Header(),
               const SizedBox(height: 16),
-              
+
               const _TodaySummary(),
               const SizedBox(height: 24),
-              
+
               // Lista de Planos (Carrossel)
               plansAsync.when(
                 data: (plans) {
@@ -96,12 +95,13 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                   return Column(
                     children: [
                       SizedBox(
-                        height: 450, // Altura suficiente para lista de exercícios
+                        height: 450,
                         child: PageView.builder(
                           controller: _pageController,
                           itemCount: plans.length,
                           itemBuilder: (_, i) => Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 4.0),
                             child: _PlanCard(plan: plans[i]),
                           ),
                         ),
@@ -118,11 +118,12 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                   height: 400,
                   child: Center(child: CircularProgressIndicator()),
                 ),
+                // Erro genérico traduzido
                 error: (e, st) => Center(
-                  child: Text('Erro ao carregar treinos: $e'),
+                  child: Text('${t.common.error}: $e'),
                 ),
               ),
-              
+
               const SizedBox(height: 24),
               const _CalendarCard(),
             ],
@@ -142,8 +143,9 @@ class _Header extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        // "Treino"
         Text(
-          'Treino',
+          t.workout.title,
           style: Theme.of(context)
               .textTheme
               .headlineMedium
@@ -152,7 +154,8 @@ class _Header extends StatelessWidget {
         IconButton(
           onPressed: () => context.push('/workout/create'),
           icon: const Icon(Icons.add_circle_outline, size: 28),
-          tooltip: "Criar novo plano",
+          // "Criar novo plano"
+          tooltip: t.workout.create_tooltip,
         )
       ],
     );
@@ -172,14 +175,16 @@ class _EmptyStateCard extends StatelessWidget {
           children: [
             const Icon(Icons.fitness_center, size: 48, color: Colors.grey),
             const SizedBox(height: 16),
-            const Text(
-              'Nenhum plano de treino encontrado.',
+            // "Nenhum plano de treino encontrado."
+            Text(
+              t.workout.empty_state.title,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             FilledButton(
               onPressed: onPressed,
-              child: const Text("Criar meu primeiro treino"),
+              // "Criar meu primeiro treino"
+              child: Text(t.workout.empty_state.button),
             )
           ],
         ),
@@ -193,12 +198,11 @@ class _TodaySummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Idealmente, isso viria de um provider de estatísticas diárias
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Hoje',
+          t.workout.summary.today, // "Hoje"
           style: Theme.of(context)
               .textTheme
               .titleMedium
@@ -206,17 +210,17 @@ class _TodaySummary extends StatelessWidget {
         ),
         const _SummaryItem(
           icon: Icons.timer_outlined,
-          text: '0h', // Placeholder MVP
+          text: '0h',
           iconColor: Color(0xFF63BC6A),
         ),
         const _SummaryItem(
           icon: Icons.local_fire_department,
-          text: '0 Kcal', // Placeholder MVP
+          text: '0 Kcal',
           iconColor: Color(0xFFFF8A65),
         ),
         const _SummaryItem(
           icon: Icons.track_changes,
-          text: '0/5', // Placeholder MVP
+          text: '0/5',
           iconColor: Color(0xFFFACC15),
         ),
       ],
@@ -260,7 +264,6 @@ class _PlanCard extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Indicador visual de "puxar"
             Container(
               margin: const EdgeInsets.symmetric(vertical: 12),
               height: 4,
@@ -270,23 +273,24 @@ class _PlanCard extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            // Opção: Editar Nome
+            // Opção: Renomear
             ListTile(
               leading: const Icon(Icons.edit_outlined),
-              title: const Text('Renomear Plano'),
+              title: Text(t.workout.options.rename),
               onTap: () {
-                Navigator.pop(ctx); // Fecha o sheet
-                _showRenameDialog(context, ref); // Abre o dialog
+                Navigator.pop(ctx);
+                _showRenameDialog(context, ref);
               },
             ),
             const Divider(indent: 16, endIndent: 16),
             // Opção: Excluir
             ListTile(
               leading: const Icon(Icons.delete_outline, color: Colors.red),
-              title: const Text('Excluir Plano', style: TextStyle(color: Colors.red)),
+              title: Text(t.workout.options.delete,
+                  style: const TextStyle(color: Colors.red)),
               onTap: () {
-                Navigator.pop(ctx); // Fecha o sheet
-                _showDeleteConfirmDialog(context, ref); // Abre confirmação
+                Navigator.pop(ctx);
+                _showDeleteConfirmDialog(context, ref);
               },
             ),
             const SizedBox(height: 12),
@@ -302,28 +306,30 @@ class _PlanCard extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Renomear Plano'),
+        title: Text(t.workout.options.rename),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Nome do treino',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: t.workout.dialogs.rename_label,
+            border: const OutlineInputBorder(),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
+            child: Text(t.common.cancel), // Reuso
           ),
           FilledButton(
             onPressed: () {
               if (controller.text.isNotEmpty) {
-                ref.read(workoutControllerProvider).renamePlan(plan.id, controller.text.trim());
+                ref
+                    .read(workoutControllerProvider)
+                    .renamePlan(plan.id, controller.text.trim());
               }
               Navigator.pop(ctx);
             },
-            child: const Text('Salvar'),
+            child: Text(t.common.save), // Reuso
           ),
         ],
       ),
@@ -335,12 +341,13 @@ class _PlanCard extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Excluir Plano?'),
-        content: Text('Tem certeza que deseja excluir "${plan.name}"? Esta ação não pode ser desfeita.'),
+        title: Text(t.workout.dialogs.delete_title),
+        // Mensagem com parâmetro dinâmico
+        content: Text(t.workout.dialogs.delete_content(name: plan.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
+            child: Text(t.common.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
@@ -348,7 +355,7 @@ class _PlanCard extends ConsumerWidget {
               ref.read(workoutControllerProvider).deletePlan(plan.id);
               Navigator.pop(ctx);
             },
-            child: const Text('Excluir'),
+            child: Text(t.workout.dialogs.delete_confirm),
           ),
         ],
       ),
@@ -377,7 +384,6 @@ class _PlanCard extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                // IMPLEMENTADO AQUI:
                 IconButton(
                   icon: Icon(Icons.more_vert, color: colors.onSurfaceVariant),
                   onPressed: () => _showPlanOptions(context, ref),
@@ -395,10 +401,11 @@ class _PlanCard extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.add_task,
-                          size: 48, color: colors.onSurfaceVariant.withOpacity(0.3)),
+                          size: 48,
+                          color: colors.onSurfaceVariant.withOpacity(0.3)),
                       const SizedBox(height: 8),
                       Text(
-                        "Este plano está vazio.",
+                        t.workout.plan_empty, // "Este plano está vazio."
                         style: TextStyle(color: colors.onSurfaceVariant),
                       ),
                     ],
@@ -418,9 +425,11 @@ class _PlanCard extends ConsumerWidget {
                         await ref
                             .read(workoutControllerProvider)
                             .toggleExercise(plan.id, exercise.id);
-                        
+
                         if (!exercise.completed && context.mounted) {
-                           ref.read(gamificationControllerProvider).earnXp(context, XpAction.completeWorkout);
+                          ref
+                              .read(gamificationControllerProvider)
+                              .earnXp(context, XpAction.completeWorkout);
                         }
                       },
                     );
@@ -435,9 +444,11 @@ class _PlanCard extends ConsumerWidget {
               alignment: Alignment.bottomRight,
               child: FilledButton.icon(
                 icon: const Icon(Icons.add),
-                label: const Text("Exercício"),
+                // Texto curto do botão
+                label: Text(t.workout.add_exercise_short),
                 onPressed: () {
-                  context.push('/workout/add-exercise?planId=${plan.id}&muscle=Peito');
+                  context.push(
+                      '/workout/add-exercise?planId=${plan.id}&muscle=Peito');
                 },
               ),
             ),
@@ -463,7 +474,9 @@ class _ExerciseRow extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    // Cores baseadas no grupo muscular para facilitar visualização
+    // A lógica de cores depende de Strings do banco ('Pernas', 'Costas').
+    // NÃO traduzir essas strings literais de comparação para não quebrar a lógica visual
+    // se o banco estiver em português.
     Color iconColor = colors.primary;
     if (exercise.muscleGroup == 'Pernas') iconColor = Colors.orange;
     if (exercise.muscleGroup == 'Costas') iconColor = Colors.purple;
@@ -491,8 +504,12 @@ class _ExerciseRow extends StatelessWidget {
                   Text(
                     exercise.name,
                     style: theme.textTheme.titleMedium?.copyWith(
-                      decoration: exercise.completed ? TextDecoration.lineThrough : null,
-                      color: exercise.completed ? colors.onSurfaceVariant : colors.onSurface,
+                      decoration: exercise.completed
+                          ? TextDecoration.lineThrough
+                          : null,
+                      color: exercise.completed
+                          ? colors.onSurfaceVariant
+                          : colors.onSurface,
                     ),
                   ),
                   if (exercise.details.isNotEmpty)
@@ -509,7 +526,8 @@ class _ExerciseRow extends StatelessWidget {
               value: exercise.completed,
               onChanged: (_) => onToggle(),
               activeColor: colors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4)),
             ),
           ],
         ),
@@ -526,7 +544,7 @@ class _PageIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (pageCount <= 1) return const SizedBox.shrink();
-    
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(
@@ -552,29 +570,29 @@ class _PageIndicator extends StatelessWidget {
 class _CalendarCard extends ConsumerWidget {
   const _CalendarCard();
 
-  static const _months = [
-    '', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-  ];
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    
+
     final completedDates = ref.watch(completedDatesProvider);
 
     final now = DateTime.now();
     final year = now.year;
     final month = now.month;
-    
+
+    // Meses traduzidos (Note que a lista começa com index 1 no loop ou devemos ajustar)
+    // No seu código original, index 0 era '', então Janeiro era 1.
+    // Slang gera listas baseadas em 0. Vamos acessar `t.workout.calendar.months[month]`.
+    final months = t.workout.calendar.months;
+
     final daysInMonth = DateTime(year, month + 1, 0).day;
     final firstDayOfMonth = DateTime(year, month, 1);
     final firstWeekday = firstDayOfMonth.weekday; // 1=Seg, 7=Dom
-    // Ajuste para calendário começar no Domingo (0)
-    final offsetDays = firstWeekday == 7 ? 0 : firstWeekday; 
+    final offsetDays = firstWeekday == 7 ? 0 : firstWeekday;
 
-    final daysOfWeek = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+    // Dias da semana traduzidos
+    final daysOfWeek = t.workout.calendar.weekdays;
 
     return Card(
       child: Padding(
@@ -585,27 +603,29 @@ class _CalendarCard extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "${_months[month]} $year",
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  // Acesso seguro ao mês
+                  "${months.length > month ? months[month] : ''} $year",
+                  style: theme.textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 Icon(Icons.calendar_month, size: 20, color: colors.primary),
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // Header Dias da Semana
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: daysOfWeek
                   .map((day) => Text(
                         day,
-                        style: theme.textTheme.labelMedium
-                            ?.copyWith(color: colors.primary, fontWeight: FontWeight.bold),
+                        style: theme.textTheme.labelMedium?.copyWith(
+                            color: colors.primary, fontWeight: FontWeight.bold),
                       ))
                   .toList(),
             ),
             const SizedBox(height: 12),
-            
+
             // Grid de Dias
             GridView.builder(
               shrinkWrap: true,
@@ -623,23 +643,25 @@ class _CalendarCard extends ConsumerWidget {
 
                 final day = index - offsetDays + 1;
                 final dateToCheck = DateTime(year, month, day);
-                
+
                 final isTrained = completedDates.contains(dateToCheck);
                 final isToday = day == now.day;
 
                 return InkWell(
                   onTap: () {
-                    ref.read(completedDatesProvider.notifier).toggleDate(dateToCheck);
+                    ref
+                        .read(completedDatesProvider.notifier)
+                        .toggleDate(dateToCheck);
                   },
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
                     decoration: BoxDecoration(
                       color: isTrained
-                          ? const Color(0xFF3B8E42) 
+                          ? const Color(0xFF3B8E42)
                           : colors.surfaceVariant.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(8),
                       border: isToday && !isTrained
-                          ? Border.all(color: colors.primary, width: 1.5) 
+                          ? Border.all(color: colors.primary, width: 1.5)
                           : null,
                     ),
                     child: Center(

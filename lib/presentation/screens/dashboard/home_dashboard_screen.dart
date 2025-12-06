@@ -3,15 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:strive/presentation/state/profile_providers.dart';
 import 'package:strive/presentation/state/stats_provider.dart';
-import 'package:strive/domain/entities/user_profile.dart';
-import 'package:strive/domain/entities/stat_item.dart';
+import 'package:strive/i18n/strings.g.dart'; // O arquivo gerado
 
 class HomeDashboardScreen extends ConsumerWidget {
   const HomeDashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Adicione o SafeArea ao redor do RefreshIndicator
     return SafeArea(
       child: RefreshIndicator(
         onRefresh: () async {
@@ -36,8 +34,6 @@ class HomeDashboardScreen extends ConsumerWidget {
   }
 }
 
-// ... (O restante do seu arquivo - _TopBar, _Greeting, etc. - continua igual)
-// <<< 1. Widget convertido para ConsumerWidget
 class _TopBar extends ConsumerWidget {
   const _TopBar();
 
@@ -74,7 +70,7 @@ class _TopBar extends ConsumerWidget {
                         style: textTheme.labelSmall
                             ?.copyWith(color: colors.primary),
                         children: [
-                          const TextSpan(text: 'nvl. '),
+                          TextSpan(text: '${t.dashboard.level_abbr} '),
                           TextSpan(
                             text: '$level',
                             style: textTheme.titleMedium
@@ -117,14 +113,14 @@ class _TopBar extends ConsumerWidget {
           child: LinearProgressIndicator(),
         ),
       ),
-      error: (e, st) => const SizedBox(
+      error: (e, st) => SizedBox(
         height: 50,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error, color: Colors.red),
-            SizedBox(width: 8),
-            Text('Erro ao carregar perfil'),
+            const Icon(Icons.error, color: Colors.red),
+            const SizedBox(width: 8),
+            Text(t.common.error_profile),
           ],
         ),
       ),
@@ -141,9 +137,10 @@ class _Greeting extends ConsumerWidget {
     final profile = ref.watch(userProfileProvider);
 
     final greetingName = profile.when(
-      data: (p) => 'Olá, ${p.name.split(' ')[0]}!',
-      loading: () => 'Olá!',
-      error: (e, st) => 'Olá!',
+      // SOLUÇÃO SIMPLES: Concatenação manual
+      data: (p) => '${t.dashboard.greeting}${p.name.split(' ')[0]}!',
+      loading: () => t.dashboard.greeting_generic,
+      error: (e, st) => t.dashboard.greeting_generic,
     );
 
     return Column(
@@ -155,7 +152,7 @@ class _Greeting extends ConsumerWidget {
               textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         Text(
-          'Vamos juntos alcançar suas metas de saúde!',
+          t.dashboard.subtitle,
           style:
               textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
@@ -172,6 +169,10 @@ class _ClassificationCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
 
+    // Dados hardcoded que você usava, apenas para exemplo
+    const int days = 4;
+    const int place = 3;
+
     return InkWell(
       onTap: () => context.push('/dashboard/leaderboard'),
       borderRadius: BorderRadius.circular(16),
@@ -182,7 +183,7 @@ class _ClassificationCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '⭐ Classificação',
+                t.dashboard.classification.title,
                 style: textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
@@ -198,12 +199,16 @@ class _ClassificationCard extends StatelessWidget {
                     child: Column(
                       children: [
                         _InfoChip(
-                          text: 'restam 4 dias',
+                          // SOLUÇÃO SIMPLES: Junta prefixo + numero + sufixo
+                          text:
+                              '${t.dashboard.classification.remaining_prefix}$days${t.dashboard.classification.remaining_suffix}',
                           icon: Icons.access_time_filled_rounded,
                         ),
                         const SizedBox(height: 8),
                         _InfoChip(
-                          text: '3º Lugar',
+                          // SOLUÇÃO SIMPLES: numero + sufixo
+                          text:
+                              '$place${t.dashboard.classification.rank_suffix}',
                           icon: Icons.emoji_events_rounded,
                         ),
                       ],
@@ -249,14 +254,13 @@ class _StatisticsCard extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          // Garante que a coluna não ocupe mais espaço do que o necessário
           mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Estatísticas',
+                  t.dashboard.stats.title,
                   style: textTheme.titleLarge,
                 ),
                 IconButton(
@@ -266,8 +270,6 @@ class _StatisticsCard extends ConsumerWidget {
                 ),
               ],
             ),
-            // O SizedBox(height: 4) foi REMOVIDO daqui
-
             availableStats.when(
               data: (list) {
                 final selectedIds = selectedStats.valueOrNull ?? [];
@@ -276,13 +278,12 @@ class _StatisticsCard extends ConsumerWidget {
                     .take(4)
                     .toList();
 
-                // Caso não haja nenhuma estatística selecionada
                 if (statCards.isEmpty) {
                   return Container(
                     padding: const EdgeInsets.only(top: 16.0),
                     alignment: Alignment.center,
                     child: Text(
-                      'Edite para adicionar estatísticas.',
+                      t.dashboard.stats.empty,
                       style: textTheme.bodyMedium
                           ?.copyWith(color: colors.onSurfaceVariant),
                     ),
@@ -290,7 +291,6 @@ class _StatisticsCard extends ConsumerWidget {
                 }
 
                 return GridView.builder(
-                  // Adicionado padding aqui para controlar o espaço
                   padding: const EdgeInsets.only(top: 16.0),
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -312,14 +312,13 @@ class _StatisticsCard extends ConsumerWidget {
                 );
               },
               loading: () => const SizedBox(
-                // Altura fixa para evitar pulos de layout
                 height: 150,
                 child: Center(child: CircularProgressIndicator()),
               ),
               error: (e, st) => Container(
                 padding: const EdgeInsets.only(top: 16.0),
                 alignment: Alignment.center,
-                child: const Text('Erro ao carregar estatísticas'),
+                child: Text(t.common.error_stats),
               ),
             ),
           ],

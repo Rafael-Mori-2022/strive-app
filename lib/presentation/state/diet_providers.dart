@@ -3,6 +3,7 @@ import 'package:strive/domain/entities/food_item.dart';
 import 'package:strive/domain/entities/meal.dart';
 import 'package:strive/domain/repositories/nutrition_repository.dart';
 import 'package:get_it/get_it.dart';
+import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
 
 // 1. Provider para acessar o Repositório (Pega do GetIt)
 final nutritionRepositoryProvider = Provider<NutritionRepository>((ref) {
@@ -10,7 +11,8 @@ final nutritionRepositoryProvider = Provider<NutritionRepository>((ref) {
 });
 
 // 2. Provider de Busca (Conectado à API Real)
-final searchFoodsProvider = FutureProvider.family<List<FoodItem>, String>((ref, query) async {
+final searchFoodsProvider =
+    FutureProvider.family<List<FoodItem>, String>((ref, query) async {
   final repository = ref.watch(nutritionRepositoryProvider);
   // Se a query for vazia, não busca nada (ou retorna lista vazia)
   if (query.isEmpty) return [];
@@ -18,9 +20,7 @@ final searchFoodsProvider = FutureProvider.family<List<FoodItem>, String>((ref, 
 });
 
 // 3. Controller das Refeições (Gerencia o Estado da Dieta)
-// Este Notifier mantém a lista de refeições atualizada na tela.
 class MealsNotifier extends AsyncNotifier<List<Meal>> {
-  
   // Carrega os dados iniciais
   @override
   Future<List<Meal>> build() async {
@@ -31,10 +31,10 @@ class MealsNotifier extends AsyncNotifier<List<Meal>> {
   // Adiciona comida e atualiza a tela
   Future<void> addFood(String mealId, FoodItem item) async {
     final repository = ref.read(nutritionRepositoryProvider);
-    
+
     // 1. Salva no repositório
     await repository.addFoodToMeal(mealId, item);
-    
+
     // 2. Força o Riverpod a recarregar a lista de refeições (Refresh na UI)
     ref.invalidateSelf();
     await future; // Aguarda o reload terminar
@@ -54,14 +54,15 @@ final mealsProvider = AsyncNotifierProvider<MealsNotifier, List<Meal>>(() {
 });
 
 // 4. Provider para Detalhes de uma Refeição Específica
-// (Filtra a lista principal para achar a refeição correta)
-final mealDetailProvider = Provider.family<AsyncValue<Meal>, String>((ref, mealId) {
+final mealDetailProvider =
+    Provider.family<AsyncValue<Meal>, String>((ref, mealId) {
   final mealsState = ref.watch(mealsProvider);
-  
+
   return mealsState.whenData((meals) {
     return meals.firstWhere(
       (m) => m.id == mealId,
-      orElse: () => Meal(id: mealId, name: 'Não encontrada', items: []),
+      // String traduzida aqui
+      orElse: () => Meal(id: mealId, name: t.diet.meal.not_found, items: []),
     );
   });
 });

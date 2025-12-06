@@ -5,6 +5,7 @@ import 'package:strive/domain/entities/exercise.dart';
 import 'package:strive/domain/entities/workout.dart';
 import 'package:strive/domain/repositories/workout_repository.dart';
 import 'package:http/http.dart' as http;
+import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
 
 class WorkoutRepositoryImpl implements WorkoutRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -13,106 +14,112 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   // Cache simples em memória
   final Map<String, List<Exercise>> _apiCache = {};
 
-  // Mapeamento Seguro (Normalizado para minúsculas sem acentos se possível)
+  // Mapeamento Expandido (PT + EN) para IDs da Wger API
   final Map<String, int> _categoryMap = {
+    // Português
     'peito': 11,
-    
     'costas': 12,
-    
-    'bíceps': 8,
-    'biceps': 8,
-    'tríceps': 8,
-    'triceps': 8,
-    
-    'pernas': 9,
-    'coxas': 9,
-    
+    'bíceps': 8, 'biceps': 8,
+    'tríceps': 8, 'triceps': 8,
+    'braços': 8, 'bracos': 8,
+    'pernas': 9, 'coxas': 9,
     'ombros': 13,
-    
-    'abdômen': 10,
-    'abdomen': 10,
-    
+    'abdômen': 10, 'abdomen': 10,
     'panturrilhas': 14,
-
     'cardio': 15,
+
+    // English (Adicionado para suportar a tradução)
+    'chest': 11,
+    'back': 12,
+    'arms': 8,
+    'biceps': 8,
+    'triceps': 8,
+    'legs': 9,
+    'shoulders': 13,
+    'abs': 10,
+    'calves': 14,
+    // 'cardio' é igual em ambos
   };
 
   @override
   Future<List<Exercise>> listExercisesByMuscle(String muscleGroup) async {
     final key = muscleGroup.toLowerCase().trim();
     final categoryId = _categoryMap[key];
-    final effectiveId = categoryId ?? 11; // Fallback
+
+    // Fallback: Se não achar (ex: busca digitada errada), tenta buscar Peito (11) ou retorna vazio na UI
+    final effectiveId = categoryId ?? 11;
 
     if (_apiCache.containsKey(key)) {
       return _apiCache[key]!;
     }
 
     try {
-      // MUDANÇA 1: Usamos /exerciseinfo/
-      // Removemos o filtro de language na URL para receber TODAS as traduções e filtrar aqui
       final url = Uri.parse(
           'https://wger.de/api/v2/exerciseinfo/?category=$effectiveId&limit=50');
-      
-      print("Chamando Wger Info: $url");
 
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['results'] == null) return [];
-        
+
         final results = data['results'] as List;
         final exercises = <Exercise>[];
 
-        for (var item in results) {
-          // MUDANÇA 2: Lógica de Prioridade de Idioma
-          // ID 7 = Português (BR ou PT)
-          // ID 2 = Inglês
-          
-          final translations = item['translations'] as List? ?? [];
-          if (translations.isEmpty) continue; // Pula se não tem tradução
+        // Detecta o idioma atual do App para priorizar a API
+        // ID 2 = Inglês, ID 7 = Português
+        final currentLocale = LocaleSettings.currentLocale; // Vem do Slang
+        final int targetLangId = (currentLocale == AppLocale.pt) ? 7 : 2;
 
-          // Tenta achar em PT
+        for (var item in results) {
+          final translations = item['translations'] as List? ?? [];
+          if (translations.isEmpty) continue;
+
+          // 1. Tenta achar no idioma do app
           var translation = translations.firstWhere(
-            (t) => t['language'] == 7,
+            (t) => t['language'] == targetLangId,
             orElse: () => null,
           );
 
-          // Se não tem nem PT nem EN, pula esse exercício estranho
+          // 2. Fallback: Se não achar no idioma do app, tenta Inglês (2) (se o app for PT)
+          if (translation == null && targetLangId != 2) {
+            translation = translations.firstWhere(
+              (t) => t['language'] == 2,
+              orElse: () => null,
+            );
+          }
+
+          // 3. Último caso: pega o primeiro que vier ou pula
           if (translation == null) continue;
 
           // --- Extração de Dados ---
-          
-          String name = translation['name']?.toString().trim() ?? 'Exercício';
-          
-          // Limpeza de HTML da descrição
+          String name = translation['name']?.toString().trim() ?? 'Exercise';
+
           String descRaw = translation['description']?.toString() ?? '';
           String descClean = descRaw
-              .replaceAll(RegExp(r'<[^>]*>'), '') // Remove tags
-              .replaceAll('&nbsp;', ' ') // Remove espaços HTML
+              .replaceAll(RegExp(r'<[^>]*>'), '')
+              .replaceAll('&nbsp;', ' ')
               .trim();
-          
+
           if (descClean.length > 100) {
             descClean = "${descClean.substring(0, 100)}...";
           }
-          if (descClean.isEmpty) descClean = "Sem detalhes adicionais.";
+          if (descClean.isEmpty) descClean = "No details.";
 
-          // Tenta pegar imagem (se existir no array de imagens)
           String? imageUrl;
           final images = item['images'] as List? ?? [];
           if (images.isNotEmpty) {
-            // Pega a primeira imagem disponível
-            imageUrl = images[0]['image']; 
+            imageUrl = images[0]['image'];
           }
 
           exercises.add(Exercise(
-            id: item['id'].toString(),
-            name: name,
-            muscleGroup: muscleGroup, // Mantemos o filtro original para display
-            description: descClean,
-            details: "4x12", // Sugestão padrão
-            imageUrl: imageUrl, // Agora pode vir preenchido se a API tiver
-          ));
+              id: item['id'].toString(),
+              name: name,
+              muscleGroup: muscleGroup,
+              description: descClean,
+              details: "4x12",
+              imageUrl: imageUrl,
+              completed: false));
         }
 
         _apiCache[key] = exercises;
@@ -124,11 +131,6 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
     return [];
   }
 
-  // --- MÉTODOS DO FIRESTORE (MANTIDOS IGUAIS) ---
-  // Copie exatamente os métodos do Firestore que fizemos na resposta anterior
-  // (getWorkoutPlans, createWorkout, addExercise, etc.)
-  // Vou recolocá-los aqui para facilitar o Copy/Paste completo:
-
   @override
   Future<List<WorkoutPlan>> getWorkoutPlans() async {
     final user = _auth.currentUser;
@@ -138,12 +140,11 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
         .collection('users')
         .doc(user.uid)
         .collection('workouts')
-        .orderBy('createdAt', descending: true) // Ordenar por mais recente
+        .orderBy('createdAt', descending: true)
         .get();
 
     return snapshot.docs.map((doc) {
       final data = doc.data();
-      // Tratamento seguro para lista de exercícios
       List<Exercise> exercises = [];
       if (data['exercises'] != null) {
         exercises = (data['exercises'] as List)
@@ -153,7 +154,8 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
 
       return WorkoutPlan(
         id: doc.id,
-        name: data['name'] ?? 'Treino sem nome',
+        // Fallback simples se vier nulo do banco
+        name: data['name'] ?? 'Workout',
         exercises: exercises,
       );
     }).toList();
@@ -205,8 +207,6 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
     final snapshot = await docRef.get();
     if (!snapshot.exists) return;
 
-    // Firestore não tem arrayRemove para objetos complexos facilmente se não tiver a referência exata.
-    // A melhor forma é ler, filtrar e salvar de volta.
     final exercises = (snapshot.data()!['exercises'] as List)
         .map((e) => Exercise.fromMap(e))
         .where((e) => e.id != exerciseId)

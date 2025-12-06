@@ -24,15 +24,29 @@ dependencies:
   # Pacote específico para o Google Sign-In
   google_sign_in: ^6.2.1
   cloud_firestore: ^5.4.4
-  flutter_localizations:
-    sdk: flutter
   intl: ^0.20.2
   shared_preferences: ^2.2.2
+  flutter_localizations:
+    sdk: flutter
+  slang: ^3.31.0
+  slang_flutter: ^3.31.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  build_runner: ^2.4.11
+  slang_build_runner: ^3.31.0
 
 flutter:
   uses-material-design: true
+
+slang:
+  base_locale: pt
+  input_directory: lib/i18n
+  input_file_pattern: .i18n.json
+  output_directory: lib/i18n
+  output_file_name: strings.g.dart
+  namespaces: false
+  translate_var: t
+  enum_name: AppLocale
