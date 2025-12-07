@@ -1,38 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:strive/domain/entities/workout.dart';
 import 'package:strive/domain/entities/exercise.dart';
 import 'package:strive/presentation/state/workout_providers.dart';
 import 'package:strive/presentation/state/gamification_provider.dart';
 import 'package:strive/domain/enums/xp_action.dart';
-import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
+import 'package:strive/i18n/strings.g.dart';
 
-// --- PROVIDER DO CALENDÁRIO ---
 final completedDatesProvider =
-    NotifierProvider<CompletedDatesNotifier, Set<DateTime>>(
+    AsyncNotifierProvider<CompletedDatesNotifier, Set<DateTime>>(
         CompletedDatesNotifier.new);
 
-class CompletedDatesNotifier extends Notifier<Set<DateTime>> {
+class CompletedDatesNotifier extends AsyncNotifier<Set<DateTime>> {
+  static const _kKey = 'completed_workout_dates';
+
   @override
-  Set<DateTime> build() {
-    return {};
+  Future<Set<DateTime>> build() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stringList = prefs.getStringList(_kKey) ?? [];
+
+    return stringList.map((s) => DateTime.parse(s)).toSet();
   }
 
-  void toggleDate(DateTime date) {
+  Future<void> toggleDate(DateTime date) async {
     final normalizedDate = DateTime(date.year, date.month, date.day);
-    final newState = Set<DateTime>.from(state);
+    
+    final currentSet = state.value ?? {};
+    final newSet = Set<DateTime>.from(currentSet);
 
-    if (newState.contains(normalizedDate)) {
-      newState.remove(normalizedDate);
+    if (newSet.contains(normalizedDate)) {
+      newSet.remove(normalizedDate);
     } else {
-      newState.add(normalizedDate);
+      newSet.add(normalizedDate);
     }
-    state = newState;
+
+    state = AsyncData(newSet);
+
+    final prefs = await SharedPreferences.getInstance();
+    final stringList = newSet.map((d) => d.toIso8601String()).toList();
+    await prefs.setStringList(_kKey, stringList);
   }
 }
 
-// --- TELA PRINCIPAL DE TREINO ---
 class WorkoutScreen extends ConsumerStatefulWidget {
   const WorkoutScreen({super.key});
 
@@ -68,12 +79,14 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface, // Atualizado para surface
+      backgroundColor: theme.colorScheme.surface,
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(
           onRefresh: () async {
             ref.refresh(workoutPlansProvider);
+            // Opcional: Recarregar calendário tbm
+            // ref.refresh(completedDatesProvider);
           },
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
@@ -118,7 +131,6 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                   height: 400,
                   child: Center(child: CircularProgressIndicator()),
                 ),
-                // Erro genérico traduzido
                 error: (e, st) => Center(
                   child: Text('${t.common.error}: $e'),
                 ),
@@ -134,8 +146,6 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
   }
 }
 
-// --- WIDGETS INTERNOS ---
-
 class _Header extends StatelessWidget {
   const _Header();
   @override
@@ -143,7 +153,6 @@ class _Header extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // "Treino"
         Text(
           t.workout.title,
           style: Theme.of(context)
@@ -154,7 +163,6 @@ class _Header extends StatelessWidget {
         IconButton(
           onPressed: () => context.push('/workout/create'),
           icon: const Icon(Icons.add_circle_outline, size: 28),
-          // "Criar novo plano"
           tooltip: t.workout.create_tooltip,
         )
       ],
@@ -175,7 +183,6 @@ class _EmptyStateCard extends StatelessWidget {
           children: [
             const Icon(Icons.fitness_center, size: 48, color: Colors.grey),
             const SizedBox(height: 16),
-            // "Nenhum plano de treino encontrado."
             Text(
               t.workout.empty_state.title,
               textAlign: TextAlign.center,
@@ -183,7 +190,6 @@ class _EmptyStateCard extends StatelessWidget {
             const SizedBox(height: 16),
             FilledButton(
               onPressed: onPressed,
-              // "Criar meu primeiro treino"
               child: Text(t.workout.empty_state.button),
             )
           ],
@@ -202,7 +208,7 @@ class _TodaySummary extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          t.workout.summary.today, // "Hoje"
+          t.workout.summary.today,
           style: Theme.of(context)
               .textTheme
               .titleMedium
@@ -247,12 +253,10 @@ class _SummaryItem extends StatelessWidget {
   }
 }
 
-// CARD PRINCIPAL DO PLANO (DINÂMICO)
 class _PlanCard extends ConsumerWidget {
   final WorkoutPlan plan;
   const _PlanCard({required this.plan});
 
-  // 1. Função para mostrar o Menu Inferior (Sheet)
   void _showPlanOptions(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
@@ -273,7 +277,6 @@ class _PlanCard extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            // Opção: Renomear
             ListTile(
               leading: const Icon(Icons.edit_outlined),
               title: Text(t.workout.options.rename),
@@ -283,7 +286,6 @@ class _PlanCard extends ConsumerWidget {
               },
             ),
             const Divider(indent: 16, endIndent: 16),
-            // Opção: Excluir
             ListTile(
               leading: const Icon(Icons.delete_outline, color: Colors.red),
               title: Text(t.workout.options.delete,
@@ -300,7 +302,6 @@ class _PlanCard extends ConsumerWidget {
     );
   }
 
-  // 2. Dialog para Renomear
   void _showRenameDialog(BuildContext context, WidgetRef ref) {
     final controller = TextEditingController(text: plan.name);
     showDialog(
@@ -318,7 +319,7 @@ class _PlanCard extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(t.common.cancel), // Reuso
+            child: Text(t.common.cancel),
           ),
           FilledButton(
             onPressed: () {
@@ -329,20 +330,18 @@ class _PlanCard extends ConsumerWidget {
               }
               Navigator.pop(ctx);
             },
-            child: Text(t.common.save), // Reuso
+            child: Text(t.common.save),
           ),
         ],
       ),
     );
   }
 
-  // 3. Dialog de Confirmação de Exclusão
   void _showDeleteConfirmDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(t.workout.dialogs.delete_title),
-        // Mensagem com parâmetro dinâmico
         content: Text(t.workout.dialogs.delete_content(name: plan.name)),
         actions: [
           TextButton(
@@ -374,7 +373,6 @@ class _PlanCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header do Plano
             Row(
               children: [
                 Expanded(
@@ -393,7 +391,6 @@ class _PlanCard extends ConsumerWidget {
             const Divider(),
             const SizedBox(height: 8),
 
-            // Lista de Exercícios
             if (plan.exercises.isEmpty)
               Expanded(
                 child: Center(
@@ -405,7 +402,7 @@ class _PlanCard extends ConsumerWidget {
                           color: colors.onSurfaceVariant.withOpacity(0.3)),
                       const SizedBox(height: 8),
                       Text(
-                        t.workout.plan_empty, // "Este plano está vazio."
+                        t.workout.plan_empty,
                         style: TextStyle(color: colors.onSurfaceVariant),
                       ),
                     ],
@@ -439,12 +436,10 @@ class _PlanCard extends ConsumerWidget {
 
             const SizedBox(height: 16),
 
-            // Botão Adicionar Exercício
             Align(
               alignment: Alignment.bottomRight,
               child: FilledButton.icon(
                 icon: const Icon(Icons.add),
-                // Texto curto do botão
                 label: Text(t.workout.add_exercise_short),
                 onPressed: () {
                   context.push(
@@ -459,7 +454,6 @@ class _PlanCard extends ConsumerWidget {
   }
 }
 
-// Linha de Exercício Individual
 class _ExerciseRow extends StatelessWidget {
   const _ExerciseRow({
     required this.exercise,
@@ -474,9 +468,6 @@ class _ExerciseRow extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    // A lógica de cores depende de Strings do banco ('Pernas', 'Costas').
-    // NÃO traduzir essas strings literais de comparação para não quebrar a lógica visual
-    // se o banco estiver em português.
     Color iconColor = colors.primary;
     if (exercise.muscleGroup == 'Pernas') iconColor = Colors.orange;
     if (exercise.muscleGroup == 'Costas') iconColor = Colors.purple;
@@ -566,7 +557,7 @@ class _PageIndicator extends StatelessWidget {
   }
 }
 
-// --- CALENDÁRIO ---
+// --- CALENDÁRIO COM PERSISTÊNCIA ---
 class _CalendarCard extends ConsumerWidget {
   const _CalendarCard();
 
@@ -575,23 +566,21 @@ class _CalendarCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    final completedDates = ref.watch(completedDatesProvider);
+    // AQUI: Lê o valor assíncrono.
+    // Usamos .value ou fallback para conjunto vazio enquanto carrega
+    final completedDatesAsync = ref.watch(completedDatesProvider);
+    final completedDates = completedDatesAsync.value ?? {};
 
     final now = DateTime.now();
     final year = now.year;
     final month = now.month;
 
-    // Meses traduzidos (Note que a lista começa com index 1 no loop ou devemos ajustar)
-    // No seu código original, index 0 era '', então Janeiro era 1.
-    // Slang gera listas baseadas em 0. Vamos acessar `t.workout.calendar.months[month]`.
     final months = t.workout.calendar.months;
-
     final daysInMonth = DateTime(year, month + 1, 0).day;
     final firstDayOfMonth = DateTime(year, month, 1);
-    final firstWeekday = firstDayOfMonth.weekday; // 1=Seg, 7=Dom
+    final firstWeekday = firstDayOfMonth.weekday;
     final offsetDays = firstWeekday == 7 ? 0 : firstWeekday;
 
-    // Dias da semana traduzidos
     final daysOfWeek = t.workout.calendar.weekdays;
 
     return Card(
@@ -603,7 +592,6 @@ class _CalendarCard extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  // Acesso seguro ao mês
                   "${months.length > month ? months[month] : ''} $year",
                   style: theme.textTheme.titleMedium
                       ?.copyWith(fontWeight: FontWeight.bold),
@@ -649,6 +637,7 @@ class _CalendarCard extends ConsumerWidget {
 
                 return InkWell(
                   onTap: () {
+                    // Chama o notifier para salvar
                     ref
                         .read(completedDatesProvider.notifier)
                         .toggleDate(dateToCheck);

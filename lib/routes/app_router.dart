@@ -21,6 +21,7 @@ import 'package:strive/presentation/screens/profile/profile_screen.dart';
 import 'package:strive/presentation/screens/basic/login_screen.dart';
 import 'package:strive/presentation/screens/basic/loading_screen.dart';
 import 'package:strive/presentation/screens/profile/profile_providers.dart';
+import 'package:strive/presentation/state/navigation_provider.dart';
 
 enum AppRoute {
   loading,
@@ -31,13 +32,18 @@ enum AppRoute {
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshNotifier = ref.watch(goRouterRefreshStreamProvider.notifier);
 
-  // Observamos os estados
   final authState = ref.watch(authStateStreamProvider);
-  final profileState = ref.watch(userProfileStreamProvider.select(
-  (value) => value.whenData((profile) => profile != null)
-  ));
+  
+  final lastRoute = ref.read(navigationStateProvider);
 
-  return GoRouter(
+  final profileState = ref.watch(userProfileStreamProvider.select(
+    (value) => value.whenData((profile) => profile != null),
+  ));
+  final isProfileLoading = ref.watch(
+    userProfileStreamProvider.select((value) => value.isLoading),
+  );
+
+  final router = GoRouter(
     refreshListenable: refreshNotifier,
     initialLocation: '/login',
     routes: [
@@ -65,12 +71,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 message: 'Tudo Certo! Seus dados foram cadastrados!')),
       ),
 
-      // --- NAVEGAÇÃO PRINCIPAL (COM ABAS) ---
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             AppShell(navigationShell: navigationShell),
         branches: [
-          // --- ABA 1: DASHBOARD ---
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/dashboard',
@@ -94,7 +98,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ]),
 
-          // --- ABA 2: DIETA ---
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/diet',
@@ -121,7 +124,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ]),
 
-          // --- ABA 3: TREINO ---
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/workout',
@@ -129,7 +131,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               pageBuilder: (context, state) =>
                   const NoTransitionPage(child: WorkoutScreen()),
               routes: [
-                // Rota do Editor (Agora recebe o ID do plano na URL)
+                // Rota do Editor
                 GoRoute(
                   path: 'editor/:planId', 
                   name: 'workout-editor',
@@ -145,7 +147,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   pageBuilder: (context, state) =>
                       const NoTransitionPage(child: WorkoutCreateScreen()),
                 ),
-                // Rota de Adicionar Exercício (Captura muscle e planId)
                 GoRoute(
                   path: 'add-exercise',
                   name: 'add-exercise',
@@ -162,7 +163,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ]),
 
-          // --- ABA 4: EXPLORAR ---
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/explore',
@@ -197,48 +197,50 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
     ],
 
-    // --- LÓGICA DE REDIRECIONAMENTO BLINDADA ---
     redirect: (BuildContext context, GoRouterState state) {
       
       final isLoggingIn = state.matchedLocation == '/login';
       final isOnboarding = state.matchedLocation == '/onboarding';
       final isLoading = state.matchedLocation == '/loading';
 
-      // 1. Auth Loading -> Loading (Prioridade Máxima)
+      // 1. Auth Loading -> Loading
       if (authState.isLoading) return '/loading';
 
       final isLoggedIn = authState.valueOrNull != null;
 
-      // 2. Não Logado -> Login
       if (!isLoggedIn) {
         return isLoggingIn ? null : '/login';
       }
 
-      // 3. Perfil Loading -> Loading (Prioridade Alta para evitar flash de onboarding)
-      if (profileState.isLoading) return '/loading';
+      if (isProfileLoading) return '/loading';
 
-      final hasProfile = profileState.valueOrNull != null;
+      final hasProfile = profileState.value ?? false;
 
-      // 4. Logado mas SEM Perfil -> Onboarding
-      // Se ele tentar sair do onboarding, forçamos ele a ficar
       if (!hasProfile) {
         return isOnboarding ? null : '/onboarding';
       }
 
-      // 5. Logado E COM Perfil (Caso Crítico)
-      if (hasProfile) {
-        // Se ele tentar ir para Login, Loading ou Onboarding, mandamos para Dashboard.
-        // CASO CONTRÁRIO (ex: ele está em /diet), deixamos ele quieto (return null).
-        if (isLoggingIn || isLoading || isOnboarding) {
-          return '/dashboard';
+      if (isLoggingIn || isLoading || isOnboarding) {
+        if (lastRoute != null && lastRoute.isNotEmpty && lastRoute != '/') {
+           return lastRoute;
         }
+        return '/dashboard';
       }
 
-      // Nenhuma regra de bloqueio se aplica -> Deixa navegar
       return null;
     },
 
     errorPageBuilder: (context, state) =>
         const NoTransitionPage(child: UnderConstructionScreen()),
   );
+
+  router.routerDelegate.addListener(() {
+    final location = router.routerDelegate.currentConfiguration.uri.toString();
+    
+    Future.microtask(() {
+      ref.read(navigationStateProvider.notifier).saveLastRoute(location);
+    });
+  });
+
+  return router;
 });

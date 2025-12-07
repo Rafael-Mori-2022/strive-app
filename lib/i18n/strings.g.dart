@@ -3,10 +3,10 @@
 /// Original: lib/i18n
 /// To regenerate, run: `dart run slang`
 ///
-/// Locales: 5
-/// Strings: 1060 (212 per locale)
+/// Locales: 6
+/// Strings: 1272 (212 per locale)
 ///
-/// Built on 2025-12-07 at 15:55 UTC
+/// Built on 2025-12-07 at 17:16 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -29,7 +29,8 @@ enum AppLocale with BaseAppLocale<AppLocale, Translations> {
 	en(languageCode: 'en', build: _StringsEn.build),
 	es(languageCode: 'es', build: _StringsEs.build),
 	fr(languageCode: 'fr', build: _StringsFr.build),
-	it(languageCode: 'it', build: _StringsIt.build);
+	it(languageCode: 'it', build: _StringsIt.build),
+	zh(languageCode: 'zh', build: _StringsZh.build);
 
 	const AppLocale({required this.languageCode, this.scriptCode, this.countryCode, required this.build}); // ignore: unused_element
 
@@ -3545,6 +3546,690 @@ class _StringsMockExploreTagsIt extends _StringsMockExploreTagsPt {
 	@override String get focus => 'focus';
 }
 
+// Path: <root>
+class _StringsZh extends Translations {
+	/// You can call this constructor and build your own translation instance of this locale.
+	/// Constructing via the enum [AppLocale.build] is preferred.
+	_StringsZh.build({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver})
+		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
+		  $meta = TranslationMetadata(
+		    locale: AppLocale.zh,
+		    overrides: overrides ?? {},
+		    cardinalResolver: cardinalResolver,
+		    ordinalResolver: ordinalResolver,
+		  ),
+		  super.build(cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver) {
+		super.$meta.setFlatMapFunction($meta.getTranslation); // copy base translations to super.$meta
+		$meta.setFlatMapFunction(_flatMapFunction);
+	}
+
+	/// Metadata for the translations of <zh>.
+	@override final TranslationMetadata<AppLocale, Translations> $meta;
+
+	/// Access flat map
+	@override dynamic operator[](String key) => $meta.getTranslation(key) ?? super.$meta.getTranslation(key);
+
+	@override late final _StringsZh _root = this; // ignore: unused_field
+
+	// Translations
+	@override late final _StringsCommonZh common = _StringsCommonZh._(_root);
+	@override late final _StringsLoginZh login = _StringsLoginZh._(_root);
+	@override late final _StringsDashboardZh dashboard = _StringsDashboardZh._(_root);
+	@override late final _StringsSuccessZh success = _StringsSuccessZh._(_root);
+	@override late final _StringsUnderConstructionZh under_construction = _StringsUnderConstructionZh._(_root);
+	@override late final _StringsEditStatsZh edit_stats = _StringsEditStatsZh._(_root);
+	@override late final _StringsAddFoodZh add_food = _StringsAddFoodZh._(_root);
+	@override late final _StringsDietZh diet = _StringsDietZh._(_root);
+	@override late final _StringsMealDetailZh meal_detail = _StringsMealDetailZh._(_root);
+	@override late final _StringsExploreZh explore = _StringsExploreZh._(_root);
+	@override late final _StringsLeaderboardZh leaderboard = _StringsLeaderboardZh._(_root);
+	@override late final _StringsProfileSetupZh profile_setup = _StringsProfileSetupZh._(_root);
+	@override late final _StringsProfileZh profile = _StringsProfileZh._(_root);
+	@override late final _StringsAddExerciseZh add_exercise = _StringsAddExerciseZh._(_root);
+	@override late final _StringsWorkoutCreateZh workout_create = _StringsWorkoutCreateZh._(_root);
+	@override late final _StringsWorkoutEditorZh workout_editor = _StringsWorkoutEditorZh._(_root);
+	@override late final _StringsWorkoutZh workout = _StringsWorkoutZh._(_root);
+	@override late final _StringsMockZh mock = _StringsMockZh._(_root);
+}
+
+// Path: common
+class _StringsCommonZh extends _StringsCommonPt {
+	_StringsCommonZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get error => '加载错误';
+	@override String get error_profile => '加载个人资料错误';
+	@override String get error_stats => '加载统计数据错误';
+	@override String get back => '返回';
+	@override String get cancel => '取消';
+	@override String get save => '保存';
+	@override String get not_authenticated => '用户未验证。';
+	@override String get xp_abbr => 'XP';
+	@override String get league => '联赛';
+	@override String rank_pattern({required Object rank}) => '排名 #${rank}';
+}
+
+// Path: login
+class _StringsLoginZh extends _StringsLoginPt {
+	_StringsLoginZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get tagline => '您的努力，您的数据，\n您的成果。';
+	@override String get google_button => '使用 Google 登录';
+	@override String get terms_disclaimer => '继续即表示您同意我们的条款。';
+}
+
+// Path: dashboard
+class _StringsDashboardZh extends _StringsDashboardPt {
+	_StringsDashboardZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get level_abbr => '等级';
+	@override String get greeting => '你好，';
+	@override String get greeting_generic => '你好！';
+	@override String get subtitle => '让我们一起实现您的健康目标！';
+	@override late final _StringsDashboardClassificationZh classification = _StringsDashboardClassificationZh._(_root);
+	@override late final _StringsDashboardStatsZh stats = _StringsDashboardStatsZh._(_root);
+}
+
+// Path: success
+class _StringsSuccessZh extends _StringsSuccessPt {
+	_StringsSuccessZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '成功';
+	@override String get default_message => '一切就绪！您的数据已注册！';
+}
+
+// Path: under_construction
+class _StringsUnderConstructionZh extends _StringsUnderConstructionPt {
+	_StringsUnderConstructionZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '404';
+	@override String get message => '此页面仍在建设中！';
+	@override String get subtitle => '是有氧运动做迷路了吗？';
+}
+
+// Path: edit_stats
+class _StringsEditStatsZh extends _StringsEditStatsPt {
+	_StringsEditStatsZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '编辑精选';
+	@override String get instruction => '最多选择 4 个统计数据进行展示';
+}
+
+// Path: add_food
+class _StringsAddFoodZh extends _StringsAddFoodPt {
+	_StringsAddFoodZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '添加食物';
+	@override String get search_hint => '搜索例如：“苹果”，“蛋白粉”...';
+	@override String get not_found => '未找到食物';
+	@override String get error_api => 'API 连接错误';
+	@override String get instruction => '输入以在全​​球数据库中搜索';
+	@override String get macro_p => '蛋';
+	@override String get macro_c => '碳';
+	@override String get macro_f => '脂';
+}
+
+// Path: diet
+class _StringsDietZh extends _StringsDietPt {
+	_StringsDietZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '饮食';
+	@override late final _StringsDietWaterZh water = _StringsDietWaterZh._(_root);
+	@override late final _StringsDietMacrosZh macros = _StringsDietMacrosZh._(_root);
+	@override late final _StringsDietMealZh meal = _StringsDietMealZh._(_root);
+	@override late final _StringsDietMealTypesZh meal_types = _StringsDietMealTypesZh._(_root);
+}
+
+// Path: meal_detail
+class _StringsMealDetailZh extends _StringsMealDetailPt {
+	_StringsMealDetailZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '餐点详情';
+	@override String macro_summary({required Object calories, required Object protein, required Object carbs, required Object fat}) => '${calories} 千卡 • 蛋 ${protein}g • 碳 ${carbs}g • 脂 ${fat}g';
+	@override String item_details({required Object calories, required Object protein, required Object carbs, required Object fat}) => '${calories} 千卡 - 蛋 ${protein}g 碳 ${carbs}g 脂 ${fat}g';
+}
+
+// Path: explore
+class _StringsExploreZh extends _StringsExplorePt {
+	_StringsExploreZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '探索';
+	@override String get search_hint => '搜索功能';
+	@override String get not_found => '未找到功能。';
+	@override late final _StringsExploreCategoriesZh categories = _StringsExploreCategoriesZh._(_root);
+}
+
+// Path: leaderboard
+class _StringsLeaderboardZh extends _StringsLeaderboardPt {
+	_StringsLeaderboardZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '排行榜';
+	@override String get error => '加载排行榜错误';
+	@override late final _StringsLeaderboardZonesZh zones = _StringsLeaderboardZonesZh._(_root);
+	@override late final _StringsLeaderboardEntryZh entry = _StringsLeaderboardEntryZh._(_root);
+	@override late final _StringsLeaderboardLeaguesZh leagues = _StringsLeaderboardLeaguesZh._(_root);
+}
+
+// Path: profile_setup
+class _StringsProfileSetupZh extends _StringsProfileSetupPt {
+	_StringsProfileSetupZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title_edit => '编辑资料';
+	@override String get title_create => '创建资料';
+	@override String get welcome => '欢迎！';
+	@override String get subtitle => '让我们设置您的个人资料以个性化您的旅程。';
+	@override late final _StringsProfileSetupSectionsZh sections = _StringsProfileSetupSectionsZh._(_root);
+	@override late final _StringsProfileSetupFieldsZh fields = _StringsProfileSetupFieldsZh._(_root);
+	@override late final _StringsProfileSetupActionsZh actions = _StringsProfileSetupActionsZh._(_root);
+	@override late final _StringsProfileSetupFeedbackZh feedback = _StringsProfileSetupFeedbackZh._(_root);
+	@override late final _StringsProfileSetupGoalsZh goals = _StringsProfileSetupGoalsZh._(_root);
+	@override late final _StringsProfileSetupGendersZh genders = _StringsProfileSetupGendersZh._(_root);
+}
+
+// Path: profile
+class _StringsProfileZh extends _StringsProfilePt {
+	_StringsProfileZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '个人资料';
+	@override String stats_format({required Object age, required Object height, required Object weight}) => '${age} 岁 • ${height} cm • ${weight} kg';
+	@override String get dark_mode => '深色模式';
+	@override String get edit_profile => '更新资料';
+	@override String get view_leaderboard => '查看排行榜';
+	@override String get logout => '退出 (Logout)';
+	@override String get not_found => '未找到个人资料';
+	@override String get create_profile => '创建资料';
+	@override String get default_user => '运动员';
+}
+
+// Path: add_exercise
+class _StringsAddExerciseZh extends _StringsAddExercisePt {
+	_StringsAddExerciseZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '添加运动';
+	@override String get search_hint => '按肌肉群搜索 (如: 胸部, 背部)';
+	@override String error({required Object error}) => '错误: ${error}';
+	@override String empty_title({required Object query}) => '未找到关于 "${query}" 的运动';
+	@override String get empty_subtitle => '尝试: 胸部, 背部, 腿部, 二头肌...';
+	@override String added_feedback({required Object name}) => '${name} 已添加到训练中！';
+}
+
+// Path: workout_create
+class _StringsWorkoutCreateZh extends _StringsWorkoutCreatePt {
+	_StringsWorkoutCreateZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '新计划';
+	@override String get subtitle => '为您的新训练计划命名。';
+	@override String get field_label => '训练名称';
+	@override String get field_hint => '例如: 训练 A';
+	@override String get validator_error => '请给训练命名。';
+	@override String get button_create => '创建计划';
+	@override String get suggestions_label => '快速建议:';
+	@override String success_feedback({required Object name}) => '训练 "${name}" 已创建！';
+	@override String error_feedback({required Object error}) => '创建错误: ${error}';
+	@override late final _StringsWorkoutCreateSuggestionsZh suggestions = _StringsWorkoutCreateSuggestionsZh._(_root);
+}
+
+// Path: workout_editor
+class _StringsWorkoutEditorZh extends _StringsWorkoutEditorPt {
+	_StringsWorkoutEditorZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '编辑训练';
+	@override String get add_button => '添加';
+	@override String error({required Object error}) => '错误: ${error}';
+	@override String get not_found => '未找到计划。';
+	@override String get empty_text => '此训练为空。';
+	@override String get add_exercise_button => '添加运动';
+	@override String removed_snackbar({required Object name}) => '${name} 已移除';
+	@override late final _StringsWorkoutEditorRemoveDialogZh remove_dialog = _StringsWorkoutEditorRemoveDialogZh._(_root);
+}
+
+// Path: workout
+class _StringsWorkoutZh extends _StringsWorkoutPt {
+	_StringsWorkoutZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '训练';
+	@override String get create_tooltip => '创建新计划';
+	@override late final _StringsWorkoutEmptyStateZh empty_state = _StringsWorkoutEmptyStateZh._(_root);
+	@override late final _StringsWorkoutSummaryZh summary = _StringsWorkoutSummaryZh._(_root);
+	@override late final _StringsWorkoutOptionsZh options = _StringsWorkoutOptionsZh._(_root);
+	@override late final _StringsWorkoutDialogsZh dialogs = _StringsWorkoutDialogsZh._(_root);
+	@override String get plan_empty => '此计划为空。';
+	@override String get add_exercise_short => '运动';
+	@override late final _StringsWorkoutCalendarZh calendar = _StringsWorkoutCalendarZh._(_root);
+}
+
+// Path: mock
+class _StringsMockZh extends _StringsMockPt {
+	_StringsMockZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override late final _StringsMockExploreZh explore = _StringsMockExploreZh._(_root);
+	@override late final _StringsMockStatsZh stats = _StringsMockStatsZh._(_root);
+}
+
+// Path: dashboard.classification
+class _StringsDashboardClassificationZh extends _StringsDashboardClassificationPt {
+	_StringsDashboardClassificationZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '⭐ 排名';
+	@override String get remaining_prefix => '剩余 ';
+	@override String get remaining_suffix => ' 天';
+	@override String get rank_suffix => '名';
+}
+
+// Path: dashboard.stats
+class _StringsDashboardStatsZh extends _StringsDashboardStatsPt {
+	_StringsDashboardStatsZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '统计';
+	@override String get empty => '编辑以添加统计数据。';
+}
+
+// Path: diet.water
+class _StringsDietWaterZh extends _StringsDietWaterPt {
+	_StringsDietWaterZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get edit_goal_title => '设定饮水目标';
+	@override String get liters_label => '升';
+	@override String get edit_stepper_title => '每次点击量';
+	@override String get ml_label => '毫升 (ml)';
+	@override String goal_display({required Object value}) => '目标: ${value} L';
+}
+
+// Path: diet.macros
+class _StringsDietMacrosZh extends _StringsDietMacrosPt {
+	_StringsDietMacrosZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get carbs => '碳水化合物';
+	@override String get protein => '蛋白质';
+	@override String get fat => '脂肪';
+}
+
+// Path: diet.meal
+class _StringsDietMealZh extends _StringsDietMealPt {
+	_StringsDietMealZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String more_items({required Object count}) => '+ ${count} 其他项目';
+	@override String total_calories({required Object calories}) => '总计: ${calories} 千卡';
+	@override String get empty => '未记录食物';
+	@override String get not_found => '未找到餐点';
+}
+
+// Path: diet.meal_types
+class _StringsDietMealTypesZh extends _StringsDietMealTypesPt {
+	_StringsDietMealTypesZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get breakfast => '早餐';
+	@override String get morning_snack => '早间加餐';
+	@override String get lunch => '午餐';
+	@override String get afternoon_snack => '下午加餐';
+	@override String get dinner => '晚餐';
+	@override String get supper => '夜宵';
+	@override String get pre_workout => '训练前';
+	@override String get post_workout => '训练后';
+	@override String get snack => '零食';
+}
+
+// Path: explore.categories
+class _StringsExploreCategoriesZh extends _StringsExploreCategoriesPt {
+	_StringsExploreCategoriesZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get activity => '活动';
+	@override String get nutrition => '营养';
+	@override String get sleep => '睡眠';
+	@override String get medication => '药物';
+	@override String get body_measurements => '身体测量';
+	@override String get mobility => '灵活性';
+}
+
+// Path: leaderboard.zones
+class _StringsLeaderboardZonesZh extends _StringsLeaderboardZonesPt {
+	_StringsLeaderboardZonesZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get promotion => '晋级区';
+	@override String get demotion => '降级区';
+}
+
+// Path: leaderboard.entry
+class _StringsLeaderboardEntryZh extends _StringsLeaderboardEntryPt {
+	_StringsLeaderboardEntryZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String level({required Object level}) => '等级 ${level}';
+	@override String xp({required Object value}) => '${value} XP';
+}
+
+// Path: leaderboard.leagues
+class _StringsLeaderboardLeaguesZh extends _StringsLeaderboardLeaguesPt {
+	_StringsLeaderboardLeaguesZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get wood => '木头';
+	@override String get iron => '铁';
+	@override String get bronze => '青铜';
+	@override String get silver => '白银';
+	@override String get gold => '黄金';
+	@override String get platinum => '白金';
+	@override String get diamond => '钻石';
+	@override String get obsidian => '黑曜石';
+	@override String get master => '大师';
+	@override String get stellar => '星耀';
+	@override String get legend => '传奇';
+}
+
+// Path: profile_setup.sections
+class _StringsProfileSetupSectionsZh extends _StringsProfileSetupSectionsPt {
+	_StringsProfileSetupSectionsZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get about => '关于您';
+	@override String get measures => '测量';
+	@override String get goal => '主要目标';
+}
+
+// Path: profile_setup.fields
+class _StringsProfileSetupFieldsZh extends _StringsProfileSetupFieldsPt {
+	_StringsProfileSetupFieldsZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get name => '全名';
+	@override String get name_error => '请输入您的名字';
+	@override String get dob => '出生日期';
+	@override String get gender => '性别';
+	@override String get height => '身高 (cm)';
+	@override String get weight => '体重 (kg)';
+	@override String get goal_select => '选择您的目标';
+	@override String get required_error => '必填';
+}
+
+// Path: profile_setup.actions
+class _StringsProfileSetupActionsZh extends _StringsProfileSetupActionsPt {
+	_StringsProfileSetupActionsZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get save => '保存更改';
+	@override String get finish => '完成注册';
+}
+
+// Path: profile_setup.feedback
+class _StringsProfileSetupFeedbackZh extends _StringsProfileSetupFeedbackPt {
+	_StringsProfileSetupFeedbackZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get fill_all => '请填写所有字段。';
+	@override String get success => '个人资料保存成功！';
+	@override String error({required Object error}) => '保存错误: ${error}';
+}
+
+// Path: profile_setup.goals
+class _StringsProfileSetupGoalsZh extends _StringsProfileSetupGoalsPt {
+	_StringsProfileSetupGoalsZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get lose_weight => '减肥';
+	@override String get gain_muscle => '增肌';
+	@override String get endurance => '提高耐力';
+	@override String get health => '保持健康';
+}
+
+// Path: profile_setup.genders
+class _StringsProfileSetupGendersZh extends _StringsProfileSetupGendersPt {
+	_StringsProfileSetupGendersZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get male => '男';
+	@override String get female => '女';
+	@override String get other => '其他';
+}
+
+// Path: workout_create.suggestions
+class _StringsWorkoutCreateSuggestionsZh extends _StringsWorkoutCreateSuggestionsPt {
+	_StringsWorkoutCreateSuggestionsZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get full_body => '全身';
+	@override String get upper_body => '上半身';
+	@override String get lower_body => '下半身';
+	@override String get push_day => '推力日 (Push)';
+	@override String get pull_day => '拉力日 (Pull)';
+	@override String get leg_day => '腿部日';
+	@override String get cardio_abs => '有氧 & 腹肌';
+	@override String get yoga_flow => '瑜伽流';
+}
+
+// Path: workout_editor.remove_dialog
+class _StringsWorkoutEditorRemoveDialogZh extends _StringsWorkoutEditorRemoveDialogPt {
+	_StringsWorkoutEditorRemoveDialogZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '移除运动？';
+	@override String content({required Object name}) => '您确定要移除 ${name} 吗？';
+	@override String get confirm => '移除';
+}
+
+// Path: workout.empty_state
+class _StringsWorkoutEmptyStateZh extends _StringsWorkoutEmptyStatePt {
+	_StringsWorkoutEmptyStateZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '未找到训练计划。';
+	@override String get button => '创建我的第一个训练';
+}
+
+// Path: workout.summary
+class _StringsWorkoutSummaryZh extends _StringsWorkoutSummaryPt {
+	_StringsWorkoutSummaryZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get today => '今天';
+}
+
+// Path: workout.options
+class _StringsWorkoutOptionsZh extends _StringsWorkoutOptionsPt {
+	_StringsWorkoutOptionsZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get rename => '重命名计划';
+	@override String get delete => '删除计划';
+}
+
+// Path: workout.dialogs
+class _StringsWorkoutDialogsZh extends _StringsWorkoutDialogsPt {
+	_StringsWorkoutDialogsZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get rename_label => '训练名称';
+	@override String get delete_title => '删除计划？';
+	@override String delete_content({required Object name}) => '您确定要删除 "${name}" 吗？此操作无法撤销。';
+	@override String get delete_confirm => '删除';
+}
+
+// Path: workout.calendar
+class _StringsWorkoutCalendarZh extends _StringsWorkoutCalendarPt {
+	_StringsWorkoutCalendarZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override List<String> get months => [
+		'',
+		'一月',
+		'二月',
+		'三月',
+		'四月',
+		'五月',
+		'六月',
+		'七月',
+		'八月',
+		'九月',
+		'十月',
+		'十一月',
+		'十二月',
+	];
+	@override List<String> get weekdays => [
+		'日',
+		'一',
+		'二',
+		'三',
+		'四',
+		'五',
+		'六',
+	];
+}
+
+// Path: mock.explore
+class _StringsMockExploreZh extends _StringsMockExplorePt {
+	_StringsMockExploreZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get nutrition => '营养';
+	@override String get training => '训练';
+	@override String get sleep => '睡眠';
+	@override String get mindfulness => '正念';
+	@override late final _StringsMockExploreTagsZh tags = _StringsMockExploreTagsZh._(_root);
+}
+
+// Path: mock.stats
+class _StringsMockStatsZh extends _StringsMockStatsPt {
+	_StringsMockStatsZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get calories => '卡路里';
+	@override String get protein => '蛋白质';
+	@override String get carbs => '碳水';
+	@override String get fat => '脂肪';
+	@override String get water => '水';
+	@override String get steps => '步数';
+	@override String get sleep => '睡眠';
+}
+
+// Path: mock.explore.tags
+class _StringsMockExploreTagsZh extends _StringsMockExploreTagsPt {
+	_StringsMockExploreTagsZh._(_StringsZh root) : this._root = root, super._(root);
+
+	@override final _StringsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get macros => '宏量营养素';
+	@override String get hydration => '补水';
+	@override String get recipes => '食谱';
+	@override String get hypertrophy => '肥大';
+	@override String get strength => '力量';
+	@override String get mobility => '灵活性';
+	@override String get hygiene => '卫生';
+	@override String get cycle => '周期';
+	@override String get breathing => '呼吸';
+	@override String get focus => '专注';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 
@@ -4643,6 +5328,226 @@ extension on _StringsIt {
 			case 'mock.stats.water': return 'Acqua';
 			case 'mock.stats.steps': return 'Passi';
 			case 'mock.stats.sleep': return 'Sonno';
+			default: return null;
+		}
+	}
+}
+
+extension on _StringsZh {
+	dynamic _flatMapFunction(String path) {
+		switch (path) {
+			case 'common.error': return '加载错误';
+			case 'common.error_profile': return '加载个人资料错误';
+			case 'common.error_stats': return '加载统计数据错误';
+			case 'common.back': return '返回';
+			case 'common.cancel': return '取消';
+			case 'common.save': return '保存';
+			case 'common.not_authenticated': return '用户未验证。';
+			case 'common.xp_abbr': return 'XP';
+			case 'common.league': return '联赛';
+			case 'common.rank_pattern': return ({required Object rank}) => '排名 #${rank}';
+			case 'login.tagline': return '您的努力，您的数据，\n您的成果。';
+			case 'login.google_button': return '使用 Google 登录';
+			case 'login.terms_disclaimer': return '继续即表示您同意我们的条款。';
+			case 'dashboard.level_abbr': return '等级';
+			case 'dashboard.greeting': return '你好，';
+			case 'dashboard.greeting_generic': return '你好！';
+			case 'dashboard.subtitle': return '让我们一起实现您的健康目标！';
+			case 'dashboard.classification.title': return '⭐ 排名';
+			case 'dashboard.classification.remaining_prefix': return '剩余 ';
+			case 'dashboard.classification.remaining_suffix': return ' 天';
+			case 'dashboard.classification.rank_suffix': return '名';
+			case 'dashboard.stats.title': return '统计';
+			case 'dashboard.stats.empty': return '编辑以添加统计数据。';
+			case 'success.title': return '成功';
+			case 'success.default_message': return '一切就绪！您的数据已注册！';
+			case 'under_construction.title': return '404';
+			case 'under_construction.message': return '此页面仍在建设中！';
+			case 'under_construction.subtitle': return '是有氧运动做迷路了吗？';
+			case 'edit_stats.title': return '编辑精选';
+			case 'edit_stats.instruction': return '最多选择 4 个统计数据进行展示';
+			case 'add_food.title': return '添加食物';
+			case 'add_food.search_hint': return '搜索例如：“苹果”，“蛋白粉”...';
+			case 'add_food.not_found': return '未找到食物';
+			case 'add_food.error_api': return 'API 连接错误';
+			case 'add_food.instruction': return '输入以在全​​球数据库中搜索';
+			case 'add_food.macro_p': return '蛋';
+			case 'add_food.macro_c': return '碳';
+			case 'add_food.macro_f': return '脂';
+			case 'diet.title': return '饮食';
+			case 'diet.water.edit_goal_title': return '设定饮水目标';
+			case 'diet.water.liters_label': return '升';
+			case 'diet.water.edit_stepper_title': return '每次点击量';
+			case 'diet.water.ml_label': return '毫升 (ml)';
+			case 'diet.water.goal_display': return ({required Object value}) => '目标: ${value} L';
+			case 'diet.macros.carbs': return '碳水化合物';
+			case 'diet.macros.protein': return '蛋白质';
+			case 'diet.macros.fat': return '脂肪';
+			case 'diet.meal.more_items': return ({required Object count}) => '+ ${count} 其他项目';
+			case 'diet.meal.total_calories': return ({required Object calories}) => '总计: ${calories} 千卡';
+			case 'diet.meal.empty': return '未记录食物';
+			case 'diet.meal.not_found': return '未找到餐点';
+			case 'diet.meal_types.breakfast': return '早餐';
+			case 'diet.meal_types.morning_snack': return '早间加餐';
+			case 'diet.meal_types.lunch': return '午餐';
+			case 'diet.meal_types.afternoon_snack': return '下午加餐';
+			case 'diet.meal_types.dinner': return '晚餐';
+			case 'diet.meal_types.supper': return '夜宵';
+			case 'diet.meal_types.pre_workout': return '训练前';
+			case 'diet.meal_types.post_workout': return '训练后';
+			case 'diet.meal_types.snack': return '零食';
+			case 'meal_detail.title': return '餐点详情';
+			case 'meal_detail.macro_summary': return ({required Object calories, required Object protein, required Object carbs, required Object fat}) => '${calories} 千卡 • 蛋 ${protein}g • 碳 ${carbs}g • 脂 ${fat}g';
+			case 'meal_detail.item_details': return ({required Object calories, required Object protein, required Object carbs, required Object fat}) => '${calories} 千卡 - 蛋 ${protein}g 碳 ${carbs}g 脂 ${fat}g';
+			case 'explore.title': return '探索';
+			case 'explore.search_hint': return '搜索功能';
+			case 'explore.not_found': return '未找到功能。';
+			case 'explore.categories.activity': return '活动';
+			case 'explore.categories.nutrition': return '营养';
+			case 'explore.categories.sleep': return '睡眠';
+			case 'explore.categories.medication': return '药物';
+			case 'explore.categories.body_measurements': return '身体测量';
+			case 'explore.categories.mobility': return '灵活性';
+			case 'leaderboard.title': return '排行榜';
+			case 'leaderboard.error': return '加载排行榜错误';
+			case 'leaderboard.zones.promotion': return '晋级区';
+			case 'leaderboard.zones.demotion': return '降级区';
+			case 'leaderboard.entry.level': return ({required Object level}) => '等级 ${level}';
+			case 'leaderboard.entry.xp': return ({required Object value}) => '${value} XP';
+			case 'leaderboard.leagues.wood': return '木头';
+			case 'leaderboard.leagues.iron': return '铁';
+			case 'leaderboard.leagues.bronze': return '青铜';
+			case 'leaderboard.leagues.silver': return '白银';
+			case 'leaderboard.leagues.gold': return '黄金';
+			case 'leaderboard.leagues.platinum': return '白金';
+			case 'leaderboard.leagues.diamond': return '钻石';
+			case 'leaderboard.leagues.obsidian': return '黑曜石';
+			case 'leaderboard.leagues.master': return '大师';
+			case 'leaderboard.leagues.stellar': return '星耀';
+			case 'leaderboard.leagues.legend': return '传奇';
+			case 'profile_setup.title_edit': return '编辑资料';
+			case 'profile_setup.title_create': return '创建资料';
+			case 'profile_setup.welcome': return '欢迎！';
+			case 'profile_setup.subtitle': return '让我们设置您的个人资料以个性化您的旅程。';
+			case 'profile_setup.sections.about': return '关于您';
+			case 'profile_setup.sections.measures': return '测量';
+			case 'profile_setup.sections.goal': return '主要目标';
+			case 'profile_setup.fields.name': return '全名';
+			case 'profile_setup.fields.name_error': return '请输入您的名字';
+			case 'profile_setup.fields.dob': return '出生日期';
+			case 'profile_setup.fields.gender': return '性别';
+			case 'profile_setup.fields.height': return '身高 (cm)';
+			case 'profile_setup.fields.weight': return '体重 (kg)';
+			case 'profile_setup.fields.goal_select': return '选择您的目标';
+			case 'profile_setup.fields.required_error': return '必填';
+			case 'profile_setup.actions.save': return '保存更改';
+			case 'profile_setup.actions.finish': return '完成注册';
+			case 'profile_setup.feedback.fill_all': return '请填写所有字段。';
+			case 'profile_setup.feedback.success': return '个人资料保存成功！';
+			case 'profile_setup.feedback.error': return ({required Object error}) => '保存错误: ${error}';
+			case 'profile_setup.goals.lose_weight': return '减肥';
+			case 'profile_setup.goals.gain_muscle': return '增肌';
+			case 'profile_setup.goals.endurance': return '提高耐力';
+			case 'profile_setup.goals.health': return '保持健康';
+			case 'profile_setup.genders.male': return '男';
+			case 'profile_setup.genders.female': return '女';
+			case 'profile_setup.genders.other': return '其他';
+			case 'profile.title': return '个人资料';
+			case 'profile.stats_format': return ({required Object age, required Object height, required Object weight}) => '${age} 岁 • ${height} cm • ${weight} kg';
+			case 'profile.dark_mode': return '深色模式';
+			case 'profile.edit_profile': return '更新资料';
+			case 'profile.view_leaderboard': return '查看排行榜';
+			case 'profile.logout': return '退出 (Logout)';
+			case 'profile.not_found': return '未找到个人资料';
+			case 'profile.create_profile': return '创建资料';
+			case 'profile.default_user': return '运动员';
+			case 'add_exercise.title': return '添加运动';
+			case 'add_exercise.search_hint': return '按肌肉群搜索 (如: 胸部, 背部)';
+			case 'add_exercise.error': return ({required Object error}) => '错误: ${error}';
+			case 'add_exercise.empty_title': return ({required Object query}) => '未找到关于 "${query}" 的运动';
+			case 'add_exercise.empty_subtitle': return '尝试: 胸部, 背部, 腿部, 二头肌...';
+			case 'add_exercise.added_feedback': return ({required Object name}) => '${name} 已添加到训练中！';
+			case 'workout_create.title': return '新计划';
+			case 'workout_create.subtitle': return '为您的新训练计划命名。';
+			case 'workout_create.field_label': return '训练名称';
+			case 'workout_create.field_hint': return '例如: 训练 A';
+			case 'workout_create.validator_error': return '请给训练命名。';
+			case 'workout_create.button_create': return '创建计划';
+			case 'workout_create.suggestions_label': return '快速建议:';
+			case 'workout_create.success_feedback': return ({required Object name}) => '训练 "${name}" 已创建！';
+			case 'workout_create.error_feedback': return ({required Object error}) => '创建错误: ${error}';
+			case 'workout_create.suggestions.full_body': return '全身';
+			case 'workout_create.suggestions.upper_body': return '上半身';
+			case 'workout_create.suggestions.lower_body': return '下半身';
+			case 'workout_create.suggestions.push_day': return '推力日 (Push)';
+			case 'workout_create.suggestions.pull_day': return '拉力日 (Pull)';
+			case 'workout_create.suggestions.leg_day': return '腿部日';
+			case 'workout_create.suggestions.cardio_abs': return '有氧 & 腹肌';
+			case 'workout_create.suggestions.yoga_flow': return '瑜伽流';
+			case 'workout_editor.title': return '编辑训练';
+			case 'workout_editor.add_button': return '添加';
+			case 'workout_editor.error': return ({required Object error}) => '错误: ${error}';
+			case 'workout_editor.not_found': return '未找到计划。';
+			case 'workout_editor.empty_text': return '此训练为空。';
+			case 'workout_editor.add_exercise_button': return '添加运动';
+			case 'workout_editor.removed_snackbar': return ({required Object name}) => '${name} 已移除';
+			case 'workout_editor.remove_dialog.title': return '移除运动？';
+			case 'workout_editor.remove_dialog.content': return ({required Object name}) => '您确定要移除 ${name} 吗？';
+			case 'workout_editor.remove_dialog.confirm': return '移除';
+			case 'workout.title': return '训练';
+			case 'workout.create_tooltip': return '创建新计划';
+			case 'workout.empty_state.title': return '未找到训练计划。';
+			case 'workout.empty_state.button': return '创建我的第一个训练';
+			case 'workout.summary.today': return '今天';
+			case 'workout.options.rename': return '重命名计划';
+			case 'workout.options.delete': return '删除计划';
+			case 'workout.dialogs.rename_label': return '训练名称';
+			case 'workout.dialogs.delete_title': return '删除计划？';
+			case 'workout.dialogs.delete_content': return ({required Object name}) => '您确定要删除 "${name}" 吗？此操作无法撤销。';
+			case 'workout.dialogs.delete_confirm': return '删除';
+			case 'workout.plan_empty': return '此计划为空。';
+			case 'workout.add_exercise_short': return '运动';
+			case 'workout.calendar.months.0': return '';
+			case 'workout.calendar.months.1': return '一月';
+			case 'workout.calendar.months.2': return '二月';
+			case 'workout.calendar.months.3': return '三月';
+			case 'workout.calendar.months.4': return '四月';
+			case 'workout.calendar.months.5': return '五月';
+			case 'workout.calendar.months.6': return '六月';
+			case 'workout.calendar.months.7': return '七月';
+			case 'workout.calendar.months.8': return '八月';
+			case 'workout.calendar.months.9': return '九月';
+			case 'workout.calendar.months.10': return '十月';
+			case 'workout.calendar.months.11': return '十一月';
+			case 'workout.calendar.months.12': return '十二月';
+			case 'workout.calendar.weekdays.0': return '日';
+			case 'workout.calendar.weekdays.1': return '一';
+			case 'workout.calendar.weekdays.2': return '二';
+			case 'workout.calendar.weekdays.3': return '三';
+			case 'workout.calendar.weekdays.4': return '四';
+			case 'workout.calendar.weekdays.5': return '五';
+			case 'workout.calendar.weekdays.6': return '六';
+			case 'mock.explore.nutrition': return '营养';
+			case 'mock.explore.training': return '训练';
+			case 'mock.explore.sleep': return '睡眠';
+			case 'mock.explore.mindfulness': return '正念';
+			case 'mock.explore.tags.macros': return '宏量营养素';
+			case 'mock.explore.tags.hydration': return '补水';
+			case 'mock.explore.tags.recipes': return '食谱';
+			case 'mock.explore.tags.hypertrophy': return '肥大';
+			case 'mock.explore.tags.strength': return '力量';
+			case 'mock.explore.tags.mobility': return '灵活性';
+			case 'mock.explore.tags.hygiene': return '卫生';
+			case 'mock.explore.tags.cycle': return '周期';
+			case 'mock.explore.tags.breathing': return '呼吸';
+			case 'mock.explore.tags.focus': return '专注';
+			case 'mock.stats.calories': return '卡路里';
+			case 'mock.stats.protein': return '蛋白质';
+			case 'mock.stats.carbs': return '碳水';
+			case 'mock.stats.fat': return '脂肪';
+			case 'mock.stats.water': return '水';
+			case 'mock.stats.steps': return '步数';
+			case 'mock.stats.sleep': return '睡眠';
 			default: return null;
 		}
 	}
