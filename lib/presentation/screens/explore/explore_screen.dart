@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -16,54 +17,54 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // Lista de itens
+    // Lista de itens com Strings traduzidas
     final exploreItems = [
       {
-        'title': 'Atividade',
+        'title': t.explore.categories.activity, // "Atividade"
         'icon': Icons.local_fire_department,
         'color': const Color(0xFFFF8A65),
         'route': '/workout'
       },
       {
-        'title': 'Alimentação',
+        'title': t.explore.categories.nutrition, // "Alimentação"
         'icon': Icons.restaurant_rounded,
         'color': const Color(0xFFFACC15),
         'route': '/diet'
       },
       {
-        'title': 'Sono',
+        'title': t.explore.categories.sleep, // "Sono"
         'icon': Icons.bed_rounded,
         'color': Colors.blue.shade300,
         'route': '/sleep'
       },
       {
-        'title': 'Medicamentos',
+        'title': t.explore.categories.medication, // "Medicamentos"
         'icon': Icons.medication_rounded,
         'color': Colors.cyan.shade300,
         'route': '/medicine'
       },
       {
-        'title': 'Medidas Corporais',
+        'title': t.explore.categories.body_measurements, // "Medidas Corporais"
         'icon': Icons.accessibility_new_rounded,
         'color': Colors.red.shade300,
         'route': '/body'
       },
       {
-        'title': 'Mobilidade',
+        'title': t.explore.categories.mobility, // "Mobilidade"
         'icon': Icons.directions_walk_rounded,
         'color': const Color(0xFFFACC15),
         'route': '/activity'
       },
     ];
 
-    // Lógica de Filtragem
+    // Lógica de Filtragem (Funciona igual, agora buscando no texto traduzido)
     final filteredItems = exploreItems.where((item) {
       final title = item['title'] as String;
       return title.toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: theme.colorScheme.background, // Mantido original
       body: SafeArea(
         bottom: false,
         child: ListView(
@@ -81,7 +82,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             const SizedBox(height: 24),
             // 3. Título "Explorar"
             Text(
-              'Explorar',
+              t.explore.title,
               style: theme.textTheme.headlineMedium
                   ?.copyWith(fontWeight: FontWeight.w600),
             ),
@@ -92,7 +93,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                 padding: const EdgeInsets.only(top: 32.0),
                 child: Center(
                   child: Text(
-                    'Nenhuma funcionalidade encontrada.',
+                    t.explore.not_found, // "Nenhuma funcionalidade encontrada."
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -132,14 +133,15 @@ class _SearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return TextField(
-      onChanged: onChanged, // Conecta o input à função
+      onChanged: onChanged,
       decoration: InputDecoration(
-        hintText: 'Buscar funcionalidade',
+        hintText: t.explore.search_hint, // "Buscar funcionalidade"
         hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
         prefixIcon:
             Icon(Icons.search, color: theme.colorScheme.onSurfaceVariant),
         filled: true,
-        fillColor: theme.colorScheme.surfaceContainerHighest, // Cor mais adequada para input
+        fillColor:
+            theme.colorScheme.surfaceContainerHighest, // Mantido original
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
@@ -161,7 +163,7 @@ class _CategoryRow extends StatelessWidget {
   final String title;
   final IconData icon;
   final Color iconColor;
-  final VoidCallback onTap; // Recebe a função de navegação
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -169,21 +171,13 @@ class _CategoryRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: InkWell(
-        onTap: onTap, // Executa a navegação
+        onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerLow, // Cor de card
+            color: theme.colorScheme.surfaceContainerLow, // Mantido original
             borderRadius: BorderRadius.circular(16),
-            // Opcional: adicionar sombra leve
-            // boxShadow: [
-            //   BoxShadow(
-            //     color: Colors.black.withOpacity(0.05),
-            //     blurRadius: 4,
-            //     offset: const Offset(0, 2),
-            //   ),
-            // ],
           ),
           child: Row(
             children: [
@@ -197,12 +191,9 @@ class _CategoryRow extends StatelessWidget {
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: Text(
-                  title, 
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w500
-                  )
-                ),
+                child: Text(title,
+                    style: theme.textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w500)),
               ),
               Icon(Icons.chevron_right,
                   color: theme.colorScheme.onSurfaceVariant),

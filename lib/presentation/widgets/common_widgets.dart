@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:strive/theme.dart';
+import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
 
 class PrimaryButton extends StatelessWidget {
   final String label;
@@ -205,7 +206,9 @@ class XPBar extends StatelessWidget {
               colors: [scheme.primaryContainer, scheme.primary.withAlpha(50)])),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text('XP', style: Theme.of(context).textTheme.titleMedium),
+          // TRADUZIDO: "XP"
+          Text(t.common.xp_abbr,
+              style: Theme.of(context).textTheme.titleMedium),
           Text(label, style: Theme.of(context).textTheme.labelMedium),
         ]),
         const SizedBox(height: 8),
@@ -301,10 +304,12 @@ class LeagueCard extends StatelessWidget {
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                  Text('League',
+                  // TRADUZIDO: "Liga"
+                  Text(t.common.league,
                       style: Theme.of(context).textTheme.labelMedium),
                   Text(tier, style: Theme.of(context).textTheme.titleLarge),
-                  Text('Rank #$rank',
+                  // TRADUZIDO: "Rank #123"
+                  Text(t.common.rank_pattern(rank: rank),
                       style: Theme.of(context).textTheme.labelMedium),
                 ])),
             Icon(Icons.chevron_right, color: scheme.onPrimaryContainer)

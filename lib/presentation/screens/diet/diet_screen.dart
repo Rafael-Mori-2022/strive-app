@@ -6,6 +6,7 @@ import 'package:strive/domain/entities/meal.dart';
 import 'package:strive/presentation/state/diet_providers.dart';
 import 'package:strive/presentation/state/gamification_provider.dart';
 import 'package:strive/domain/enums/xp_action.dart';
+import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
 
 class DietScreen extends ConsumerWidget {
   const DietScreen({super.key});
@@ -16,7 +17,8 @@ class DietScreen extends ConsumerWidget {
     final mealsAsync = ref.watch(mealsProvider);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor:
+          Theme.of(context).colorScheme.background, // Mantido original
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(
@@ -37,12 +39,12 @@ class DietScreen extends ConsumerWidget {
                 loading: () => const _LoadingCard(height: 150),
                 error: (_, __) => const SizedBox.shrink(),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Card de Água (Agora com Meta Editável)
               const _WaterCard(),
-              
+
               const SizedBox(height: 16),
 
               // Lista de Refeições
@@ -55,10 +57,11 @@ class DietScreen extends ConsumerWidget {
                     final meal = list[index];
                     return _MealCard(meal: meal);
                   },
-                  separatorBuilder: (context, index) => const SizedBox(height: 16),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 16),
                 ),
                 loading: () => const LinearProgressIndicator(),
-                error: (e, st) => Center(child: Text('Erro: $e')),
+                error: (e, st) => Center(child: Text('${t.common.error}: $e')),
               ),
             ],
           ),
@@ -75,7 +78,7 @@ class _Header extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: Text(
-        'Dieta',
+        t.diet.title, // "Dieta"
         style: Theme.of(context)
             .textTheme
             .headlineMedium
@@ -90,33 +93,40 @@ class _WaterCard extends ConsumerWidget {
   const _WaterCard();
 
   // Dialog para editar a Meta
-  void _showEditGoalDialog(BuildContext context, WidgetRef ref, int currentGoal) {
-    final controller = TextEditingController(text: (currentGoal / 1000).toString());
+  void _showEditGoalDialog(
+      BuildContext context, WidgetRef ref, int currentGoal) {
+    final controller =
+        TextEditingController(text: (currentGoal / 1000).toString());
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Definir Meta de Água'),
+        title: Text(t.diet.water.edit_goal_title), // "Definir Meta de Água"
         content: TextField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
-          decoration: const InputDecoration(
-            labelText: 'Litros',
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))
+          ],
+          decoration: InputDecoration(
+            labelText: t.diet.water.liters_label, // "Litros"
             suffixText: 'L',
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(t.common.cancel)),
           FilledButton(
             onPressed: () {
               final val = double.tryParse(controller.text.replaceAll(',', '.'));
               if (val != null && val > 0) {
-                ref.read(waterGoalProvider.notifier).state = (val * 1000).toInt();
+                ref.read(waterGoalProvider.notifier).state =
+                    (val * 1000).toInt();
               }
               Navigator.pop(ctx);
             },
-            child: const Text('Salvar'),
+            child: Text(t.common.save),
           ),
         ],
       ),
@@ -124,12 +134,13 @@ class _WaterCard extends ConsumerWidget {
   }
 
   // Dialog para editar o Stepper (Quantidade por clique)
-  void _showEditStepperDialog(BuildContext context, WidgetRef ref, int currentStep) {
+  void _showEditStepperDialog(
+      BuildContext context, WidgetRef ref, int currentStep) {
     final controller = TextEditingController(text: currentStep.toString());
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Quantidade por Clique'),
+        title: Text(t.diet.water.edit_stepper_title), // "Quantidade por Clique"
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -137,17 +148,19 @@ class _WaterCard extends ConsumerWidget {
               controller: controller,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: const InputDecoration(
-                labelText: 'Mililitros (ml)',
+              decoration: InputDecoration(
+                labelText: t.diet.water.ml_label, // "Mililitros (ml)"
                 suffixText: 'ml',
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(t.common.cancel)),
           FilledButton(
             onPressed: () {
               final val = int.tryParse(controller.text);
@@ -156,7 +169,7 @@ class _WaterCard extends ConsumerWidget {
               }
               Navigator.pop(ctx);
             },
-            child: const Text('Salvar'),
+            child: Text(t.common.save),
           ),
         ],
       ),
@@ -178,7 +191,10 @@ class _WaterCard extends ConsumerWidget {
       child: Stack(
         children: [
           Positioned(
-            bottom: 0, left: 0, right: 0, height: 4,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 4,
             child: LinearProgressIndicator(
               value: progress,
               backgroundColor: Colors.transparent,
@@ -186,7 +202,8 @@ class _WaterCard extends ConsumerWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             child: Row(
               children: [
                 Icon(Icons.water_drop, color: Colors.blue.shade300, size: 32),
@@ -196,7 +213,8 @@ class _WaterCard extends ConsumerWidget {
                   children: [
                     Text(
                       '${(currentWater / 1000).toStringAsFixed(2)} L',
-                      style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      style: textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     InkWell(
                       onTap: () => _showEditGoalDialog(context, ref, goalWater),
@@ -206,7 +224,9 @@ class _WaterCard extends ConsumerWidget {
                         child: Row(
                           children: [
                             Text(
-                              'Meta: ${(goalWater / 1000).toStringAsFixed(1)} L',
+                              // "Meta: X L"
+                              t.diet.water.goal_display(
+                                  value: (goalWater / 1000).toStringAsFixed(1)),
                               style: textTheme.bodySmall?.copyWith(
                                 color: colors.onSurfaceVariant,
                                 decoration: TextDecoration.underline,
@@ -214,7 +234,8 @@ class _WaterCard extends ConsumerWidget {
                               ),
                             ),
                             const SizedBox(width: 4),
-                            Icon(Icons.edit, size: 12, color: colors.onSurfaceVariant),
+                            Icon(Icons.edit,
+                                size: 12, color: colors.onSurfaceVariant),
                           ],
                         ),
                       ),
@@ -233,16 +254,19 @@ class _WaterCard extends ConsumerWidget {
                       IconButton(
                         icon: const Icon(Icons.remove, size: 20),
                         onPressed: () {
-                          final newVal = (currentWater - stepperValue).clamp(0, 10000);
+                          final newVal =
+                              (currentWater - stepperValue).clamp(0, 10000);
                           ref.read(waterIntakeProvider.notifier).state = newVal;
                         },
                       ),
                       // Valor do stepper agora é clicável para editar
                       InkWell(
-                        onTap: () => _showEditStepperDialog(context, ref, stepperValue),
+                        onTap: () =>
+                            _showEditStepperDialog(context, ref, stepperValue),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text('$stepperValue ml', 
+                          child: Text(
+                            '$stepperValue ml',
                             style: textTheme.labelMedium?.copyWith(
                               decoration: TextDecoration.underline,
                               decorationStyle: TextDecorationStyle.dotted,
@@ -253,10 +277,13 @@ class _WaterCard extends ConsumerWidget {
                       IconButton(
                         icon: const Icon(Icons.add, size: 20),
                         onPressed: () {
-                          final newVal = (currentWater + stepperValue).clamp(0, 10000);
+                          final newVal =
+                              (currentWater + stepperValue).clamp(0, 10000);
                           ref.read(waterIntakeProvider.notifier).state = newVal;
                           if (context.mounted) {
-                             ref.read(gamificationControllerProvider).earnXp(context, XpAction.addWater);
+                            ref
+                                .read(gamificationControllerProvider)
+                                .earnXp(context, XpAction.addWater);
                           }
                         },
                       ),
@@ -316,7 +343,8 @@ class _CalorieMacroCard extends StatelessWidget {
                     value: (totalCalories / goalCalories).clamp(0.0, 1.0),
                     strokeWidth: 8,
                     backgroundColor: colors.surfaceVariant,
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.redAccent),
+                    valueColor:
+                        const AlwaysStoppedAnimation<Color>(Colors.redAccent),
                   ),
                   Center(
                     child: Column(
@@ -324,11 +352,13 @@ class _CalorieMacroCard extends StatelessWidget {
                       children: [
                         Text(
                           totalCalories.toStringAsFixed(0),
-                          style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                          style: textTheme.headlineSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         Text(
                           'kcal',
-                          style: textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
+                          style: textTheme.bodySmall
+                              ?.copyWith(color: colors.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -343,21 +373,21 @@ class _CalorieMacroCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _MacroBar(
-                    title: 'Carboidrato',
+                    title: t.diet.macros.carbs, // "Carboidrato"
                     value: totalCarbs,
                     goal: goalCarbs,
                     color: Colors.blue.shade400,
                   ),
                   const SizedBox(height: 12),
                   _MacroBar(
-                    title: 'Proteína',
+                    title: t.diet.macros.protein, // "Proteína"
                     value: totalProtein,
                     goal: goalProtein,
                     color: Colors.green.shade400,
                   ),
                   const SizedBox(height: 12),
                   _MacroBar(
-                    title: 'Gordura',
+                    title: t.diet.macros.fat, // "Gordura"
                     value: totalFat,
                     goal: goalFat,
                     color: Colors.orange.shade400,
@@ -426,9 +456,11 @@ class _MealCard extends ConsumerWidget {
     final colors = Theme.of(context).colorScheme;
 
     IconData mainIcon = Icons.restaurant;
-    if (meal.name.toLowerCase().contains('café')) mainIcon = Icons.bakery_dining;
+    if (meal.name.toLowerCase().contains('café'))
+      mainIcon = Icons.bakery_dining;
     if (meal.name.toLowerCase().contains('lanche')) mainIcon = Icons.apple;
-    if (meal.name.toLowerCase().contains('jantar')) mainIcon = Icons.dinner_dining;
+    if (meal.name.toLowerCase().contains('jantar'))
+      mainIcon = Icons.dinner_dining;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -445,7 +477,9 @@ class _MealCard extends ConsumerWidget {
                     children: [
                       Icon(mainIcon, color: colors.primary, size: 24),
                       const SizedBox(width: 12),
-                      Text(meal.name, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      Text(meal.name,
+                          style: textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold)),
                     ],
                   ),
                   Container(
@@ -454,7 +488,8 @@ class _MealCard extends ConsumerWidget {
                       color: colors.primaryContainer,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.add, size: 20, color: colors.onPrimaryContainer),
+                    child: Icon(Icons.add,
+                        size: 20, color: colors.onPrimaryContainer),
                   )
                 ],
               ),
@@ -462,21 +497,28 @@ class _MealCard extends ConsumerWidget {
                 const Divider(height: 24),
                 // Lista resumida dos itens
                 ...meal.items.take(3).map((item) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Row(
-                    children: [
-                      Expanded(child: Text(item.name, style: textTheme.bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis)),
-                      Text('${item.calories.toStringAsFixed(0)} kcal', 
-                           style: textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant)),
-                    ],
-                  ),
-                )),
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                              child: Text(item.name,
+                                  style: textTheme.bodyMedium,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis)),
+                          Text('${item.calories.toStringAsFixed(0)} kcal',
+                              style: textTheme.bodySmall
+                                  ?.copyWith(color: colors.onSurfaceVariant)),
+                        ],
+                      ),
+                    )),
                 if (meal.items.length > 3)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
-                      '+ ${meal.items.length - 3} outros itens',
-                      style: textTheme.labelSmall?.copyWith(color: colors.primary),
+                      // "+ X outros itens"
+                      t.diet.meal.more_items(count: meal.items.length - 3),
+                      style:
+                          textTheme.labelSmall?.copyWith(color: colors.primary),
                     ),
                   ),
                 const SizedBox(height: 12),
@@ -484,17 +526,21 @@ class _MealCard extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      'Total: ${meal.calories.toStringAsFixed(0)} kcal',
-                      style: textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
+                      // "Total: X kcal"
+                      t.diet.meal.total_calories(
+                          calories: meal.calories.toStringAsFixed(0)),
+                      style: textTheme.labelMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
-              ] else 
+              ] else
                 Padding(
                   padding: const EdgeInsets.only(top: 12.0),
                   child: Text(
-                    'Nenhum alimento registrado',
-                    style: textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic, color: colors.outline),
+                    t.diet.meal.empty, // "Nenhum alimento registrado"
+                    style: textTheme.bodySmall?.copyWith(
+                        fontStyle: FontStyle.italic, color: colors.outline),
                   ),
                 ),
             ],

@@ -5,23 +5,29 @@ import 'package:strive/domain/entities/exercise.dart';
 import 'package:strive/domain/enums/xp_action.dart';
 import 'package:strive/presentation/state/gamification_provider.dart';
 import 'package:strive/presentation/state/workout_providers.dart';
+import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
 
-// Provider auxiliar para buscar exercícios da API
-final searchExercisesProvider = FutureProvider.family<List<Exercise>, String>((ref, query) async {
-  // Se a query estiver vazia, retorna uma lista padrão (ex: Peito) ou vazia
+// Provider auxiliar (Mantido a lógica original, pois envolve chaves de API/Banco)
+final searchExercisesProvider =
+    FutureProvider.family<List<Exercise>, String>((ref, query) async {
   if (query.isEmpty) {
     return ref.read(workoutRepositoryProvider).listExercisesByMuscle('Peito');
   }
-  
-  // Lógica simples: verifica se a query corresponde a um grupo muscular conhecido
-  final muscleGroups = ['Peito', 'Costas', 'Bíceps', 'Tríceps', 'Pernas', 'Ombros', 'Abdômen'];
-  
-  // Tenta encontrar um match exato ou parcial
+
+  final muscleGroups = [
+    'Peito',
+    'Costas',
+    'Bíceps',
+    'Tríceps',
+    'Pernas',
+    'Ombros',
+    'Abdômen'
+  ];
+
   final match = muscleGroups.firstWhere(
-    (m) => m.toLowerCase().contains(query.toLowerCase()), 
-    orElse: () => 'Peito' // Fallback padrão
-  );
-  
+      (m) => m.toLowerCase().contains(query.toLowerCase()),
+      orElse: () => 'Peito');
+
   return ref.read(workoutRepositoryProvider).listExercisesByMuscle(match);
 });
 
@@ -63,18 +69,17 @@ class _AddExerciseScreenState extends ConsumerState<AddExerciseScreen> {
     final colors = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: colors.background,
+      backgroundColor: colors.surface, // Atualizado para surface
       appBar: AppBar(
-        title: const Text('Adicionar Exercício'),
+        // Título traduzido
+        title: Text(t.add_exercise.title),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          // CORREÇÃO: Usa GoRouter para voltar de forma segura
           onPressed: () {
             if (context.canPop()) {
               context.pop();
             } else {
-              // Fallback seguro caso não haja histórico (ex: deep link)
-              context.go('/workout'); 
+              context.go('/workout');
             }
           },
         ),
@@ -87,7 +92,8 @@ class _AddExerciseScreenState extends ConsumerState<AddExerciseScreen> {
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText: 'Buscar por grupo muscular (ex: Peito, Costas)',
+                // Hint traduzido
+                hintText: t.add_exercise.search_hint,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
@@ -112,23 +118,29 @@ class _AddExerciseScreenState extends ConsumerState<AddExerciseScreen> {
           Expanded(
             child: exercisesAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, st) => Center(child: Text('Erro: $e')),
+              // Erro traduzido com parâmetro
+              error: (e, st) => Center(
+                  child: Text(t.add_exercise.error(error: e.toString()))),
               data: (exercises) {
                 if (exercises.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.search_off, size: 64, color: colors.onSurfaceVariant),
+                        Icon(Icons.search_off,
+                            size: 64, color: colors.onSurfaceVariant),
                         const SizedBox(height: 16),
+                        // Título vazio com parâmetro query
                         Text(
-                          'Nenhum exercício encontrado para "$_query"',
+                          t.add_exercise.empty_title(query: _query),
                           style: TextStyle(color: colors.onSurfaceVariant),
                         ),
                         const SizedBox(height: 8),
+                        // Sugestões traduzidas
                         Text(
-                          'Tente: Peito, Costas, Pernas, Bíceps...',
-                          style: TextStyle(fontSize: 12, color: colors.onSurfaceVariant),
+                          t.add_exercise.empty_subtitle,
+                          style: TextStyle(
+                              fontSize: 12, color: colors.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -136,26 +148,29 @@ class _AddExerciseScreenState extends ConsumerState<AddExerciseScreen> {
                 }
 
                 return ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   itemCount: exercises.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final exercise = exercises[index];
                     return Card(
                       elevation: 2,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                       child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
                         leading: CircleAvatar(
                           backgroundColor: colors.primaryContainer,
-                          child: Icon(Icons.fitness_center, color: colors.onPrimaryContainer),
+                          child: Icon(Icons.fitness_center,
+                              color: colors.onPrimaryContainer),
                         ),
                         title: Text(
                           exercise.name,
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Text(
-                          // Mostra grupo muscular e um trecho da descrição limpa
                           "${exercise.muscleGroup} • ${exercise.description?.replaceAll(RegExp(r'<[^>]*>'), '').split('.').first ?? ''}",
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -165,27 +180,31 @@ class _AddExerciseScreenState extends ConsumerState<AddExerciseScreen> {
                           color: colors.primary,
                           onPressed: () async {
                             // 1. Adicionar ao Plano
-                            await ref.read(workoutControllerProvider).addExerciseToPlan(
-                              widget.planId,
-                              // Cria uma nova instância para garantir dados limpos
-                              Exercise(
-                                id: exercise.id, 
-                                name: exercise.name,
-                                muscleGroup: exercise.muscleGroup,
-                                description: exercise.description,
-                                details: "3x12", // Valor padrão inicial
-                                completed: false,
-                              ),
-                            );
+                            await ref
+                                .read(workoutControllerProvider)
+                                .addExerciseToPlan(
+                                  widget.planId,
+                                  Exercise(
+                                    id: exercise.id,
+                                    name: exercise.name,
+                                    muscleGroup: exercise.muscleGroup,
+                                    description: exercise.description,
+                                    details: "3x12",
+                                    completed: false,
+                                  ),
+                                );
 
                             // 2. Dar XP e Feedback Visual
                             if (context.mounted) {
-                              // Usando 'updateProfile' como ação genérica, idealmente teria 'addExercise' no enum
-                              ref.read(gamificationControllerProvider).earnXp(context, XpAction.updateProfile); 
-                              
+                              ref
+                                  .read(gamificationControllerProvider)
+                                  .earnXp(context, XpAction.updateProfile);
+
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('${exercise.name} adicionado ao treino!'),
+                                  // Feedback traduzido com parâmetro
+                                  content: Text(t.add_exercise
+                                      .added_feedback(name: exercise.name)),
                                   behavior: SnackBarBehavior.floating,
                                   duration: const Duration(seconds: 2),
                                 ),

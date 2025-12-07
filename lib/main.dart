@@ -8,8 +8,14 @@ import 'package:strive/di/service_locator.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'firebase_options.dart';
 
+// 1. Importe o arquivo gerado pelo Slang
+import 'package:strive/i18n/strings.g.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 2. Inicialize o Slang para usar o local do dispositivo
+  LocaleSettings.useDeviceLocale();
 
   // Inicialização do Firebase
   await Firebase.initializeApp(
@@ -18,7 +24,15 @@ Future<void> main() async {
 
   await setupServiceLocator();
 
-  runApp(const ProviderScope(child: StriveApp()));
+  // 3. Envolva o StriveApp no TranslationProvider
+  // A ordem sugerida é: ProviderScope -> TranslationProvider -> App
+  runApp(
+    ProviderScope(
+      child: TranslationProvider(
+        child: const StriveApp(),
+      ),
+    ),
+  );
 }
 
 class StriveApp extends ConsumerWidget {
@@ -28,18 +42,13 @@ class StriveApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
     final currentThemeMode = ref.watch(themeProvider);
+
     return MaterialApp.router(
       title: 'Strive',
       debugShowCheckedModeBanner: false,
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('pt', 'BR'), // Português Brasil
-        Locale('en', 'US'), // Inglês Americano
-      ],
+      locale: TranslationProvider.of(context).flutterLocale,
+      supportedLocales: AppLocaleUtils.supportedLocales,
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: currentThemeMode,

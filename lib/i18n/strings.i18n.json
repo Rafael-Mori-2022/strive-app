@@ -1,0 +1,284 @@
+{
+  "common": {
+    "error": "Erro ao carregar",
+    "error_profile": "Erro ao carregar perfil",
+    "error_stats": "Erro ao carregar estatísticas",
+    "back": "Voltar",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "not_authenticated": "Usuário não autenticado.",
+    "xp_abbr": "XP",
+    "league": "Liga",
+    "rank_pattern": "Rank #$rank"
+  },
+  "login": {
+    "tagline": "Seu esforço, seus dados,\nseus resultados.",
+    "google_button": "Entrar com Google",
+    "terms_disclaimer": "Ao continuar, você concorda com nossos Termos."
+  },
+  "dashboard": {
+    "level_abbr": "nvl.",
+    "greeting": "Olá, ",
+    "greeting_generic": "Olá!",
+    "subtitle": "Vamos juntos alcançar suas metas de saúde!",
+    "classification": {
+      "title": "⭐ Classificação",
+      "remaining_prefix": "restam ",
+      "remaining_suffix": " dias",
+      "rank_suffix": "º Lugar"
+    },
+    "stats": {
+      "title": "Estatísticas",
+      "empty": "Edite para adicionar estatísticas."
+    }
+  },
+  "success": {
+    "title": "Sucesso",
+    "default_message": "Tudo Certo! Seus dados foram cadastrados!"
+  },
+  "under_construction": {
+    "title": "404",
+    "message": "Essa página ainda está em construção!",
+    "subtitle": "Estava fazendo seu cardio e se perdeu?"
+  },
+  "edit_stats": {
+    "title": "Editar destaques",
+    "instruction": "Selecione até 4 estatísticas para destacar"
+  },
+  "add_food": {
+    "title": "Adicionar Alimento",
+    "search_hint": "Busque ex: \"Maçã\", \"Whey\"...",
+    "not_found": "Nenhum alimento encontrado",
+    "error_api": "Erro na conexão com a API",
+    "instruction": "Digite para buscar na base de dados global",
+    "macro_p": "P",
+    "macro_c": "C",
+    "macro_f": "G"
+  },
+  "diet": {
+    "title": "Dieta",
+    "water": {
+      "edit_goal_title": "Definir Meta de Água",
+      "liters_label": "Litros",
+      "edit_stepper_title": "Quantidade por Clique",
+      "ml_label": "Mililitros (ml)",
+      "goal_display": "Meta: $value L"
+    },
+    "macros": {
+      "carbs": "Carboidrato",
+      "protein": "Proteína",
+      "fat": "Gordura"
+    },
+    "meal": {
+      "more_items": "+ $count outros itens",
+      "total_calories": "Total: $calories kcal",
+      "empty": "Nenhum alimento registrado",
+      "not_found": "Refeição não encontrada"
+    },
+    "meal_types": {
+      "breakfast": "Café da Manhã",
+      "morning_snack": "Lanche da Manhã",
+      "lunch": "Almoço",
+      "afternoon_snack": "Lanche da Tarde",
+      "dinner": "Jantar",
+      "supper": "Ceia",
+      "pre_workout": "Pré-treino",
+      "post_workout": "Pós-treino",
+      "snack": "Lanche"
+    }
+  },
+  "meal_detail": {
+    "title": "Detalhes da Refeição",
+    "macro_summary": "$calories kcal • P ${protein}g • C ${carbs}g • G ${fat}g",
+    "item_details": "$calories kcal - P ${protein}g C ${carbs}g G ${fat}g"
+  },
+  "explore": {
+    "title": "Explorar",
+    "search_hint": "Buscar funcionalidade",
+    "not_found": "Nenhuma funcionalidade encontrada.",
+    "categories": {
+      "activity": "Atividade",
+      "nutrition": "Alimentação",
+      "sleep": "Sono",
+      "medication": "Medicamentos",
+      "body_measurements": "Medidas Corporais",
+      "mobility": "Mobilidade"
+    }
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "error": "Erro ao carregar leaderboard",
+    "zones": {
+      "promotion": "ZONA DE PROMOÇÃO",
+      "demotion": "ZONA DE REBAIXAMENTO"
+    },
+    "entry": {
+      "level": "Nível $level",
+      "xp": "$value XP"
+    },
+    "leagues": {
+      "wood": "MADEIRA",
+      "iron": "FERRO",
+      "bronze": "BRONZE",
+      "silver": "PRATA",
+      "gold": "OURO",
+      "platinum": "PLATINA",
+      "diamond": "DIAMANTE",
+      "obsidian": "OBSIDIANA",
+      "master": "MESTRE",
+      "stellar": "ESTELAR",
+      "legend": "LENDA"
+    }
+  },
+  "profile_setup": {
+    "title_edit": "Editar Perfil",
+    "title_create": "Criar Perfil",
+    "welcome": "Bem-vindo(a)!",
+    "subtitle": "Vamos configurar seu perfil para personalizar sua jornada.",
+    "sections": {
+      "about": "Sobre você",
+      "measures": "Medidas",
+      "goal": "Objetivo Principal"
+    },
+    "fields": {
+      "name": "Nome Completo",
+      "name_error": "Informe seu nome",
+      "dob": "Nascimento",
+      "gender": "Gênero",
+      "height": "Altura (cm)",
+      "weight": "Peso (kg)",
+      "goal_select": "Selecione seu objetivo",
+      "required_error": "Obrigatório"
+    },
+    "actions": {
+      "save": "Salvar Alterações",
+      "finish": "Finalizar Cadastro"
+    },
+    "feedback": {
+      "fill_all": "Por favor, preencha todos os campos.",
+      "success": "Perfil salvo com sucesso!",
+      "error": "Erro ao salvar: $error"
+    },
+    "goals": {
+      "lose_weight": "Perder Peso",
+      "gain_muscle": "Ganhar Massa Muscular",
+      "endurance": "Melhorar Resistência",
+      "health": "Manter Saúde"
+    },
+    "genders": {
+      "male": "Masculino",
+      "female": "Feminino",
+      "other": "Outro"
+    }
+  },
+  "profile": {
+    "title": "Perfil",
+    "stats_format": "$age anos • $height cm • $weight kg",
+    "dark_mode": "Modo Escuro",
+    "edit_profile": "Atualizar perfil",
+    "view_leaderboard": "Ver Leaderboard",
+    "logout": "Sair (Logout)",
+    "not_found": "Perfil não encontrado",
+    "create_profile": "Criar perfil",
+    "default_user": "Atleta"
+  },
+  "add_exercise": {
+    "title": "Adicionar Exercício",
+    "search_hint": "Buscar por grupo muscular (ex: Peito, Costas)",
+    "error": "Erro: $error",
+    "empty_title": "Nenhum exercício encontrado para \"$query\"",
+    "empty_subtitle": "Tente: Peito, Costas, Pernas, Bíceps...",
+    "added_feedback": "$name adicionado ao treino!"
+  },
+  "workout_create": {
+    "title": "Novo Plano",
+    "subtitle": "Dê um nome para sua nova rotina de treinos.",
+    "field_label": "Nome do Treino",
+    "field_hint": "Ex: Treino A",
+    "validator_error": "Por favor, dê um nome ao treino.",
+    "button_create": "Criar Treino",
+    "suggestions_label": "Sugestões rápidas:",
+    "success_feedback": "Treino \"$name\" criado!",
+    "error_feedback": "Erro ao criar: $error",
+    "suggestions": {
+      "full_body": "Full Body",
+      "upper_body": "Upper Body",
+      "lower_body": "Lower Body",
+      "push_day": "Push Day",
+      "pull_day": "Pull Day",
+      "leg_day": "Leg Day",
+      "cardio_abs": "Cardio & Abs",
+      "yoga_flow": "Yoga Flow"
+    }
+  },
+  "workout_editor": {
+    "title": "Editar Treino",
+    "add_button": "Adicionar",
+    "error": "Erro: $error",
+    "not_found": "Plano não encontrado.",
+    "empty_text": "Este treino está vazio.",
+    "add_exercise_button": "Adicionar Exercício",
+    "removed_snackbar": "$name removido",
+    "remove_dialog": {
+      "title": "Remover exercício?",
+      "content": "Deseja remover $name?",
+      "confirm": "Remover"
+    }
+  },
+  "workout": {
+    "title": "Treino",
+    "create_tooltip": "Criar novo plano",
+    "empty_state": {
+      "title": "Nenhum plano de treino encontrado.",
+      "button": "Criar meu primeiro treino"
+    },
+    "summary": {
+      "today": "Hoje"
+    },
+    "options": {
+      "rename": "Renomear Plano",
+      "delete": "Excluir Plano"
+    },
+    "dialogs": {
+      "rename_label": "Nome do treino",
+      "delete_title": "Excluir Plano?",
+      "delete_content": "Tem certeza que deseja excluir \"$name\"? Esta ação não pode ser desfeita.",
+      "delete_confirm": "Excluir"
+    },
+    "plan_empty": "Este plano está vazio.",
+    "add_exercise_short": "Exercício",
+    "calendar": {
+      "months": ["", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"],
+      "weekdays": ["D", "S", "T", "Q", "Q", "S", "S"]
+    }
+  },
+  "mock": {
+    "explore": {
+      "nutrition": "Nutrição",
+      "training": "Treino",
+      "sleep": "Sono",
+      "mindfulness": "Mindfulness",
+      "tags": {
+        "macros": "macros",
+        "hydration": "hidratação",
+        "recipes": "receitas",
+        "hypertrophy": "hipertrofia",
+        "strength": "força",
+        "mobility": "mobilidade",
+        "hygiene": "higiene",
+        "cycle": "ciclo",
+        "breathing": "respiração",
+        "focus": "foco"
+      }
+    },
+    "stats": {
+      "calories": "Calorias",
+      "protein": "Proteína",
+      "carbs": "Carbo",
+      "fat": "Gordura",
+      "water": "Água",
+      "steps": "Passos",
+      "sleep": "Sono"
+    }
+  }
+}

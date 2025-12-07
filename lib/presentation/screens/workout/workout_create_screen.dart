@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:strive/presentation/state/workout_providers.dart';
+import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
 
 class WorkoutCreateScreen extends ConsumerStatefulWidget {
   const WorkoutCreateScreen({super.key});
 
   @override
-  ConsumerState<WorkoutCreateScreen> createState() => _WorkoutCreateScreenState();
+  ConsumerState<WorkoutCreateScreen> createState() =>
+      _WorkoutCreateScreenState();
 }
 
 class _WorkoutCreateScreenState extends ConsumerState<WorkoutCreateScreen> {
@@ -15,17 +17,17 @@ class _WorkoutCreateScreenState extends ConsumerState<WorkoutCreateScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
-  // Sugestões rápidas para facilitar a vida do usuário
-  final List<String> _suggestions = [
-    'Full Body',
-    'Upper Body',
-    'Lower Body',
-    'Push Day',
-    'Pull Day',
-    'Leg Day',
-    'Cardio & Abs',
-    'Yoga Flow'
-  ];
+  // Transformado em getter para permitir tradução dinâmica
+  List<String> get _suggestions => [
+        t.workout_create.suggestions.full_body,
+        t.workout_create.suggestions.upper_body,
+        t.workout_create.suggestions.lower_body,
+        t.workout_create.suggestions.push_day,
+        t.workout_create.suggestions.pull_day,
+        t.workout_create.suggestions.leg_day,
+        t.workout_create.suggestions.cardio_abs,
+        t.workout_create.suggestions.yoga_flow
+      ];
 
   @override
   void dispose() {
@@ -39,13 +41,16 @@ class _WorkoutCreateScreenState extends ConsumerState<WorkoutCreateScreen> {
     setState(() => _isLoading = true);
     try {
       // Cria o plano no Firestore
-      await ref.read(workoutControllerProvider).createPlan(_nameCtrl.text.trim());
-      
+      await ref
+          .read(workoutControllerProvider)
+          .createPlan(_nameCtrl.text.trim());
+
       if (mounted) {
-        // Feedback tátil e visual
+        // Feedback tátil e visual com parâmetro
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Treino "${_nameCtrl.text}" criado!'),
+            content:
+                Text(t.workout_create.success_feedback(name: _nameCtrl.text)),
             backgroundColor: Colors.green,
           ),
         );
@@ -54,7 +59,11 @@ class _WorkoutCreateScreenState extends ConsumerState<WorkoutCreateScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao criar: $e'), backgroundColor: Colors.red),
+          // Erro com parâmetro
+          SnackBar(
+              content:
+                  Text(t.workout_create.error_feedback(error: e.toString())),
+              backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -66,14 +75,16 @@ class _WorkoutCreateScreenState extends ConsumerState<WorkoutCreateScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    // Captura a lista traduzida
+    final currentSuggestions = _suggestions;
 
     return Scaffold(
-      backgroundColor: colors.background,
+      backgroundColor: colors.surface, // Atualizado para surface
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.close, color: colors.onBackground),
+          icon: Icon(Icons.close, color: colors.onSurface),
           onPressed: () => context.pop(),
         ),
       ),
@@ -102,22 +113,22 @@ class _WorkoutCreateScreenState extends ConsumerState<WorkoutCreateScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                
+
                 Text(
-                  "Novo Plano",
+                  t.workout_create.title, // "Novo Plano"
                   style: theme.textTheme.displaySmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: colors.onBackground,
+                    color: colors.onSurface,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Dê um nome para sua nova rotina de treinos.",
+                  t.workout_create.subtitle, // "Dê um nome..."
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: colors.onSurfaceVariant,
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
 
                 // --- Campo de Texto ---
@@ -126,9 +137,10 @@ class _WorkoutCreateScreenState extends ConsumerState<WorkoutCreateScreen> {
                   autofocus: true,
                   style: TextStyle(fontSize: 18, color: colors.onSurface),
                   decoration: InputDecoration(
-                    labelText: 'Nome do Treino',
-                    hintText: 'Ex: Treino A',
-                    prefixIcon: Icon(Icons.edit_outlined, color: colors.primary),
+                    labelText: t.workout_create.field_label, // "Nome do Treino"
+                    hintText: t.workout_create.field_hint, // "Ex: Treino A"
+                    prefixIcon:
+                        Icon(Icons.edit_outlined, color: colors.primary),
                     filled: true,
                     fillColor: colors.surfaceVariant.withOpacity(0.3),
                     border: OutlineInputBorder(
@@ -142,7 +154,7 @@ class _WorkoutCreateScreenState extends ConsumerState<WorkoutCreateScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Por favor, dê um nome ao treino.';
+                      return t.workout_create.validator_error; // "Por favor..."
                     }
                     return null;
                   },
@@ -152,7 +164,7 @@ class _WorkoutCreateScreenState extends ConsumerState<WorkoutCreateScreen> {
 
                 const SizedBox(height: 24),
 
-                // --- Botão de Criar (Logo abaixo do input) ---
+                // --- Botão de Criar ---
                 SizedBox(
                   width: double.infinity,
                   height: 56,
@@ -175,9 +187,10 @@ class _WorkoutCreateScreenState extends ConsumerState<WorkoutCreateScreen> {
                               strokeWidth: 2.5,
                             ),
                           )
-                        : const Text(
-                            "Criar Treino",
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        : Text(
+                            t.workout_create.button_create, // "Criar Treino"
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                   ),
                 ),
@@ -186,7 +199,7 @@ class _WorkoutCreateScreenState extends ConsumerState<WorkoutCreateScreen> {
 
                 // --- Sugestões Rápidas (Chips) ---
                 Text(
-                  "Sugestões rápidas:",
+                  t.workout_create.suggestions_label, // "Sugestões rápidas:"
                   style: theme.textTheme.labelLarge?.copyWith(
                     color: colors.onSurfaceVariant,
                     fontWeight: FontWeight.bold,
@@ -196,14 +209,13 @@ class _WorkoutCreateScreenState extends ConsumerState<WorkoutCreateScreen> {
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: _suggestions.map((suggestion) {
+                  children: currentSuggestions.map((suggestion) {
                     return ActionChip(
                       label: Text(suggestion),
                       backgroundColor: colors.surface,
                       side: BorderSide(color: colors.outline.withOpacity(0.2)),
                       onPressed: () {
                         _nameCtrl.text = suggestion;
-                        // Move o cursor para o final
                         _nameCtrl.selection = TextSelection.fromPosition(
                           TextPosition(offset: _nameCtrl.text.length),
                         );
@@ -211,8 +223,7 @@ class _WorkoutCreateScreenState extends ConsumerState<WorkoutCreateScreen> {
                     );
                   }).toList(),
                 ),
-                
-                // Espaçamento extra para não ficar colado na bottom nav
+
                 const SizedBox(height: 100),
               ],
             ),

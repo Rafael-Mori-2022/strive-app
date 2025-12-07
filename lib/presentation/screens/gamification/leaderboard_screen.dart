@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:strive/domain/entities/leaderboard_entry.dart';
 import 'package:strive/presentation/state/leaderboard_provider.dart';
+import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
 
 class LeaderboardScreen extends ConsumerStatefulWidget {
   const LeaderboardScreen({super.key});
@@ -14,31 +15,64 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   late PageController _pageController;
   final int _currentLeagueIndex = 4;
 
-  final List<Map<String, dynamic>> _leagues = [
-    {'name': 'MADEIRA', 'color': Color(0xFF8D6E63), 'icon': Icons.nature},
-    {'name': 'FERRO', 'color': Color(0xFF78909C), 'icon': Icons.gavel},
-    {
-      'name': 'BRONZE',
-      'color': Color.fromARGB(255, 193, 83, 49),
-      'icon': Icons.shield_outlined
-    },
-    {'name': 'PRATA', 'color': Color(0xFF90A4AE), 'icon': Icons.shield},
-    {'name': 'OURO', 'color': Color(0xFFFFC107), 'icon': Icons.shield},
-    {
-      'name': 'PLATINA',
-      'color': Color(0xFF00BCD4),
-      'icon': Icons.diamond_outlined
-    },
-    {'name': 'DIAMANTE', 'color': Color(0xFF2979FF), 'icon': Icons.diamond},
-    {'name': 'OBSIDIANA', 'color': Color(0xFF311B92), 'icon': Icons.hexagon},
-    {'name': 'MESTRE', 'color': Color(0xFFD500F9), 'icon': Icons.auto_awesome},
-    {'name': 'ESTELAR', 'color': Color(0xFF00E676), 'icon': Icons.stars},
-    {
-      'name': 'LENDA',
-      'color': Color(0xFFFF3D00),
-      'icon': Icons.local_fire_department
-    },
-  ];
+  // Transformado em getter para permitir tradução dinâmica
+  List<Map<String, dynamic>> get _leagues => [
+        {
+          'name': t.leaderboard.leagues.wood,
+          'color': const Color(0xFF8D6E63),
+          'icon': Icons.nature
+        },
+        {
+          'name': t.leaderboard.leagues.iron,
+          'color': const Color(0xFF78909C),
+          'icon': Icons.gavel
+        },
+        {
+          'name': t.leaderboard.leagues.bronze,
+          'color': const Color.fromARGB(255, 193, 83, 49),
+          'icon': Icons.shield_outlined
+        },
+        {
+          'name': t.leaderboard.leagues.silver,
+          'color': const Color(0xFF90A4AE),
+          'icon': Icons.shield
+        },
+        {
+          'name': t.leaderboard.leagues.gold,
+          'color': const Color(0xFFFFC107),
+          'icon': Icons.shield
+        },
+        {
+          'name': t.leaderboard.leagues.platinum,
+          'color': const Color(0xFF00BCD4),
+          'icon': Icons.diamond_outlined
+        },
+        {
+          'name': t.leaderboard.leagues.diamond,
+          'color': const Color(0xFF2979FF),
+          'icon': Icons.diamond
+        },
+        {
+          'name': t.leaderboard.leagues.obsidian,
+          'color': const Color(0xFF311B92),
+          'icon': Icons.hexagon
+        },
+        {
+          'name': t.leaderboard.leagues.master,
+          'color': const Color(0xFFD500F9),
+          'icon': Icons.auto_awesome
+        },
+        {
+          'name': t.leaderboard.leagues.stellar,
+          'color': const Color(0xFF00E676),
+          'icon': Icons.stars
+        },
+        {
+          'name': t.leaderboard.leagues.legend,
+          'color': const Color(0xFFFF3D00),
+          'icon': Icons.local_fire_department
+        },
+      ];
 
   @override
   void initState() {
@@ -58,8 +92,11 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   @override
   Widget build(BuildContext context) {
     final board = ref.watch(leaderboardProvider);
+    // Acesso ao getter aqui para ter a lista traduzida
+    final leaguesList = _leagues;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Leaderboard')),
+      appBar: AppBar(title: Text(t.leaderboard.title)),
       body: board.when(
         data: (originalList) {
           final sortedList = List<LeaderboardEntry>.from(originalList)
@@ -71,7 +108,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                 height: 150,
                 child: PageView.builder(
                   controller: _pageController,
-                  itemCount: _leagues.length,
+                  itemCount: leaguesList.length,
                   itemBuilder: (context, index) {
                     final isLocked = index > _currentLeagueIndex;
                     return AnimatedBuilder(
@@ -94,7 +131,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                           ),
                         );
                       },
-                      child: _buildLeagueItem(_leagues[index], isLocked),
+                      child: _buildLeagueItem(leaguesList[index], isLocked),
                     );
                   },
                 ),
@@ -114,7 +151,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                     return Column(
                       children: [
                         if (showDemotionLineAbove)
-                          _buildZoneDivider("ZONA DE REBAIXAMENTO",
+                          _buildZoneDivider(t.leaderboard.zones.demotion,
                               Colors.redAccent, Icons.arrow_downward),
                         ListTile(
                           contentPadding: const EdgeInsets.symmetric(
@@ -140,10 +177,12 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Text(
-                            'Nível ${e.level}',
+                            // "Nível X"
+                            t.leaderboard.entry.level(level: e.level),
                           ),
                           trailing: Text(
-                            '${e.xp} XP',
+                            // "X XP"
+                            t.leaderboard.entry.xp(value: e.xp),
                             style: const TextStyle(
                               fontSize: 16.0,
                               fontWeight: FontWeight.w700,
@@ -151,7 +190,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                           ),
                         ),
                         if (showPromoLineBelow)
-                          _buildZoneDivider("ZONA DE PROMOÇÃO",
+                          _buildZoneDivider(t.leaderboard.zones.promotion,
                               const Color(0xFF43A047), Icons.arrow_upward),
                       ],
                     );
@@ -162,8 +201,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) =>
-            const Center(child: Text('Erro ao carregar leaderboard')),
+        error: (e, st) => Center(child: Text(t.leaderboard.error)),
       ),
     );
   }

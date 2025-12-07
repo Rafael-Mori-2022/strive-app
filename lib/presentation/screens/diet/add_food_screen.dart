@@ -5,6 +5,7 @@ import 'package:strive/domain/entities/food_item.dart';
 import 'package:strive/domain/enums/xp_action.dart';
 import 'package:strive/presentation/state/diet_providers.dart';
 import 'package:strive/presentation/state/gamification_provider.dart';
+import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
 
 class AddFoodScreen extends ConsumerStatefulWidget {
   const AddFoodScreen({super.key});
@@ -15,33 +16,34 @@ class AddFoodScreen extends ConsumerStatefulWidget {
 
 class _AddFoodScreenState extends ConsumerState<AddFoodScreen> {
   String _query = '';
-  
+
   // Recupera o mealId da rota (query param)
-  // Ex: /diet/add-food?mealId=m1
-  String? get _mealId => GoRouterState.of(context).uri.queryParameters['mealId'];
+  String? get _mealId =>
+      GoRouterState.of(context).uri.queryParameters['mealId'];
 
   @override
   Widget build(BuildContext context) {
     final searchResults = ref.watch(searchFoodsProvider(_query));
-    // Se não veio mealId, usa um fallback ou trata erro. 'm1' é Café da Manhã no mock/repo.
-    final targetMealId = _mealId ?? 'm1'; 
+    final targetMealId = _mealId ?? 'm1';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Adicionar Alimento')),
+      // Título da tela
+      appBar: AppBar(title: Text(t.add_food.title)),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            // Simplificado para TextField padrão para garantir compatibilidade
-            child: TextField( 
-              autofocus: true, // Abre o teclado automaticamente
-              decoration: const InputDecoration(
-                hintText: 'Busque ex: "Maçã", "Whey"...',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(
+            child: TextField(
+              autofocus: true,
+              decoration: InputDecoration(
+                // Hint de busca
+                hintText: t.add_food.search_hint,
+                prefixIcon: const Icon(Icons.search),
+                border: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(12)),
                 ),
-                contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
               ),
               onChanged: (v) => setState(() => _query = v),
             ),
@@ -51,7 +53,8 @@ class _AddFoodScreenState extends ConsumerState<AddFoodScreen> {
                 ? _buildEmptyState(context)
                 : searchResults.when(
                     data: (list) => list.isEmpty
-                        ? const Center(child: Text("Nenhum alimento encontrado"))
+                        // Estado vazio da busca
+                        ? Center(child: Text(t.add_food.not_found))
                         : ListView.separated(
                             padding: const EdgeInsets.all(16),
                             itemCount: list.length,
@@ -62,20 +65,16 @@ class _AddFoodScreenState extends ConsumerState<AddFoodScreen> {
                               return _FoodItemCard(
                                 item: item,
                                 onAdd: () async {
-                                  // 1. Adiciona na dieta
                                   await ref
                                       .read(mealsProvider.notifier)
                                       .addFood(targetMealId, item);
-                                  
-                                  // 2. DA O XP (Gamificação!)
+
                                   if (context.mounted) {
                                     ref
                                         .read(gamificationControllerProvider)
                                         .earnXp(context, XpAction.addMeal);
-                                    
-                                    // 3. VOLTA PARA A DIETA (CORREÇÃO CRÍTICA)
-                                    // O pop fecha a tela de Add e volta para DietScreen
-                                    context.pop(); 
+
+                                    context.pop();
                                   }
                                 },
                               );
@@ -83,8 +82,8 @@ class _AddFoodScreenState extends ConsumerState<AddFoodScreen> {
                           ),
                     loading: () =>
                         const Center(child: CircularProgressIndicator()),
-                    error: (e, st) =>
-                        const Center(child: Text('Erro na conexão com a API')),
+                    // Erro de API
+                    error: (e, st) => Center(child: Text(t.add_food.error_api)),
                   ),
           ),
         ],
@@ -99,10 +98,14 @@ class _AddFoodScreenState extends ConsumerState<AddFoodScreen> {
         children: [
           Icon(Icons.search,
               size: 64,
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.3)),
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurfaceVariant
+                  .withOpacity(0.3)),
           const SizedBox(height: 16),
+          // Instrução inicial
           Text(
-            "Digite para buscar na base de dados global",
+            t.add_food.instruction,
             style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
@@ -135,8 +138,9 @@ class _FoodItemCard extends StatelessWidget {
                   ? Image.network(
                       item.imageUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                          Container(color: colors.surfaceVariant, child: const Icon(Icons.broken_image)),
+                      errorBuilder: (_, __, ___) => Container(
+                          color: colors.surfaceVariant,
+                          child: const Icon(Icons.broken_image)),
                     )
                   : Container(
                       color: colors.surfaceVariant,
@@ -157,12 +161,15 @@ class _FoodItemCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     '${item.calories.toStringAsFixed(0)} kcal',
-                    style: TextStyle(color: colors.primary, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: colors.primary, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
+                  // Macros traduzidos (P/C/G)
                   Text(
-                    'P: ${item.protein.toStringAsFixed(1)} C: ${item.carbs.toStringAsFixed(1)} G: ${item.fat.toStringAsFixed(1)}',
-                    style: TextStyle(color: colors.onSurfaceVariant, fontSize: 12),
+                    '${t.add_food.macro_p}: ${item.protein.toStringAsFixed(1)} ${t.add_food.macro_c}: ${item.carbs.toStringAsFixed(1)} ${t.add_food.macro_f}: ${item.fat.toStringAsFixed(1)}',
+                    style:
+                        TextStyle(color: colors.onSurfaceVariant, fontSize: 12),
                   ),
                 ],
               ),

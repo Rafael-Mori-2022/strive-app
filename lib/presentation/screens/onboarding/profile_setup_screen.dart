@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:strive/presentation/state/profile_providers.dart';
+import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
 
 class ProfileSetupScreen extends ConsumerStatefulWidget {
   const ProfileSetupScreen({super.key});
@@ -28,14 +29,20 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   String? _selectedGoal;
   String? _selectedGender;
 
-  final List<String> _goals = [
-    'Perder Peso',
-    'Ganhar Massa Muscular',
-    'Melhorar Resistência',
-    'Manter Saúde'
-  ];
+  // Transformado em getter para tradução dinâmica
+  List<String> get _goals => [
+        t.profile_setup.goals.lose_weight,
+        t.profile_setup.goals.gain_muscle,
+        t.profile_setup.goals.endurance,
+        t.profile_setup.goals.health
+      ];
 
-  final List<String> _genders = ['Masculino', 'Feminino', 'Outro'];
+  // Transformado em getter para tradução dinâmica
+  List<String> get _genders => [
+        t.profile_setup.genders.male,
+        t.profile_setup.genders.female,
+        t.profile_setup.genders.other
+      ];
 
   @override
   void initState() {
@@ -45,7 +52,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     });
   }
 
-  // <<< CORREÇÃO PRINCIPAL AQUI >>>
   void _checkExistingProfile() {
     final profileState = ref.read(userProfileProvider);
 
@@ -57,20 +63,21 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         // 1. Textos Simples
         _nameCtrl.text = user.name;
         _heightCtrl.text = user.heightCm.toStringAsFixed(0);
-        _weightCtrl.text = user.weightKg.toStringAsFixed(1).replaceAll('.', ',');
+        _weightCtrl.text =
+            user.weightKg.toStringAsFixed(1).replaceAll('.', ',');
 
         // 2. Dropdown de Objetivo
+        // Nota: Isso pode falhar se o idioma mudar e o valor salvo for diferente da lista atual
         if (_goals.contains(user.goal)) {
           _selectedGoal = user.goal;
         }
 
-        // 3. Dropdown de Gênero (CORRIGIDO)
+        // 3. Dropdown de Gênero
         if (user.gender != null && _genders.contains(user.gender)) {
           _selectedGender = user.gender;
         }
 
-        // 4. Data de Nascimento (CORRIGIDO)
-        // Agora usamos o campo birthDate que adicionamos na Entidade
+        // 4. Data de Nascimento
         if (user.birthDate != null) {
           _selectedDateOfBirth = user.birthDate;
           _dobCtrl.text = "${user.birthDate!.day.toString().padLeft(2, '0')}/"
@@ -107,7 +114,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           DateTime.now().subtract(const Duration(days: 365 * 18)),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
-      locale: const Locale('pt', 'BR'),
+      locale: const Locale('pt', 'BR'), // Idealmente, isso viria do t.locale
     );
 
     if (picked != null && picked != _selectedDateOfBirth) {
@@ -126,7 +133,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         _selectedGender == null ||
         (_selectedDateOfBirth == null && _dobCtrl.text.isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, preencha todos os campos.')),
+        SnackBar(content: Text(t.profile_setup.feedback.fill_all)),
       );
       return;
     }
@@ -156,14 +163,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
-      // Se for edição, não mexemos no XP. Se for novo, definimos como 0.
       if (!_isEditing) {
         newProfile['createdAt'] = FieldValue.serverTimestamp();
-        newProfile['xp'] = 0; 
-      } else {
-        // Em edição, NÃO enviamos o campo 'xp' para o set com merge,
-        // para garantir que não sobrescreva o valor atual do banco com 0 ou null.
-        // O merge: true cuida de manter o que já existe se não mandarmos a chave.
+        newProfile['xp'] = 0;
       }
 
       await FirebaseFirestore.instance
@@ -175,14 +177,14 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Perfil salvo com sucesso!')),
+          SnackBar(content: Text(t.profile_setup.feedback.success)),
         );
         context.pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao salvar: $e')),
+          SnackBar(content: Text(t.profile_setup.feedback.error(error: e))),
         );
       }
     } finally {
@@ -196,9 +198,12 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface, // Atualizado para surface
       appBar: AppBar(
-        title: Text(_isEditing ? "Editar Perfil" : "Criar Perfil"),
+        // Título dinâmico
+        title: Text(_isEditing
+            ? t.profile_setup.title_edit
+            : t.profile_setup.title_create),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -214,7 +219,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                 if (!_isEditing) ...[
                   const SizedBox(height: 20),
                   Text(
-                    "Bem-vindo(a)!",
+                    t.profile_setup.welcome,
                     style: theme.textTheme.displaySmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: colorScheme.primary,
@@ -222,7 +227,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "Vamos configurar seu perfil para personalizar sua jornada.",
+                    t.profile_setup.subtitle,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
@@ -231,34 +236,35 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                 ] else ...[
                   const SizedBox(height: 10),
                 ],
-
-                _buildSectionTitle(context, "Sobre você"),
+                _buildSectionTitle(context, t.profile_setup.sections.about),
                 _buildTextField(
                   controller: _nameCtrl,
-                  label: "Nome Completo",
+                  label: t.profile_setup.fields.name,
                   icon: Icons.person_outline,
-                  validator: (v) => v!.isEmpty ? 'Informe seu nome' : null,
+                  validator: (v) =>
+                      v!.isEmpty ? t.profile_setup.fields.name_error : null,
                 ),
                 const SizedBox(height: 16),
-
                 Row(
                   children: [
                     Expanded(
                       child: _buildTextField(
                         controller: _dobCtrl,
-                        label: "Nascimento",
+                        label: t.profile_setup.fields.dob,
                         icon: Icons.calendar_today_outlined,
                         readOnly: true,
                         onTap: () => _selectDate(context),
-                        validator: (v) => v!.isEmpty ? 'Obrigatório' : null,
+                        validator: (v) => v!.isEmpty
+                            ? t.profile_setup.fields.required_error
+                            : null,
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: _buildDropdown(
-                        label: "Gênero",
+                        label: t.profile_setup.fields.gender,
                         value: _selectedGender,
-                        items: _genders,
+                        items: _genders, // Usa o getter traduzido
                         icon: Icons.people_outline,
                         onChanged: (v) => setState(() => _selectedGender = v),
                       ),
@@ -266,28 +272,29 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                   ],
                 ),
                 const SizedBox(height: 24),
-
-                _buildSectionTitle(context, "Medidas"),
+                _buildSectionTitle(context, t.profile_setup.sections.measures),
                 Row(
                   children: [
                     Expanded(
                       child: _buildTextField(
                         controller: _heightCtrl,
-                        label: "Altura (cm)",
+                        label: t.profile_setup.fields.height,
                         icon: Icons.height,
                         keyboardType: TextInputType.number,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(3),
                         ],
-                        validator: (v) => v!.isEmpty ? 'Obrigatório' : null,
+                        validator: (v) => v!.isEmpty
+                            ? t.profile_setup.fields.required_error
+                            : null,
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: _buildTextField(
                         controller: _weightCtrl,
-                        label: "Peso (kg)",
+                        label: t.profile_setup.fields.weight,
                         icon: Icons.monitor_weight_outlined,
                         keyboardType: const TextInputType.numberWithOptions(
                             decimal: true),
@@ -295,24 +302,23 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                           FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                           LengthLimitingTextInputFormatter(5),
                         ],
-                        validator: (v) => v!.isEmpty ? 'Obrigatório' : null,
+                        validator: (v) => v!.isEmpty
+                            ? t.profile_setup.fields.required_error
+                            : null,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 24),
-
-                _buildSectionTitle(context, "Objetivo Principal"),
+                _buildSectionTitle(context, t.profile_setup.sections.goal),
                 _buildDropdown(
-                  label: "Selecione seu objetivo",
+                  label: t.profile_setup.fields.goal_select,
                   value: _selectedGoal,
-                  items: _goals,
+                  items: _goals, // Usa o getter traduzido
                   icon: Icons.flag_outlined,
                   onChanged: (v) => setState(() => _selectedGoal = v),
                 ),
-
                 const SizedBox(height: 40),
-
                 SizedBox(
                   width: double.infinity,
                   height: 56,
@@ -330,8 +336,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                         ? const CircularProgressIndicator(color: Colors.white)
                         : Text(
                             _isEditing
-                                ? "Salvar Alterações"
-                                : "Finalizar Cadastro",
+                                ? t.profile_setup.actions.save
+                                : t.profile_setup.actions.finish,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -347,6 +353,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     );
   }
 
+  // ... (Resto dos widgets privados mantidos iguais, pois só usam argumentos)
   Widget _buildSectionTitle(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
