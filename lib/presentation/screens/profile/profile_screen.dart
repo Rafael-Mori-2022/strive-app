@@ -5,7 +5,8 @@ import 'package:strive/presentation/state/profile_providers.dart';
 import 'package:strive/presentation/widgets/common_widgets.dart';
 import 'package:strive/providers/auth_providers.dart';
 import 'package:strive/providers/theme_provider.dart';
-import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
+import 'package:strive/providers/locale_provider.dart';
+import 'package:strive/i18n/strings.g.dart'; 
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -17,10 +18,11 @@ class ProfileScreen extends ConsumerWidget {
     {'locale': AppLocale.fr, 'label': 'Français', 'flag': '🇫🇷'},
     {'locale': AppLocale.it, 'label': 'Italiano', 'flag': '🇮🇹'},
     {'locale': AppLocale.es, 'label': 'Español', 'flag': '🇪🇸'},
+    {'locale': AppLocale.zh, 'label': '中文', 'flag': '🇨🇳'},
   ];
 
-  void _showLanguageSelector(BuildContext context) {
-    final currentLocale = LocaleSettings.currentLocale;
+  void _showLanguageSelector(BuildContext context, WidgetRef ref) {
+    final currentLocale = ref.read(localeProvider);
 
     showModalBottomSheet(
       context: context,
@@ -57,7 +59,7 @@ class ProfileScreen extends ConsumerWidget {
                       : null,
                   onTap: () {
                     // Troca o idioma globalmente
-                    LocaleSettings.setLocale(thisLocale);
+                    ref.read(localeProvider.notifier).setLocale(thisLocale);
                     Navigator.pop(ctx); // Fecha o modal
                   },
                 );
@@ -121,19 +123,20 @@ class ProfileScreen extends ConsumerWidget {
               ),
               child: Column(
                 children: [
-                  // Switch de Tema
                   SwitchListTile(
                     title: Text(t.profile.dark_mode),
                     secondary: Icon(
                       isDarkMode ? Icons.dark_mode : Icons.light_mode,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: isDarkMode 
+                          ? Theme.of(context).colorScheme.primary 
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     value: isDarkMode,
                     onChanged: (val) {
                       ref.read(themeProvider.notifier).toggleTheme(val);
                     },
+                    activeColor: Theme.of(context).colorScheme.primary,
                   ),
-
                   Divider(
                       height: 1,
                       indent: 16,
@@ -162,7 +165,7 @@ class ProfileScreen extends ConsumerWidget {
                         style: const TextStyle(fontSize: 18),
                       ),
                     ),
-                    onTap: () => _showLanguageSelector(context),
+                    onTap: () => _showLanguageSelector(context, ref),
                   ),
                 ],
               ),

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Para input formatter
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:strive/domain/entities/meal.dart';
 import 'package:strive/presentation/state/diet_providers.dart';
 import 'package:strive/presentation/state/gamification_provider.dart';
 import 'package:strive/domain/enums/xp_action.dart';
-import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
+import 'package:strive/i18n/strings.g.dart';
 
 class DietScreen extends ConsumerWidget {
   const DietScreen({super.key});
@@ -121,8 +121,7 @@ class _WaterCard extends ConsumerWidget {
             onPressed: () {
               final val = double.tryParse(controller.text.replaceAll(',', '.'));
               if (val != null && val > 0) {
-                ref.read(waterGoalProvider.notifier).state =
-                    (val * 1000).toInt();
+                ref.read(waterGoalProvider.notifier).setGoal((val * 1000).toInt());
               }
               Navigator.pop(ctx);
             },
@@ -178,9 +177,12 @@ class _WaterCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentWater = ref.watch(waterIntakeProvider);
-    final goalWater = ref.watch(waterGoalProvider);
+    final currentWaterAsync = ref.watch(waterIntakeProvider);
+    final goalWaterAsync = ref.watch(waterGoalProvider);
     final stepperValue = ref.watch(waterStepperProvider); // Lê do provider
+
+    final currentWater = currentWaterAsync.value ?? 0;
+    final goalWater = goalWaterAsync.value ?? 3000;
 
     final textTheme = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
@@ -256,7 +258,7 @@ class _WaterCard extends ConsumerWidget {
                         onPressed: () {
                           final newVal =
                               (currentWater - stepperValue).clamp(0, 10000);
-                          ref.read(waterIntakeProvider.notifier).state = newVal;
+                          ref.read(waterIntakeProvider.notifier).updateVolume(newVal);
                         },
                       ),
                       // Valor do stepper agora é clicável para editar
@@ -279,7 +281,7 @@ class _WaterCard extends ConsumerWidget {
                         onPressed: () {
                           final newVal =
                               (currentWater + stepperValue).clamp(0, 10000);
-                          ref.read(waterIntakeProvider.notifier).state = newVal;
+                          ref.read(waterIntakeProvider.notifier).updateVolume(newVal);
                           if (context.mounted) {
                             ref
                                 .read(gamificationControllerProvider)

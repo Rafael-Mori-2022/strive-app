@@ -1,44 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:strive/providers/locale_provider.dart'; // Importa o sharedPreferencesProvider
 
-// Chave para salvar no disco
-const _themePrefsKey = 'selected_theme_mode';
+class ThemeNotifier extends Notifier<ThemeMode> {
+  static const String _kThemeKey = 'app_theme';
 
-final themeProvider = StateNotifierProvider<ThemeNotifier, ThemeMode>((ref) {
-  return ThemeNotifier();
-});
+  @override
+  ThemeMode build() {
+    final prefs = ref.watch(sharedPreferencesProvider);
+    final savedTheme = prefs.getString(_kThemeKey);
 
-class ThemeNotifier extends StateNotifier<ThemeMode> {
-  ThemeNotifier() : super(ThemeMode.dark) {
-    _loadTheme();
+    if (savedTheme == 'light') return ThemeMode.light;
+    if (savedTheme == 'dark') return ThemeMode.dark;
+    
+    return ThemeMode.system; // Padrão
   }
 
-  Future<void> _loadTheme() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedTheme = prefs.getString(_themePrefsKey);
-
-    if (savedTheme == 'light') {
-      state = ThemeMode.light;
-    } else if (savedTheme == 'dark') {
-      state = ThemeMode.dark;
-    } else {
-      state = ThemeMode.dark;
-    }
-  }
-
-  Future<void> setTheme(ThemeMode mode) async {
-    state = mode;
-    final prefs = await SharedPreferences.getInstance();
-    String modeString = 'system';
-    if (mode == ThemeMode.light) modeString = 'light';
-    if (mode == ThemeMode.dark) modeString = 'dark';
-
-    await prefs.setString(_themePrefsKey, modeString);
-  }
-
-  // Helper para alternar entre claro/escuro (ignora system para simplificar o toggle)
-  void toggleTheme(bool isDark) {
-    setTheme(isDark ? ThemeMode.dark : ThemeMode.light);
+  void toggleTheme(bool isDark) async {
+    state = isDark ? ThemeMode.dark : ThemeMode.light;
+    
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setString(_kThemeKey, isDark ? 'dark' : 'light');
   }
 }
+
+final themeProvider = NotifierProvider<ThemeNotifier, ThemeMode>(() {
+  return ThemeNotifier();
+});

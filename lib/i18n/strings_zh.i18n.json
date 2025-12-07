@@ -1,0 +1,284 @@
+{
+  "common": {
+    "error": "加载错误",
+    "error_profile": "加载个人资料错误",
+    "error_stats": "加载统计数据错误",
+    "back": "返回",
+    "cancel": "取消",
+    "save": "保存",
+    "not_authenticated": "用户未验证。",
+    "xp_abbr": "XP",
+    "league": "联赛",
+    "rank_pattern": "排名 #$rank"
+  },
+  "login": {
+    "tagline": "您的努力，您的数据，\n您的成果。",
+    "google_button": "使用 Google 登录",
+    "terms_disclaimer": "继续即表示您同意我们的条款。"
+  },
+  "dashboard": {
+    "level_abbr": "等级",
+    "greeting": "你好，",
+    "greeting_generic": "你好！",
+    "subtitle": "让我们一起实现您的健康目标！",
+    "classification": {
+      "title": "⭐ 排名",
+      "remaining_prefix": "剩余 ",
+      "remaining_suffix": " 天",
+      "rank_suffix": "名"
+    },
+    "stats": {
+      "title": "统计",
+      "empty": "编辑以添加统计数据。"
+    }
+  },
+  "success": {
+    "title": "成功",
+    "default_message": "一切就绪！您的数据已注册！"
+  },
+  "under_construction": {
+    "title": "404",
+    "message": "此页面仍在建设中！",
+    "subtitle": "是有氧运动做迷路了吗？"
+  },
+  "edit_stats": {
+    "title": "编辑精选",
+    "instruction": "最多选择 4 个统计数据进行展示"
+  },
+  "add_food": {
+    "title": "添加食物",
+    "search_hint": "搜索例如：“苹果”，“蛋白粉”...",
+    "not_found": "未找到食物",
+    "error_api": "API 连接错误",
+    "instruction": "输入以在全​​球数据库中搜索",
+    "macro_p": "蛋",
+    "macro_c": "碳",
+    "macro_f": "脂"
+  },
+  "diet": {
+    "title": "饮食",
+    "water": {
+      "edit_goal_title": "设定饮水目标",
+      "liters_label": "升",
+      "edit_stepper_title": "每次点击量",
+      "ml_label": "毫升 (ml)",
+      "goal_display": "目标: $value L"
+    },
+    "macros": {
+      "carbs": "碳水化合物",
+      "protein": "蛋白质",
+      "fat": "脂肪"
+    },
+    "meal": {
+      "more_items": "+ $count 其他项目",
+      "total_calories": "总计: $calories 千卡",
+      "empty": "未记录食物",
+      "not_found": "未找到餐点"
+    },
+    "meal_types": {
+      "breakfast": "早餐",
+      "morning_snack": "早间加餐",
+      "lunch": "午餐",
+      "afternoon_snack": "下午加餐",
+      "dinner": "晚餐",
+      "supper": "夜宵",
+      "pre_workout": "训练前",
+      "post_workout": "训练后",
+      "snack": "零食"
+    }
+  },
+  "meal_detail": {
+    "title": "餐点详情",
+    "macro_summary": "$calories 千卡 • 蛋 ${protein}g • 碳 ${carbs}g • 脂 ${fat}g",
+    "item_details": "$calories 千卡 - 蛋 ${protein}g 碳 ${carbs}g 脂 ${fat}g"
+  },
+  "explore": {
+    "title": "探索",
+    "search_hint": "搜索功能",
+    "not_found": "未找到功能。",
+    "categories": {
+      "activity": "活动",
+      "nutrition": "营养",
+      "sleep": "睡眠",
+      "medication": "药物",
+      "body_measurements": "身体测量",
+      "mobility": "灵活性"
+    }
+  },
+  "leaderboard": {
+    "title": "排行榜",
+    "error": "加载排行榜错误",
+    "zones": {
+      "promotion": "晋级区",
+      "demotion": "降级区"
+    },
+    "entry": {
+      "level": "等级 $level",
+      "xp": "$value XP"
+    },
+    "leagues": {
+      "wood": "木头",
+      "iron": "铁",
+      "bronze": "青铜",
+      "silver": "白银",
+      "gold": "黄金",
+      "platinum": "白金",
+      "diamond": "钻石",
+      "obsidian": "黑曜石",
+      "master": "大师",
+      "stellar": "星耀",
+      "legend": "传奇"
+    }
+  },
+  "profile_setup": {
+    "title_edit": "编辑资料",
+    "title_create": "创建资料",
+    "welcome": "欢迎！",
+    "subtitle": "让我们设置您的个人资料以个性化您的旅程。",
+    "sections": {
+      "about": "关于您",
+      "measures": "测量",
+      "goal": "主要目标"
+    },
+    "fields": {
+      "name": "全名",
+      "name_error": "请输入您的名字",
+      "dob": "出生日期",
+      "gender": "性别",
+      "height": "身高 (cm)",
+      "weight": "体重 (kg)",
+      "goal_select": "选择您的目标",
+      "required_error": "必填"
+    },
+    "actions": {
+      "save": "保存更改",
+      "finish": "完成注册"
+    },
+    "feedback": {
+      "fill_all": "请填写所有字段。",
+      "success": "个人资料保存成功！",
+      "error": "保存错误: $error"
+    },
+    "goals": {
+      "lose_weight": "减肥",
+      "gain_muscle": "增肌",
+      "endurance": "提高耐力",
+      "health": "保持健康"
+    },
+    "genders": {
+      "male": "男",
+      "female": "女",
+      "other": "其他"
+    }
+  },
+  "profile": {
+    "title": "个人资料",
+    "stats_format": "$age 岁 • $height cm • $weight kg",
+    "dark_mode": "深色模式",
+    "edit_profile": "更新资料",
+    "view_leaderboard": "查看排行榜",
+    "logout": "退出 (Logout)",
+    "not_found": "未找到个人资料",
+    "create_profile": "创建资料",
+    "default_user": "运动员"
+  },
+  "add_exercise": {
+    "title": "添加运动",
+    "search_hint": "按肌肉群搜索 (如: 胸部, 背部)",
+    "error": "错误: $error",
+    "empty_title": "未找到关于 \"$query\" 的运动",
+    "empty_subtitle": "尝试: 胸部, 背部, 腿部, 二头肌...",
+    "added_feedback": "$name 已添加到训练中！"
+  },
+  "workout_create": {
+    "title": "新计划",
+    "subtitle": "为您的新训练计划命名。",
+    "field_label": "训练名称",
+    "field_hint": "例如: 训练 A",
+    "validator_error": "请给训练命名。",
+    "button_create": "创建计划",
+    "suggestions_label": "快速建议:",
+    "success_feedback": "训练 \"$name\" 已创建！",
+    "error_feedback": "创建错误: $error",
+    "suggestions": {
+      "full_body": "全身",
+      "upper_body": "上半身",
+      "lower_body": "下半身",
+      "push_day": "推力日 (Push)",
+      "pull_day": "拉力日 (Pull)",
+      "leg_day": "腿部日",
+      "cardio_abs": "有氧 & 腹肌",
+      "yoga_flow": "瑜伽流"
+    }
+  },
+  "workout_editor": {
+    "title": "编辑训练",
+    "add_button": "添加",
+    "error": "错误: $error",
+    "not_found": "未找到计划。",
+    "empty_text": "此训练为空。",
+    "add_exercise_button": "添加运动",
+    "removed_snackbar": "$name 已移除",
+    "remove_dialog": {
+      "title": "移除运动？",
+      "content": "您确定要移除 $name 吗？",
+      "confirm": "移除"
+    }
+  },
+  "workout": {
+    "title": "训练",
+    "create_tooltip": "创建新计划",
+    "empty_state": {
+      "title": "未找到训练计划。",
+      "button": "创建我的第一个训练"
+    },
+    "summary": {
+      "today": "今天"
+    },
+    "options": {
+      "rename": "重命名计划",
+      "delete": "删除计划"
+    },
+    "dialogs": {
+      "rename_label": "训练名称",
+      "delete_title": "删除计划？",
+      "delete_content": "您确定要删除 \"$name\" 吗？此操作无法撤销。",
+      "delete_confirm": "删除"
+    },
+    "plan_empty": "此计划为空。",
+    "add_exercise_short": "运动",
+    "calendar": {
+      "months": ["", "一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+      "weekdays": ["日", "一", "二", "三", "四", "五", "六"]
+    }
+  },
+  "mock": {
+    "explore": {
+      "nutrition": "营养",
+      "training": "训练",
+      "sleep": "睡眠",
+      "mindfulness": "正念",
+      "tags": {
+        "macros": "宏量营养素",
+        "hydration": "补水",
+        "recipes": "食谱",
+        "hypertrophy": "肥大",
+        "strength": "力量",
+        "mobility": "灵活性",
+        "hygiene": "卫生",
+        "cycle": "周期",
+        "breathing": "呼吸",
+        "focus": "专注"
+      }
+    },
+    "stats": {
+      "calories": "卡路里",
+      "protein": "蛋白质",
+      "carbs": "碳水",
+      "fat": "脂肪",
+      "water": "水",
+      "steps": "步数",
+      "sleep": "睡眠"
+    }
+  }
+}

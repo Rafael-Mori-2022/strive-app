@@ -2,45 +2,39 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:strive/domain/entities/food_item.dart';
 import 'package:strive/domain/entities/meal.dart';
 import 'package:strive/domain/repositories/nutrition_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get_it/get_it.dart';
-import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
+import 'package:strive/i18n/strings.g.dart';
 
-// 1. Provider para acessar o Repositório (Pega do GetIt)
+// --- REPOSITÓRIOS E BUSCA ---
+
 final nutritionRepositoryProvider = Provider<NutritionRepository>((ref) {
   return GetIt.instance<NutritionRepository>();
 });
 
-// 2. Provider de Busca (Conectado à API Real)
 final searchFoodsProvider =
     FutureProvider.family<List<FoodItem>, String>((ref, query) async {
   final repository = ref.watch(nutritionRepositoryProvider);
-  // Se a query for vazia, não busca nada (ou retorna lista vazia)
   if (query.isEmpty) return [];
   return repository.searchFoods(query);
 });
 
-// 3. Controller das Refeições (Gerencia o Estado da Dieta)
+// --- REFEIÇÕES (MEALS) ---
+
 class MealsNotifier extends AsyncNotifier<List<Meal>> {
-  // Carrega os dados iniciais
   @override
   Future<List<Meal>> build() async {
     final repository = ref.read(nutritionRepositoryProvider);
     return repository.getMealsOfDay();
   }
 
-  // Adiciona comida e atualiza a tela
   Future<void> addFood(String mealId, FoodItem item) async {
     final repository = ref.read(nutritionRepositoryProvider);
-
-    // 1. Salva no repositório
     await repository.addFoodToMeal(mealId, item);
-
-    // 2. Força o Riverpod a recarregar a lista de refeições (Refresh na UI)
     ref.invalidateSelf();
-    await future; // Aguarda o reload terminar
+    await future;
   }
 
-  // Remove comida e atualiza a tela
   Future<void> removeFood(String mealId, String foodId) async {
     final repository = ref.read(nutritionRepositoryProvider);
     await repository.removeFoodFromMeal(mealId, foodId);
@@ -48,26 +42,23 @@ class MealsNotifier extends AsyncNotifier<List<Meal>> {
   }
 }
 
-// O Provider que a tela DietScreen vai "assistir" (watch)
 final mealsProvider = AsyncNotifierProvider<MealsNotifier, List<Meal>>(() {
   return MealsNotifier();
 });
 
-// 4. Provider para Detalhes de uma Refeição Específica
 final mealDetailProvider =
     Provider.family<AsyncValue<Meal>, String>((ref, mealId) {
   final mealsState = ref.watch(mealsProvider);
-
   return mealsState.whenData((meals) {
     return meals.firstWhere(
       (m) => m.id == mealId,
-      // String traduzida aqui
       orElse: () => Meal(id: mealId, name: t.diet.meal.not_found, items: []),
     );
   });
 });
 
-// 5. Providers auxiliares para listas rápidas (apenas wrappers do repo)
+// --- LISTAS RÁPIDAS ---
+
 final frequentFoodsProvider = FutureProvider((ref) async {
   return ref.watch(nutritionRepositoryProvider).frequentFoods();
 });
@@ -80,10 +71,66 @@ final favoriteFoodsProvider = FutureProvider((ref) async {
   return ref.watch(nutritionRepositoryProvider).favoriteFoods();
 });
 
-final waterIntakeProvider = StateProvider<int>((ref) => 0);
 
-// Meta diária (em ml)
-final waterGoalProvider = StateProvider<int>((ref) => 3000);
+// --- ÁGUA (CORRIGIDO COM ASYNC NOTIFIER) ---
 
-// Valor do incremento (Stepper) - Padrão 250ml, mas editável
+// 1. Consumo de Água
+class WaterIntakeNotifier extends AsyncNotifier<int> {
+  static const _keyVolume = 'water_volume';
+  static const _keyDate = 'water_date';
+
+  @override
+  Future<int> build() async {
+    // Carregamento inicial assíncrono SEGURO
+    final prefs = await SharedPreferences.getInstance();
+    final lastDateStr = prefs.getString(_keyDate);
+    final todayStr = DateTime.now().toIso8601String().split('T')[0];
+
+    // Se mudou o dia, reseta
+    if (lastDateStr != todayStr) {
+      await prefs.setString(_keyDate, todayStr);
+      await prefs.setInt(_keyVolume, 0);
+      return 0;
+    }
+    
+    // Retorna o valor salvo ou 0
+    return prefs.getInt(_keyVolume) ?? 0;
+  }
+
+  Future<void> updateVolume(int newVolume) async {
+    // Atualiza estado local otimisticamente
+    state = AsyncData(newVolume);
+    
+    // Salva no disco
+    final prefs = await SharedPreferences.getInstance();
+    final todayStr = DateTime.now().toIso8601String().split('T')[0];
+    
+    await prefs.setInt(_keyVolume, newVolume);
+    await prefs.setString(_keyDate, todayStr);
+  }
+}
+
+final waterIntakeProvider = AsyncNotifierProvider<WaterIntakeNotifier, int>(WaterIntakeNotifier.new);
+
+
+// 2. Meta de Água
+class WaterGoalNotifier extends AsyncNotifier<int> {
+  static const _keyGoal = 'water_goal';
+
+  @override
+  Future<int> build() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_keyGoal) ?? 3000; // Padrão 3000ml
+  }
+
+  Future<void> setGoal(int newGoal) async {
+    state = AsyncData(newGoal);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_keyGoal, newGoal);
+  }
+}
+
+final waterGoalProvider = AsyncNotifierProvider<WaterGoalNotifier, int>(WaterGoalNotifier.new);
+
+// 3. Stepper de Água (Não precisa de persistência complexa, StateProvider basta, ou Async se quiser salvar)
 final waterStepperProvider = StateProvider<int>((ref) => 250);
