@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:strive/theme.dart';
-import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
+import 'package:strive/i18n/strings.g.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String label;
@@ -191,7 +191,7 @@ class FormInput extends StatelessWidget {
 }
 
 class XPBar extends StatelessWidget {
-  final double progress; // 0..1
+  final double progress; 
   final String label;
   const XPBar({super.key, required this.progress, required this.label});
 
@@ -206,7 +206,6 @@ class XPBar extends StatelessWidget {
               colors: [scheme.primaryContainer, scheme.primary.withAlpha(50)])),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          // TRADUZIDO: "XP"
           Text(t.common.xp_abbr,
               style: Theme.of(context).textTheme.titleMedium),
           Text(label, style: Theme.of(context).textTheme.labelMedium),
@@ -304,11 +303,9 @@ class LeagueCard extends StatelessWidget {
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                  // TRADUZIDO: "Liga"
                   Text(t.common.league,
                       style: Theme.of(context).textTheme.labelMedium),
                   Text(tier, style: Theme.of(context).textTheme.titleLarge),
-                  // TRADUZIDO: "Rank #123"
                   Text(t.common.rank_pattern(rank: rank),
                       style: Theme.of(context).textTheme.labelMedium),
                 ])),

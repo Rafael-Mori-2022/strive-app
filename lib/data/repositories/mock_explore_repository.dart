@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'package:strive/domain/entities/category.dart';
 import 'package:strive/domain/repositories/explore_repository.dart';
-import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
+import 'package:strive/i18n/strings.g.dart'; 
 
 class MockExploreRepository implements ExploreRepository {
   @override
   Future<List<ExploreCategory>> getCategories() async {
-    // 'const' removido para permitir acesso dinâmico ao 't'
     return [
       ExploreCategory(
           id: 'c1',

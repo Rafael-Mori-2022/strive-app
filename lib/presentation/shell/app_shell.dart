@@ -21,23 +21,20 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
-    // Pegamos a cor de fundo do tema para o Scaffold principal
     final backgroundColor = Theme.of(context).colorScheme.background;
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      // Usamos um Stack para posicionar o conteúdo e a navbar
       body: Stack(
         children: [
-          // Conteúdo principal da tela
           Positioned.fill(
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 250),
               child: widget
-                  .navigationShell, // Isso é a tela atual (Dashboard, Diet, etc.)
+                  .navigationShell, // Tela atual
             ),
           ),
-          // Barra de Navegação no fundo (flutuante)
+          // Barra de Navegação 
           Positioned(
             left: 0,
             right: 0,
@@ -53,8 +50,6 @@ class _AppShellState extends State<AppShell> {
   }
 }
 
-// --- NOSSO WIDGET DE NAVEGAÇÃO CUSTOMIZADO ---
-
 class _CustomBottomNavBar extends StatelessWidget {
   const _CustomBottomNavBar({
     required this.currentIndex,
@@ -69,12 +64,11 @@ class _CustomBottomNavBar extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
 
     return Card(
-      // Estilização para parecer flutuante como nos protótipos
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 20),
       color: colors.surface,
       elevation: 4,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20), // Arredondado
+        borderRadius: BorderRadius.circular(20), 
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
@@ -84,22 +78,22 @@ class _CustomBottomNavBar extends StatelessWidget {
             _BottomNavItem(
               icon: Icons.home_filled,
               isActive: currentIndex == 0,
-              onTap: () => onTap(0), // Aba 0
+              onTap: () => onTap(0), 
             ),
             _BottomNavItem(
               icon: Icons.restaurant_menu_rounded,
               isActive: currentIndex == 1,
-              onTap: () => onTap(1), // Aba 1
+              onTap: () => onTap(1), 
             ),
             _BottomNavItem(
               icon: Icons.fitness_center_rounded,
               isActive: currentIndex == 2,
-              onTap: () => onTap(2), // Aba 2
+              onTap: () => onTap(2), 
             ),
             _BottomNavItem(
-              icon: Icons.grid_view_rounded, // Ícone de EXPLORAR
+              icon: Icons.grid_view_rounded, 
               isActive: currentIndex == 3,
-              onTap: () => onTap(3), // Aba 3
+              onTap: () => onTap(3), 
             ),
           ],
         ),

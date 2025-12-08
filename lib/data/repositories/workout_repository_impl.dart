@@ -5,7 +5,7 @@ import 'package:strive/domain/entities/exercise.dart';
 import 'package:strive/domain/entities/workout.dart';
 import 'package:strive/domain/repositories/workout_repository.dart';
 import 'package:http/http.dart' as http;
-import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
+import 'package:strive/i18n/strings.g.dart';
 
 class WorkoutRepositoryImpl implements WorkoutRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -28,7 +28,7 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
     'panturrilhas': 14,
     'cardio': 15,
 
-    // English (Adicionado para suportar a tradução)
+    // English
     'chest': 11,
     'back': 12,
     'arms': 8,
@@ -38,7 +38,6 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
     'shoulders': 13,
     'abs': 10,
     'calves': 14,
-    // 'cardio' é igual em ambos
   };
 
   @override
@@ -46,7 +45,7 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
     final key = muscleGroup.toLowerCase().trim();
     final categoryId = _categoryMap[key];
 
-    // Fallback: Se não achar (ex: busca digitada errada), tenta buscar Peito (11) ou retorna vazio na UI
+    // Fallback em caso de não encontrar correspondência exata
     final effectiveId = categoryId ?? 11;
 
     if (_apiCache.containsKey(key)) {
@@ -68,20 +67,19 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
 
         // Detecta o idioma atual do App para priorizar a API
         // ID 2 = Inglês, ID 7 = Português
-        final currentLocale = LocaleSettings.currentLocale; // Vem do Slang
+        final currentLocale = LocaleSettings.currentLocale; 
         final int targetLangId = (currentLocale == AppLocale.pt) ? 7 : 2;
 
         for (var item in results) {
           final translations = item['translations'] as List? ?? [];
           if (translations.isEmpty) continue;
 
-          // 1. Tenta achar no idioma do app
           var translation = translations.firstWhere(
             (t) => t['language'] == targetLangId,
             orElse: () => null,
           );
 
-          // 2. Fallback: Se não achar no idioma do app, tenta Inglês (2) (se o app for PT)
+          // 2. Fallback em caso de não achar resultado no idioma específico
           if (translation == null && targetLangId != 2) {
             translation = translations.firstWhere(
               (t) => t['language'] == 2,
@@ -89,7 +87,6 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
             );
           }
 
-          // 3. Último caso: pega o primeiro que vier ou pula
           if (translation == null) continue;
 
           // --- Extração de Dados ---

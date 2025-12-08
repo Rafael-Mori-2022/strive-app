@@ -2,10 +2,10 @@ class Exercise {
   final String id;
   final String name;
   final String muscleGroup;
-  final String details; // Usado para séries/reps (ex: "4x12")
+  final String details; 
   final bool completed;
-  final String? imageUrl; // <--- Novo: Imagem do exercício
-  final String? description; // <--- Novo: Descrição técnica
+  final String? imageUrl; 
+  final String? description;
 
   const Exercise({
     required this.id,

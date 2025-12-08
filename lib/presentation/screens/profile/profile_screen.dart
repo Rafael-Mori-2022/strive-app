@@ -82,7 +82,6 @@ class ProfileScreen extends ConsumerWidget {
     final currentLocaleEnum = TranslationProvider.of(context).flutterLocale;
 
     // Encontra a bandeira atual para exibir no botão
-    // (Lógica simples convertendo o locale do flutter de volta para o mapa)
     final currentFlag = _languages.firstWhere(
       (l) =>
           (l['locale'] as AppLocale).languageCode ==
@@ -96,7 +95,6 @@ class ProfileScreen extends ConsumerWidget {
         data: (p) => ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // --- HEADER DO PERFIL ---
             Row(children: [
               CircleAvatar(
                   radius: 28, child: Text(p.name.isNotEmpty ? p.name[0] : '?')),
@@ -112,7 +110,6 @@ class ProfileScreen extends ConsumerWidget {
 
             const SizedBox(height: 24),
 
-            // --- BLOCO DE CONFIGURAÇÕES ---
             Container(
               decoration: BoxDecoration(
                 color: Theme.of(context)
@@ -143,12 +140,10 @@ class ProfileScreen extends ConsumerWidget {
                       endIndent: 16,
                       color: Colors.grey.withOpacity(0.2)),
 
-                  // SELETOR DE IDIOMA
                   ListTile(
                     leading: Icon(Icons.language,
                         color: Theme.of(context).colorScheme.primary),
                     title: const Text("Idioma / Language"),
-                    // Mostra a bandeira do idioma atual
                     trailing: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 6),
@@ -161,7 +156,7 @@ class ProfileScreen extends ConsumerWidget {
                                   .outline
                                   .withOpacity(0.2))),
                       child: Text(
-                        currentFlag, // Exibe 🇧🇷 ou 🇺🇸 etc.
+                        currentFlag, 
                         style: const TextStyle(fontSize: 18),
                       ),
                     ),
@@ -173,7 +168,6 @@ class ProfileScreen extends ConsumerWidget {
 
             const SizedBox(height: 16),
 
-            // --- OUTRAS OPÇÕES ---
             ListTile(
                 leading: const Icon(Icons.edit),
                 title: Text(t.profile.edit_profile),

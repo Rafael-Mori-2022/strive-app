@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:strive/domain/entities/workout.dart';
 import 'package:strive/presentation/state/workout_providers.dart';
-import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
+import 'package:strive/i18n/strings.g.dart'; 
 
 class WorkoutEditorScreen extends ConsumerWidget {
   final String planId;
@@ -18,13 +18,12 @@ class WorkoutEditorScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        // Título traduzido
         title: Text(t.workout_editor.title),
         actions: [
           // Botão de atalho para adicionar mais exercícios
           TextButton.icon(
             onPressed: () => context.push(
-                '/workout/add-exercise?planId=$planId&muscle=Peito'), // Default muscle
+                '/workout/add-exercise?planId=$planId&muscle=Peito'), 
             icon: const Icon(Icons.add),
             label: Text(t.workout_editor.add_button),
           ),
@@ -32,11 +31,9 @@ class WorkoutEditorScreen extends ConsumerWidget {
       ),
       body: plansAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        // Erro com parâmetro
         error: (e, _) =>
             Center(child: Text(t.workout_editor.error(error: e.toString()))),
         data: (plans) {
-          // Encontra o plano que estamos editando
           final plan = plans.firstWhere(
             (p) => p.id == planId,
             orElse: () => WorkoutPlan(
@@ -77,7 +74,6 @@ class WorkoutEditorScreen extends ConsumerWidget {
             itemBuilder: (context, index) {
               final exercise = plan.exercises[index];
 
-              // Wrapper Dismissible
               return Dismissible(
                 key: Key(exercise.id),
                 direction: DismissDirection.endToStart,
@@ -93,7 +89,7 @@ class WorkoutEditorScreen extends ConsumerWidget {
                       .read(workoutControllerProvider)
                       .removeExerciseFromPlan(planId, exercise.id);
 
-                  // Feedback visual traduzido
+                  // Feedback visual 
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                         content: Text(t.workout_editor
@@ -130,7 +126,7 @@ class WorkoutEditorScreen extends ConsumerWidget {
                               TextButton(
                                 onPressed: () => Navigator.pop(ctx),
                                 child: Text(
-                                    t.common.cancel), // Reutilizado de common
+                                    t.common.cancel),
                               ),
                               FilledButton(
                                 style: FilledButton.styleFrom(

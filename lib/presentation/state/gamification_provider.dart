@@ -11,7 +11,6 @@ class LevelData {
   final int xpForNextLevel;
   final int currentLevelBaseXp;
   
-  // Getters para a UI
   int get xpInCurrentLevel => totalXp - currentLevelBaseXp;
   int get xpNeededForNextLevel => xpForNextLevel - currentLevelBaseXp;
   double get progress => (xpInCurrentLevel / xpNeededForNextLevel).clamp(0.0, 1.0);
@@ -24,13 +23,11 @@ class LevelData {
   });
 }
 
-// --- LÓGICA DE CÁLCULO DE NÍVEL ---
+// --- Lógica de Cálculo de Nível ---
 final levelCalculatorProvider = Provider.family<LevelData, int>((ref, totalXp) {
-  // Constante de dificuldade (quanto maior, mais difícil subir)
+  // Constante de dificuldade
   const int xpPerLevel = 1000; 
 
-  // Cálculo simples linear para MVP
-  // Nvl 1 = 0-999, Nvl 2 = 1000-1999...
   final currentLevel = (totalXp / xpPerLevel).floor() + 1;
   
   final currentLevelBaseXp = (currentLevel - 1) * xpPerLevel;
@@ -44,7 +41,6 @@ final levelCalculatorProvider = Provider.family<LevelData, int>((ref, totalXp) {
   );
 });
 
-// --- CONTROLLER DE GAMIFICAÇÃO ---
 final gamificationControllerProvider = Provider((ref) => GamificationController(ref));
 
 class GamificationController {
@@ -58,7 +54,7 @@ class GamificationController {
     if (user == null) return;
 
     try {
-      // 1. Atualiza no Firestore (Atômico)
+      // Atualiza no Firestore 
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
@@ -67,7 +63,7 @@ class GamificationController {
         'lastActive': FieldValue.serverTimestamp(),
       });
 
-      // 2. Feedback Visual (Wow Effect!)
+      // Feedback Visual 
       if (context.mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -106,7 +102,6 @@ class GamificationController {
         );
       }
 
-      // 3. Força o refresh do perfil para atualizar a barra de progresso instantaneamente
       _ref.refresh(userProfileProvider);
 
     } catch (e) {

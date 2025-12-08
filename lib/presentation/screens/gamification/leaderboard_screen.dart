@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:strive/domain/entities/leaderboard_entry.dart';
 import 'package:strive/presentation/state/leaderboard_provider.dart';
-import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
+import 'package:strive/i18n/strings.g.dart'; 
 
 class LeaderboardScreen extends ConsumerStatefulWidget {
   const LeaderboardScreen({super.key});
@@ -15,7 +15,6 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   late PageController _pageController;
   final int _currentLeagueIndex = 4;
 
-  // Transformado em getter para permitir tradução dinâmica
   List<Map<String, dynamic>> get _leagues => [
         {
           'name': t.leaderboard.leagues.wood,
@@ -92,7 +91,6 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   @override
   Widget build(BuildContext context) {
     final board = ref.watch(leaderboardProvider);
-    // Acesso ao getter aqui para ter a lista traduzida
     final leaguesList = _leagues;
 
     return Scaffold(
@@ -177,11 +175,9 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Text(
-                            // "Nível X"
                             t.leaderboard.entry.level(level: e.level),
                           ),
                           trailing: Text(
-                            // "X XP"
                             t.leaderboard.entry.xp(value: e.xp),
                             style: const TextStyle(
                               fontSize: 16.0,

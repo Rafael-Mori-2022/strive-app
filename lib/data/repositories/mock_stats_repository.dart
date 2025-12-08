@@ -2,14 +2,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:strive/domain/entities/stat_item.dart';
 import 'package:strive/domain/repositories/stats_repository.dart';
-import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
+import 'package:strive/i18n/strings.g.dart'; 
 
 class MockStatsRepository implements StatsRepository {
   List<String> _selected = ['calories', 'water', 'steps', 'sleep'];
 
   @override
   Future<List<StatItem>> getAvailableStats(String uid) async {
-    // Removido 'const' para permitir tradução dinâmica
     return [
       StatItem(
           id: 'calories',

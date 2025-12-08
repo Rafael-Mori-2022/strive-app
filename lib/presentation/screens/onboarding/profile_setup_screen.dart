@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:strive/presentation/state/profile_providers.dart';
-import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
+import 'package:strive/i18n/strings.g.dart'; 
 
 class ProfileSetupScreen extends ConsumerStatefulWidget {
   const ProfileSetupScreen({super.key});
@@ -19,7 +19,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   bool _isLoading = false;
   bool _isEditing = false;
 
-  // Controllers
   final _nameCtrl = TextEditingController();
   final _dobCtrl = TextEditingController();
   final _heightCtrl = TextEditingController();
@@ -29,7 +28,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   String? _selectedGoal;
   String? _selectedGender;
 
-  // Transformado em getter para tradução dinâmica
   List<String> get _goals => [
         t.profile_setup.goals.lose_weight,
         t.profile_setup.goals.gain_muscle,
@@ -37,7 +35,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         t.profile_setup.goals.health
       ];
 
-  // Transformado em getter para tradução dinâmica
   List<String> get _genders => [
         t.profile_setup.genders.male,
         t.profile_setup.genders.female,
@@ -60,24 +57,19 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
       setState(() {
         _isEditing = true;
 
-        // 1. Textos Simples
         _nameCtrl.text = user.name;
         _heightCtrl.text = user.heightCm.toStringAsFixed(0);
         _weightCtrl.text =
             user.weightKg.toStringAsFixed(1).replaceAll('.', ',');
 
-        // 2. Dropdown de Objetivo
-        // Nota: Isso pode falhar se o idioma mudar e o valor salvo for diferente da lista atual
         if (_goals.contains(user.goal)) {
           _selectedGoal = user.goal;
         }
 
-        // 3. Dropdown de Gênero
         if (user.gender != null && _genders.contains(user.gender)) {
           _selectedGender = user.gender;
         }
 
-        // 4. Data de Nascimento
         if (user.birthDate != null) {
           _selectedDateOfBirth = user.birthDate;
           _dobCtrl.text = "${user.birthDate!.day.toString().padLeft(2, '0')}/"
@@ -114,7 +106,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           DateTime.now().subtract(const Duration(days: 365 * 18)),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
-      locale: const Locale('pt', 'BR'), // Idealmente, isso viria do t.locale
+      locale: const Locale('pt', 'BR'), 
     );
 
     if (picked != null && picked != _selectedDateOfBirth) {
@@ -198,9 +190,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface, // Atualizado para surface
+      backgroundColor: colorScheme.surface, 
       appBar: AppBar(
-        // Título dinâmico
         title: Text(_isEditing
             ? t.profile_setup.title_edit
             : t.profile_setup.title_create),
@@ -264,7 +255,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                       child: _buildDropdown(
                         label: t.profile_setup.fields.gender,
                         value: _selectedGender,
-                        items: _genders, // Usa o getter traduzido
+                        items: _genders, 
                         icon: Icons.people_outline,
                         onChanged: (v) => setState(() => _selectedGender = v),
                       ),
@@ -314,7 +305,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                 _buildDropdown(
                   label: t.profile_setup.fields.goal_select,
                   value: _selectedGoal,
-                  items: _goals, // Usa o getter traduzido
+                  items: _goals, 
                   icon: Icons.flag_outlined,
                   onChanged: (v) => setState(() => _selectedGoal = v),
                 ),
@@ -353,7 +344,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     );
   }
 
-  // ... (Resto dos widgets privados mantidos iguais, pois só usam argumentos)
   Widget _buildSectionTitle(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),

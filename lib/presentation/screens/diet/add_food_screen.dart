@@ -5,7 +5,7 @@ import 'package:strive/domain/entities/food_item.dart';
 import 'package:strive/domain/enums/xp_action.dart';
 import 'package:strive/presentation/state/diet_providers.dart';
 import 'package:strive/presentation/state/gamification_provider.dart';
-import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
+import 'package:strive/i18n/strings.g.dart'; 
 
 class AddFoodScreen extends ConsumerStatefulWidget {
   const AddFoodScreen({super.key});
@@ -27,7 +27,6 @@ class _AddFoodScreenState extends ConsumerState<AddFoodScreen> {
     final targetMealId = _mealId ?? 'm1';
 
     return Scaffold(
-      // Título da tela
       appBar: AppBar(title: Text(t.add_food.title)),
       body: Column(
         children: [

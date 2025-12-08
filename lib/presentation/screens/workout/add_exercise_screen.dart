@@ -5,9 +5,8 @@ import 'package:strive/domain/entities/exercise.dart';
 import 'package:strive/domain/enums/xp_action.dart';
 import 'package:strive/presentation/state/gamification_provider.dart';
 import 'package:strive/presentation/state/workout_providers.dart';
-import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
+import 'package:strive/i18n/strings.g.dart'; 
 
-// Provider auxiliar (Mantido a lógica original, pois envolve chaves de API/Banco)
 final searchExercisesProvider =
     FutureProvider.family<List<Exercise>, String>((ref, query) async {
   if (query.isEmpty) {
@@ -69,9 +68,8 @@ class _AddExerciseScreenState extends ConsumerState<AddExerciseScreen> {
     final colors = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: colors.surface, // Atualizado para surface
+      backgroundColor: colors.surface, 
       appBar: AppBar(
-        // Título traduzido
         title: Text(t.add_exercise.title),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -118,7 +116,6 @@ class _AddExerciseScreenState extends ConsumerState<AddExerciseScreen> {
           Expanded(
             child: exercisesAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              // Erro traduzido com parâmetro
               error: (e, st) => Center(
                   child: Text(t.add_exercise.error(error: e.toString()))),
               data: (exercises) {
@@ -179,7 +176,7 @@ class _AddExerciseScreenState extends ConsumerState<AddExerciseScreen> {
                           icon: const Icon(Icons.add_circle, size: 32),
                           color: colors.primary,
                           onPressed: () async {
-                            // 1. Adicionar ao Plano
+                            // Adicionar ao Plano
                             await ref
                                 .read(workoutControllerProvider)
                                 .addExerciseToPlan(
@@ -194,7 +191,7 @@ class _AddExerciseScreenState extends ConsumerState<AddExerciseScreen> {
                                   ),
                                 );
 
-                            // 2. Dar XP e Feedback Visual
+                            // Dar XP e Feedback Visual
                             if (context.mounted) {
                               ref
                                   .read(gamificationControllerProvider)
@@ -202,7 +199,6 @@ class _AddExerciseScreenState extends ConsumerState<AddExerciseScreen> {
 
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  // Feedback traduzido com parâmetro
                                   content: Text(t.add_exercise
                                       .added_feedback(name: exercise.name)),
                                   behavior: SnackBarBehavior.floating,

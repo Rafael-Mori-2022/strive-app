@@ -27,7 +27,6 @@ class DietScreen extends ConsumerWidget {
             ref.refresh(mealsProvider);
           },
           child: ListView(
-            // Padding inferior grande para não ficar atrás da navbar flutuante
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
             children: [
               const _Header(),
@@ -42,7 +41,7 @@ class DietScreen extends ConsumerWidget {
 
               const SizedBox(height: 16),
 
-              // Card de Água (Agora com Meta Editável)
+              // Card de Água 
               const _WaterCard(),
 
               const SizedBox(height: 16),
@@ -88,7 +87,6 @@ class _Header extends StatelessWidget {
   }
 }
 
-// --- CARD DE ÁGUA ATUALIZADO (META EDITÁVEL) ---
 class _WaterCard extends ConsumerWidget {
   const _WaterCard();
 
@@ -100,7 +98,7 @@ class _WaterCard extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(t.diet.water.edit_goal_title), // "Definir Meta de Água"
+        title: Text(t.diet.water.edit_goal_title), 
         content: TextField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -108,7 +106,7 @@ class _WaterCard extends ConsumerWidget {
             FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))
           ],
           decoration: InputDecoration(
-            labelText: t.diet.water.liters_label, // "Litros"
+            labelText: t.diet.water.liters_label, 
             suffixText: 'L',
             border: const OutlineInputBorder(),
           ),
@@ -139,7 +137,7 @@ class _WaterCard extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(t.diet.water.edit_stepper_title), // "Quantidade por Clique"
+        title: Text(t.diet.water.edit_stepper_title), 
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -148,7 +146,7 @@ class _WaterCard extends ConsumerWidget {
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               decoration: InputDecoration(
-                labelText: t.diet.water.ml_label, // "Mililitros (ml)"
+                labelText: t.diet.water.ml_label, 
                 suffixText: 'ml',
                 border: const OutlineInputBorder(),
               ),
@@ -179,7 +177,7 @@ class _WaterCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentWaterAsync = ref.watch(waterIntakeProvider);
     final goalWaterAsync = ref.watch(waterGoalProvider);
-    final stepperValue = ref.watch(waterStepperProvider); // Lê do provider
+    final stepperValue = ref.watch(waterStepperProvider); 
 
     final currentWater = currentWaterAsync.value ?? 0;
     final goalWater = goalWaterAsync.value ?? 3000;
@@ -226,7 +224,6 @@ class _WaterCard extends ConsumerWidget {
                         child: Row(
                           children: [
                             Text(
-                              // "Meta: X L"
                               t.diet.water.goal_display(
                                   value: (goalWater / 1000).toStringAsFixed(1)),
                               style: textTheme.bodySmall?.copyWith(
@@ -261,7 +258,6 @@ class _WaterCard extends ConsumerWidget {
                           ref.read(waterIntakeProvider.notifier).updateVolume(newVal);
                         },
                       ),
-                      // Valor do stepper agora é clicável para editar
                       InkWell(
                         onTap: () =>
                             _showEditStepperDialog(context, ref, stepperValue),
@@ -301,7 +297,6 @@ class _WaterCard extends ConsumerWidget {
   }
 }
 
-// --- CARD DE CALORIAS E MACROS (Mantido, apenas garantindo imports) ---
 class _CalorieMacroCard extends StatelessWidget {
   final List<Meal> meals;
   const _CalorieMacroCard({required this.meals});
@@ -320,7 +315,6 @@ class _CalorieMacroCard extends StatelessWidget {
       totalFat += meal.fat;
     }
 
-    // Metas fixas para MVP (poderiam vir do userProfile)
     const double goalCalories = 2500;
     const double goalCarbs = 300;
     const double goalProtein = 160;
@@ -334,7 +328,6 @@ class _CalorieMacroCard extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            // Anel de Progresso
             SizedBox(
               width: 110,
               height: 110,
@@ -375,21 +368,21 @@ class _CalorieMacroCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _MacroBar(
-                    title: t.diet.macros.carbs, // "Carboidrato"
+                    title: t.diet.macros.carbs,
                     value: totalCarbs,
                     goal: goalCarbs,
                     color: Colors.blue.shade400,
                   ),
                   const SizedBox(height: 12),
                   _MacroBar(
-                    title: t.diet.macros.protein, // "Proteína"
+                    title: t.diet.macros.protein, 
                     value: totalProtein,
                     goal: goalProtein,
                     color: Colors.green.shade400,
                   ),
                   const SizedBox(height: 12),
                   _MacroBar(
-                    title: t.diet.macros.fat, // "Gordura"
+                    title: t.diet.macros.fat, 
                     value: totalFat,
                     goal: goalFat,
                     color: Colors.orange.shade400,
@@ -447,7 +440,6 @@ class _MacroBar extends StatelessWidget {
   }
 }
 
-// --- CARD DE REFEIÇÃO (Mantido) ---
 class _MealCard extends ConsumerWidget {
   final Meal meal;
   const _MealCard({required this.meal});
@@ -497,7 +489,6 @@ class _MealCard extends ConsumerWidget {
               ),
               if (meal.items.isNotEmpty) ...[
                 const Divider(height: 24),
-                // Lista resumida dos itens
                 ...meal.items.take(3).map((item) => Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4.0),
                       child: Row(
@@ -517,7 +508,6 @@ class _MealCard extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
-                      // "+ X outros itens"
                       t.diet.meal.more_items(count: meal.items.length - 3),
                       style:
                           textTheme.labelSmall?.copyWith(color: colors.primary),
@@ -528,7 +518,6 @@ class _MealCard extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      // "Total: X kcal"
                       t.diet.meal.total_calories(
                           calories: meal.calories.toStringAsFixed(0)),
                       style: textTheme.labelMedium
@@ -540,7 +529,7 @@ class _MealCard extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 12.0),
                   child: Text(
-                    t.diet.meal.empty, // "Nenhum alimento registrado"
+                    t.diet.meal.empty, 
                     style: textTheme.bodySmall?.copyWith(
                         fontStyle: FontStyle.italic, color: colors.outline),
                   ),

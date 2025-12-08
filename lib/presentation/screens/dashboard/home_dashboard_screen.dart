@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:strive/presentation/state/profile_providers.dart';
 import 'package:strive/presentation/state/stats_provider.dart';
-import 'package:strive/i18n/strings.g.dart'; // O arquivo gerado
+import 'package:strive/i18n/strings.g.dart'; 
 
 class HomeDashboardScreen extends ConsumerWidget {
   const HomeDashboardScreen({super.key});
@@ -137,7 +137,6 @@ class _Greeting extends ConsumerWidget {
     final profile = ref.watch(userProfileProvider);
 
     final greetingName = profile.when(
-      // SOLUÇÃO SIMPLES: Concatenação manual
       data: (p) => '${t.dashboard.greeting}${p.name.split(' ')[0]}!',
       loading: () => t.dashboard.greeting_generic,
       error: (e, st) => t.dashboard.greeting_generic,
@@ -169,7 +168,6 @@ class _ClassificationCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
 
-    // Dados hardcoded que você usava, apenas para exemplo
     const int days = 4;
     const int place = 3;
 
@@ -199,14 +197,12 @@ class _ClassificationCard extends StatelessWidget {
                     child: Column(
                       children: [
                         _InfoChip(
-                          // SOLUÇÃO SIMPLES: Junta prefixo + numero + sufixo
                           text:
                               '${t.dashboard.classification.remaining_prefix}$days${t.dashboard.classification.remaining_suffix}',
                           icon: Icons.access_time_filled_rounded,
                         ),
                         const SizedBox(height: 8),
                         _InfoChip(
-                          // SOLUÇÃO SIMPLES: numero + sufixo
                           text:
                               '$place${t.dashboard.classification.rank_suffix}',
                           icon: Icons.emoji_events_rounded,

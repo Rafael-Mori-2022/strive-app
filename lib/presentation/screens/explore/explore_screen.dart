@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
+import 'package:strive/i18n/strings.g.dart'; 
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -17,61 +17,59 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // Lista de itens com Strings traduzidas
     final exploreItems = [
       {
-        'title': t.explore.categories.activity, // "Atividade"
+        'title': t.explore.categories.activity, 
         'icon': Icons.local_fire_department,
         'color': const Color(0xFFFF8A65),
         'route': '/workout'
       },
       {
-        'title': t.explore.categories.nutrition, // "Alimentação"
+        'title': t.explore.categories.nutrition, 
         'icon': Icons.restaurant_rounded,
         'color': const Color(0xFFFACC15),
         'route': '/diet'
       },
       {
-        'title': t.explore.categories.sleep, // "Sono"
+        'title': t.explore.categories.sleep, 
         'icon': Icons.bed_rounded,
         'color': Colors.blue.shade300,
         'route': '/sleep'
       },
       {
-        'title': t.explore.categories.medication, // "Medicamentos"
+        'title': t.explore.categories.medication, 
         'icon': Icons.medication_rounded,
         'color': Colors.cyan.shade300,
         'route': '/medicine'
       },
       {
-        'title': t.explore.categories.body_measurements, // "Medidas Corporais"
+        'title': t.explore.categories.body_measurements, 
         'icon': Icons.accessibility_new_rounded,
         'color': Colors.red.shade300,
         'route': '/body'
       },
       {
-        'title': t.explore.categories.mobility, // "Mobilidade"
+        'title': t.explore.categories.mobility, 
         'icon': Icons.directions_walk_rounded,
         'color': const Color(0xFFFACC15),
         'route': '/activity'
       },
     ];
 
-    // Lógica de Filtragem (Funciona igual, agora buscando no texto traduzido)
+    // Lógica de Filtragem
     final filteredItems = exploreItems.where((item) {
       final title = item['title'] as String;
       return title.toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background, // Mantido original
+      backgroundColor: theme.colorScheme.background, 
       body: SafeArea(
         bottom: false,
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           children: [
             const SizedBox(height: 16),
-            // 2. Barra de Busca
             _SearchBar(
               onChanged: (value) {
                 setState(() {
@@ -80,20 +78,18 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
               },
             ),
             const SizedBox(height: 24),
-            // 3. Título "Explorar"
             Text(
               t.explore.title,
               style: theme.textTheme.headlineMedium
                   ?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 16),
-            // 4. Renderização da Lista Filtrada
             if (filteredItems.isEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 32.0),
                 child: Center(
                   child: Text(
-                    t.explore.not_found, // "Nenhuma funcionalidade encontrada."
+                    t.explore.not_found, 
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -107,13 +103,12 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           title: item['title'] as String,
                           icon: item['icon'] as IconData,
                           iconColor: item['color'] as Color,
-                          // Passamos a rota para o widget
                           onTap: () => context.go(item['route'] as String),
                         ))
                     .toList(),
               ),
 
-            const SizedBox(height: 100), // Espaço extra para o final da lista
+            const SizedBox(height: 100), 
           ],
         ),
       ),
@@ -121,10 +116,9 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   }
 }
 
-// --- WIDGETS PRIVADOS ---
+// --- Widgets Privados ---
 
 class _SearchBar extends StatelessWidget {
-  // Adicionamos o parâmetro onChanged
   final ValueChanged<String> onChanged;
 
   const _SearchBar({required this.onChanged});
@@ -135,13 +129,13 @@ class _SearchBar extends StatelessWidget {
     return TextField(
       onChanged: onChanged,
       decoration: InputDecoration(
-        hintText: t.explore.search_hint, // "Buscar funcionalidade"
+        hintText: t.explore.search_hint, 
         hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
         prefixIcon:
             Icon(Icons.search, color: theme.colorScheme.onSurfaceVariant),
         filled: true,
         fillColor:
-            theme.colorScheme.surfaceContainerHighest, // Mantido original
+            theme.colorScheme.surfaceContainerHighest, 
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
@@ -176,7 +170,7 @@ class _CategoryRow extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerLow, // Mantido original
+            color: theme.colorScheme.surfaceContainerLow, 
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(

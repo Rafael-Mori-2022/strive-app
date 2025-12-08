@@ -20,7 +20,6 @@ class SelectedStatsNotifier extends AsyncNotifier<List<String>> {
 
   @override
   Future<List<String>> build() async {
-    // 1. Tenta carregar do SharedPreferences primeiro (Local)
     final prefs = ref.watch(sharedPreferencesProvider);
     final savedList = prefs.getStringList(_kSelectedStatsKey);
 

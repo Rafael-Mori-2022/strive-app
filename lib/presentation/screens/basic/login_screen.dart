@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:strive/i18n/strings.g.dart'; // O arquivo gerado pelo Slang
+import 'package:strive/i18n/strings.g.dart'; 
 import 'package:strive/providers/auth_providers.dart';
 
 class LoginScreen extends ConsumerWidget {
@@ -16,7 +16,6 @@ class LoginScreen extends ConsumerWidget {
       backgroundColor: colors.surface,
       body: Stack(
         children: [
-          // Imagem de fundo
           Positioned.fill(
             child: Image.network(
               'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1000&auto=format&fit=crop',
@@ -76,7 +75,7 @@ class LoginScreen extends ConsumerWidget {
 
                   const SizedBox(height: 24),
 
-                  // Título do App (Mantido Hardcoded por ser Marca)
+                  // Título do App 
                   Text(
                     "Strive",
                     style: theme.textTheme.displayLarge?.copyWith(
@@ -115,7 +114,7 @@ class LoginScreen extends ConsumerWidget {
                   // Termos traduzidos
                   Center(
                     child: Text(
-                      t.login.terms_disclaimer, // Nota: snake_case aqui
+                      t.login.terms_disclaimer, 
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colors.onSurfaceVariant.withOpacity(0.6),
@@ -175,7 +174,7 @@ class _GoogleSignInButton extends StatelessWidget {
             const SizedBox(width: 12),
             // Texto do botão traduzido
             Text(
-              t.login.google_button, // Nota: snake_case aqui
+              t.login.google_button, 
               style: textTheme.titleMedium?.copyWith(
                 color: colors.onPrimary,
                 fontWeight: FontWeight.bold,

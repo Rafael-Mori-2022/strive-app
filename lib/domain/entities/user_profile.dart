@@ -1,11 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart'; // Necessário para Timestamp
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 
 class UserProfile {
   final String id;
   final String name;
   final String email;
   final int age;
-  final DateTime? birthDate; // <<< NOVO CAMPO
+  final DateTime? birthDate; 
   final double heightCm;
   final double weightKg;
   final String? gender;
@@ -17,7 +17,7 @@ class UserProfile {
     required this.name,
     required this.email,
     required this.age,
-    this.birthDate, // <<< NOVO
+    this.birthDate, 
     required this.heightCm,
     required this.weightKg,
     this.gender,
@@ -31,7 +31,6 @@ class UserProfile {
       name: map['name'] ?? '',
       email: map['email'] ?? '',
       age: map['age']?.toInt() ?? 0,
-      // <<< LÓGICA PARA LER A DATA DO FIREBASE
       birthDate: map['birthDate'] != null 
           ? (map['birthDate'] as Timestamp).toDate() 
           : null,
@@ -49,7 +48,6 @@ class UserProfile {
       'name': name,
       'email': email,
       'age': age,
-      // <<< LÓGICA PARA ENVIAR A DATA (se necessário usar o toMap)
       'birthDate': birthDate != null ? Timestamp.fromDate(birthDate!) : null,
       'heightCm': heightCm,
       'weightKg': weightKg,

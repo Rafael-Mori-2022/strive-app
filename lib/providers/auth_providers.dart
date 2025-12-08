@@ -6,22 +6,22 @@ import 'package:strive/di/service_locator.dart';
 import 'package:strive/services/auth_service.dart';
 import 'package:flutter/foundation.dart';
 
-// 1. Provider para o AuthService
+// Provider para o AuthService
 final authServiceProvider = Provider<AuthService>((ref) {
   return sl<AuthService>();
 });
 
-// 2. Provider para o Stream de Estado de Autenticação
+// Provider para o Stream de Estado de Autenticação
 final authStateStreamProvider = StreamProvider<User?>((ref) {
   return ref.watch(authServiceProvider).authStateChanges;
 });
 
-// 3. Provider para o Usuário Atual
+// Provider para o Usuário Atual
 final currentUserProvider = Provider<User?>((ref) {
   return ref.watch(authServiceProvider).getCurrentUser();
 });
 
-// 4. Helper para GoRouter
+// Helper para GoRouter
 class GoRouterRefreshStream extends AutoDisposeStreamNotifier<void>
     implements Listenable {
   late final StreamSubscription<dynamic> _subscription;
@@ -40,7 +40,7 @@ class GoRouterRefreshStream extends AutoDisposeStreamNotifier<void>
   @override
   Stream<void> build() {
     _subscription = ref.watch(authStateStreamProvider.stream).listen((_) {
-      _listener?.call(); // Notifica o GoRouter para re-rotear
+      _listener?.call(); 
     });
 
     ref.onDispose(() {

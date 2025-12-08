@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:strive/presentation/state/diet_providers.dart';
-import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
+import 'package:strive/i18n/strings.g.dart'; 
 
 class MealDetailScreen extends ConsumerWidget {
   final String mealId;
@@ -11,7 +11,6 @@ class MealDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final meal = ref.watch(mealDetailProvider(mealId));
     return Scaffold(
-      // Título da AppBar
       appBar: AppBar(title: Text(t.meal_detail.title)),
       body: meal.when(
         data: (m) => ListView(
@@ -19,7 +18,7 @@ class MealDetailScreen extends ConsumerWidget {
           children: [
             Text(m.name, style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 8),
-            // Resumo de Macros (Cabeçalho)
+            // Resumo de Macros 
             Text(t.meal_detail.macro_summary(
                 calories: m.calories.toStringAsFixed(0),
                 protein: m.protein.toStringAsFixed(0),
@@ -29,17 +28,17 @@ class MealDetailScreen extends ConsumerWidget {
             ...m.items.map((item) => Card(
                 child: ListTile(
                     title: Text(item.name),
-                    // Detalhes do Item (Lista)
+                    // Detalhes do Item 
                     subtitle: Text(t.meal_detail.item_details(
                         calories: item.calories.toStringAsFixed(0),
-                        protein: item.protein, // Mantido original (sem asFixed)
-                        carbs: item.carbs, // Mantido original
-                        fat: item.fat // Mantido original
+                        protein: item.protein, 
+                        carbs: item.carbs, 
+                        fat: item.fat 
                         ))))),
           ],
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        // Mensagem de erro reutilizada
+        // Mensagem de erro 
         error: (e, st) => Center(child: Text(t.common.error)),
       ),
     );

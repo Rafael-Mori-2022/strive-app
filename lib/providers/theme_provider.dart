@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:strive/providers/locale_provider.dart'; // Importa o sharedPreferencesProvider
+import 'package:strive/providers/locale_provider.dart'; 
 
 class ThemeNotifier extends Notifier<ThemeMode> {
   static const String _kThemeKey = 'app_theme';
@@ -14,7 +14,7 @@ class ThemeNotifier extends Notifier<ThemeMode> {
     if (savedTheme == 'light') return ThemeMode.light;
     if (savedTheme == 'dark') return ThemeMode.dark;
     
-    return ThemeMode.system; // Padrão
+    return ThemeMode.system; 
   }
 
   void toggleTheme(bool isDark) async {

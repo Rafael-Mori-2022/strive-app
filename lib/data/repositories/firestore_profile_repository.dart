@@ -23,7 +23,6 @@ class FirestoreProfileRepository implements ProfileRepository {
   @override
   Future<void> saveProfile(UserProfile profile) async {
     try {
-      // .set com SetOptions(merge: true) é bom para não apagar campos extras que você crie no futuro
       await _firestore
           .collection('users')
           .doc(profile.id)

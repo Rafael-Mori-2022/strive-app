@@ -131,7 +131,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               pageBuilder: (context, state) =>
                   const NoTransitionPage(child: WorkoutScreen()),
               routes: [
-                // Rota do Editor
                 GoRoute(
                   path: 'editor/:planId', 
                   name: 'workout-editor',
@@ -203,7 +202,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isOnboarding = state.matchedLocation == '/onboarding';
       final isLoading = state.matchedLocation == '/loading';
 
-      // 1. Auth Loading -> Loading
       if (authState.isLoading) return '/loading';
 
       final isLoggedIn = authState.valueOrNull != null;

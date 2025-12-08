@@ -85,8 +85,6 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         child: RefreshIndicator(
           onRefresh: () async {
             ref.refresh(workoutPlansProvider);
-            // Opcional: Recarregar calendário tbm
-            // ref.refresh(completedDatesProvider);
           },
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
@@ -97,7 +95,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               const _TodaySummary(),
               const SizedBox(height: 24),
 
-              // Lista de Planos (Carrossel)
+              // Lista de Planos 
               plansAsync.when(
                 data: (plans) {
                   if (plans.isEmpty) {
@@ -557,7 +555,6 @@ class _PageIndicator extends StatelessWidget {
   }
 }
 
-// --- CALENDÁRIO COM PERSISTÊNCIA ---
 class _CalendarCard extends ConsumerWidget {
   const _CalendarCard();
 
@@ -566,8 +563,6 @@ class _CalendarCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    // AQUI: Lê o valor assíncrono.
-    // Usamos .value ou fallback para conjunto vazio enquanto carrega
     final completedDatesAsync = ref.watch(completedDatesProvider);
     final completedDates = completedDatesAsync.value ?? {};
 
@@ -601,7 +596,6 @@ class _CalendarCard extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
 
-            // Header Dias da Semana
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: daysOfWeek
@@ -614,7 +608,6 @@ class _CalendarCard extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
 
-            // Grid de Dias
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -637,7 +630,6 @@ class _CalendarCard extends ConsumerWidget {
 
                 return InkWell(
                   onTap: () {
-                    // Chama o notifier para salvar
                     ref
                         .read(completedDatesProvider.notifier)
                         .toggleDate(dateToCheck);

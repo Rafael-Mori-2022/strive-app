@@ -9,13 +9,13 @@ final workoutRepositoryProvider = Provider<WorkoutRepository>((ref) {
   return GetIt.instance<WorkoutRepository>();
 });
 
-// Lista de Planos (Stream ou Future que atualiza)
+// Lista de Planos 
 final workoutPlansProvider = FutureProvider<List<WorkoutPlan>>((ref) async {
   final repo = ref.watch(workoutRepositoryProvider);
   return repo.getWorkoutPlans();
 });
 
-// Lista de Exercícios da API (Por músculo)
+// Lista de Exercícios da API 
 final exercisesByMuscleProvider = FutureProvider.family<List<Exercise>, String>((ref, muscle) async {
   final repo = ref.watch(workoutRepositoryProvider);
   return repo.listExercisesByMuscle(muscle);
@@ -30,7 +30,7 @@ class WorkoutController {
 
   Future<void> createPlan(String name) async {
     await _ref.read(workoutRepositoryProvider).createWorkout(name);
-    _ref.refresh(workoutPlansProvider); // Recarrega a lista
+    _ref.refresh(workoutPlansProvider); 
   }
 
   Future<void> addExerciseToPlan(String planId, Exercise exercise) async {
@@ -39,7 +39,6 @@ class WorkoutController {
   }
 
   Future<void> toggleExercise(String planId, String exerciseId) async {
-    // Otimisticamente atualiza a UI seria o ideal, mas aqui vamos recarregar
     await _ref.read(workoutRepositoryProvider).toggleExercise(planId, exerciseId);
     _ref.refresh(workoutPlansProvider);
   }

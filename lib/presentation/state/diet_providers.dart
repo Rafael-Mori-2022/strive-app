@@ -6,8 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get_it/get_it.dart';
 import 'package:strive/i18n/strings.g.dart';
 
-// --- REPOSITÓRIOS E BUSCA ---
-
 final nutritionRepositoryProvider = Provider<NutritionRepository>((ref) {
   return GetIt.instance<NutritionRepository>();
 });
@@ -18,8 +16,6 @@ final searchFoodsProvider =
   if (query.isEmpty) return [];
   return repository.searchFoods(query);
 });
-
-// --- REFEIÇÕES (MEALS) ---
 
 class MealsNotifier extends AsyncNotifier<List<Meal>> {
   @override
@@ -57,8 +53,6 @@ final mealDetailProvider =
   });
 });
 
-// --- LISTAS RÁPIDAS ---
-
 final frequentFoodsProvider = FutureProvider((ref) async {
   return ref.watch(nutritionRepositoryProvider).frequentFoods();
 });
@@ -72,21 +66,18 @@ final favoriteFoodsProvider = FutureProvider((ref) async {
 });
 
 
-// --- ÁGUA (CORRIGIDO COM ASYNC NOTIFIER) ---
-
-// 1. Consumo de Água
+// Consumo de Água
 class WaterIntakeNotifier extends AsyncNotifier<int> {
   static const _keyVolume = 'water_volume';
   static const _keyDate = 'water_date';
 
   @override
   Future<int> build() async {
-    // Carregamento inicial assíncrono SEGURO
     final prefs = await SharedPreferences.getInstance();
     final lastDateStr = prefs.getString(_keyDate);
     final todayStr = DateTime.now().toIso8601String().split('T')[0];
 
-    // Se mudou o dia, reseta
+    // Se mudou o dia - reseta
     if (lastDateStr != todayStr) {
       await prefs.setString(_keyDate, todayStr);
       await prefs.setInt(_keyVolume, 0);
@@ -98,7 +89,7 @@ class WaterIntakeNotifier extends AsyncNotifier<int> {
   }
 
   Future<void> updateVolume(int newVolume) async {
-    // Atualiza estado local otimisticamente
+    // Atualiza estado local 
     state = AsyncData(newVolume);
     
     // Salva no disco
@@ -113,7 +104,7 @@ class WaterIntakeNotifier extends AsyncNotifier<int> {
 final waterIntakeProvider = AsyncNotifierProvider<WaterIntakeNotifier, int>(WaterIntakeNotifier.new);
 
 
-// 2. Meta de Água
+// Meta de Água
 class WaterGoalNotifier extends AsyncNotifier<int> {
   static const _keyGoal = 'water_goal';
 
@@ -132,5 +123,5 @@ class WaterGoalNotifier extends AsyncNotifier<int> {
 
 final waterGoalProvider = AsyncNotifierProvider<WaterGoalNotifier, int>(WaterGoalNotifier.new);
 
-// 3. Stepper de Água (Não precisa de persistência complexa, StateProvider basta, ou Async se quiser salvar)
+// Stepper de Água
 final waterStepperProvider = StateProvider<int>((ref) => 250);

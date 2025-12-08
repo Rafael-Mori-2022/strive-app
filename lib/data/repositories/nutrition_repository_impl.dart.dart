@@ -10,7 +10,7 @@ class NutritionRepositoryImpl implements NutritionRepository {
   static const String _kMealsKey = 'daily_meals_data';
   static const String _kDateKey = 'daily_meals_date';
 
-  // Estrutura inicial vazia
+  // Estrutura inicial 
   Map<String, Meal> _meals = {
     'm1': const Meal(id: 'm1', name: 'Placeholder', items: []),
     'm2': const Meal(id: 'm2', name: 'Placeholder', items: []),
@@ -21,7 +21,7 @@ class NutritionRepositoryImpl implements NutritionRepository {
   // Flag para saber se já carregamos do disco
   bool _isLoaded = false;
 
-  // --- MÉTODOS AUXILIARES DE PERSISTÊNCIA ---
+  // --- Métodos auxiliares de persistência ---
 
   Future<void> _loadFromPrefs() async {
     if (_isLoaded) return;
@@ -30,8 +30,7 @@ class NutritionRepositoryImpl implements NutritionRepository {
     final lastDate = prefs.getString(_kDateKey);
     final today = DateTime.now().toIso8601String().split('T')[0];
 
-    // Se a data mudou, não carregamos nada (reseta para o padrão vazio)
-    // E atualizamos a data no disco
+    // Se a data mudou, não carrega nada - padrão vazio
     if (lastDate != today) {
       await prefs.setString(_kDateKey, today);
       await prefs.remove(_kMealsKey); // Limpa dados velhos
@@ -47,9 +46,6 @@ class NutritionRepositoryImpl implements NutritionRepository {
         // Reconstrói o mapa de refeições
         decoded.forEach((key, value) {
           if (_meals.containsKey(key)) {
-             // Precisamos converter o JSON de volta para Meal/FoodItem
-             // Isso requer que suas entidades tenham fromMap/fromJson.
-             // Como Meal e FoodItem são simples, vou fazer manual aqui para garantir.
              final itemsList = (value['items'] as List).map((i) => FoodItem(
                id: i['id'],
                name: i['name'],
@@ -97,7 +93,7 @@ class NutritionRepositoryImpl implements NutritionRepository {
     await prefs.setString(_kDateKey, today);
   }
 
-  // --- TRADUÇÃO ---
+  // --- Tradução ---
   String _getLocalizedName(String id) {
     switch (id) {
       case 'm1': return t.diet.meal_types.breakfast;
@@ -139,11 +135,11 @@ class NutritionRepositoryImpl implements NutritionRepository {
     }
   }
 
-  // --- GESTÃO DE REFEIÇÕES ---
+  // --- Gestão de Refeições ---
 
   @override
   Future<List<Meal>> getMealsOfDay() async {
-    await _loadFromPrefs(); // Garante que carregou antes de retornar
+    await _loadFromPrefs(); 
     return _meals.values.map((m) {
       return m.copyWith(name: _getLocalizedName(m.id));
     }).toList();

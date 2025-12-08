@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:strive/presentation/widgets/common_widgets.dart';
-import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
+import 'package:strive/i18n/strings.g.dart'; 
 
 class UnderConstructionScreen extends StatelessWidget {
   const UnderConstructionScreen({super.key});
@@ -23,7 +23,7 @@ class UnderConstructionScreen extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleLarge,
                 textAlign: TextAlign.center),
             const SizedBox(height: 8),
-            // Subtítulo engraçado ("cardio")
+            // Subtítulo 
             Text(t.under_construction.subtitle,
                 style: Theme.of(context).textTheme.headlineSmall,
                 textAlign: TextAlign.center),

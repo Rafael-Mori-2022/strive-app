@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:strive/presentation/state/stats_provider.dart';
-import 'package:strive/i18n/strings.g.dart'; // Importação do Slang
+import 'package:strive/i18n/strings.g.dart'; 
 
 class EditStatsScreen extends ConsumerWidget {
   const EditStatsScreen({super.key});
@@ -16,7 +16,6 @@ class EditStatsScreen extends ConsumerWidget {
     final isMaxReached = selectedList.length >= 4;
 
     return Scaffold(
-      // Título da AppBar
       appBar: AppBar(title: Text(t.edit_stats.title)),
       body: Column(
         children: [
@@ -40,15 +39,15 @@ class EditStatsScreen extends ConsumerWidget {
                   final isEnabled = isOn || !isMaxReached;
 
                   return SwitchListTile(
-                    title: Text(s.title), // Vem do provider (não alterado)
-                    subtitle: Text(s.value), // Vem do provider (não alterado)
+                    title: Text(s.title), 
+                    subtitle: Text(s.value), 
                     value: isOn,
                     onChanged: isEnabled ? (_) => notifier.toggle(s.id) : null,
                   );
                 },
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
-              // Reutilizando mensagem de erro comum
+              // Mensagem de erro
               error: (e, st) => Center(child: Text(t.common.error)),
             ),
           ),
