@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:strive/domain/entities/leaderboard_entry.dart';
 import 'package:strive/presentation/state/leaderboard_provider.dart';
-import 'package:strive/i18n/strings.g.dart'; 
+import 'package:strive/providers/auth_providers.dart'; // Importante para identificar o usuário
+import 'package:strive/i18n/strings.g.dart';
 
 class LeaderboardScreen extends ConsumerStatefulWidget {
   const LeaderboardScreen({super.key});
@@ -13,64 +14,21 @@ class LeaderboardScreen extends ConsumerStatefulWidget {
 
 class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   late PageController _pageController;
-  final int _currentLeagueIndex = 4;
+  final int _currentLeagueIndex = 4; // Exemplo: Usuário está na liga Ouro (index 4)
 
+  // Getter para as ligas (usa as traduções)
   List<Map<String, dynamic>> get _leagues => [
-        {
-          'name': t.leaderboard.leagues.wood,
-          'color': const Color(0xFF8D6E63),
-          'icon': Icons.nature
-        },
-        {
-          'name': t.leaderboard.leagues.iron,
-          'color': const Color(0xFF78909C),
-          'icon': Icons.gavel
-        },
-        {
-          'name': t.leaderboard.leagues.bronze,
-          'color': const Color.fromARGB(255, 193, 83, 49),
-          'icon': Icons.shield_outlined
-        },
-        {
-          'name': t.leaderboard.leagues.silver,
-          'color': const Color(0xFF90A4AE),
-          'icon': Icons.shield
-        },
-        {
-          'name': t.leaderboard.leagues.gold,
-          'color': const Color(0xFFFFC107),
-          'icon': Icons.shield
-        },
-        {
-          'name': t.leaderboard.leagues.platinum,
-          'color': const Color(0xFF00BCD4),
-          'icon': Icons.diamond_outlined
-        },
-        {
-          'name': t.leaderboard.leagues.diamond,
-          'color': const Color(0xFF2979FF),
-          'icon': Icons.diamond
-        },
-        {
-          'name': t.leaderboard.leagues.obsidian,
-          'color': const Color(0xFF311B92),
-          'icon': Icons.hexagon
-        },
-        {
-          'name': t.leaderboard.leagues.master,
-          'color': const Color(0xFFD500F9),
-          'icon': Icons.auto_awesome
-        },
-        {
-          'name': t.leaderboard.leagues.stellar,
-          'color': const Color(0xFF00E676),
-          'icon': Icons.stars
-        },
-        {
-          'name': t.leaderboard.leagues.legend,
-          'color': const Color(0xFFFF3D00),
-          'icon': Icons.local_fire_department
-        },
+        {'name': t.leaderboard.leagues.wood, 'color': const Color(0xFF8D6E63), 'icon': Icons.nature},
+        {'name': t.leaderboard.leagues.iron, 'color': const Color(0xFF78909C), 'icon': Icons.gavel},
+        {'name': t.leaderboard.leagues.bronze, 'color': const Color.fromARGB(255, 193, 83, 49), 'icon': Icons.shield_outlined},
+        {'name': t.leaderboard.leagues.silver, 'color': const Color(0xFF90A4AE), 'icon': Icons.shield},
+        {'name': t.leaderboard.leagues.gold, 'color': const Color(0xFFFFC107), 'icon': Icons.shield},
+        {'name': t.leaderboard.leagues.platinum, 'color': const Color(0xFF00BCD4), 'icon': Icons.diamond_outlined},
+        {'name': t.leaderboard.leagues.diamond, 'color': const Color(0xFF2979FF), 'icon': Icons.diamond},
+        {'name': t.leaderboard.leagues.obsidian, 'color': const Color(0xFF311B92), 'icon': Icons.hexagon},
+        {'name': t.leaderboard.leagues.master, 'color': const Color(0xFFD500F9), 'icon': Icons.auto_awesome},
+        {'name': t.leaderboard.leagues.stellar, 'color': const Color(0xFF00E676), 'icon': Icons.stars},
+        {'name': t.leaderboard.leagues.legend, 'color': const Color(0xFFFF3D00), 'icon': Icons.local_fire_department},
       ];
 
   @override
@@ -91,17 +49,24 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   @override
   Widget build(BuildContext context) {
     final board = ref.watch(leaderboardProvider);
+    
+    // Obtém o usuário atual para destacar na lista
+    final currentUserState = ref.watch(currentUserProvider);
+    final currentUserId = currentUserState.value?.uid;
+
     final leaguesList = _leagues;
 
     return Scaffold(
       appBar: AppBar(title: Text(t.leaderboard.title)),
       body: board.when(
         data: (originalList) {
+          // Garante a ordenação por XP (Decrescente)
           final sortedList = List<LeaderboardEntry>.from(originalList)
             ..sort((a, b) => b.xp.compareTo(a.xp));
 
           return Column(
             children: [
+              // --- CARROSSEL DE LIGAS ---
               SizedBox(
                 height: 150,
                 child: PageView.builder(
@@ -134,6 +99,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                   },
                 ),
               ),
+
+              // --- LISTA DE CLASSIFICAÇÃO ---
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.only(bottom: 20),
@@ -142,49 +109,75 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                     final e = sortedList[i];
                     final position = i + 1;
 
-                    final bool showPromoLineBelow = i == 4;
+                    // Lógica para destacar o próprio usuário
+                    final isMe = currentUserId != null && e.userId == currentUserId;
+
+                    // Lógica das linhas de zona (Promoção/Rebaixamento)
+                    final bool showPromoLineBelow = i == 4; // Top 5 sobem
                     final bool showDemotionLineAbove =
-                        sortedList.length > 5 && i == sortedList.length - 5;
+                        sortedList.length > 5 && i == sortedList.length - 5; // Bottom 5 descem
 
                     return Column(
                       children: [
                         if (showDemotionLineAbove)
                           _buildZoneDivider(t.leaderboard.zones.demotion,
                               Colors.redAccent, Icons.arrow_downward),
-                        ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 4),
-                          leading: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SizedBox(
-                                width: 30,
-                                child: Center(child: _getRankIcon(position)),
+                        
+                        Container(
+                          // Destaque visual se for o usuário logado
+                          decoration: isMe
+                              ? BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
+                                  border: Border(
+                                    left: BorderSide(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      width: 4,
+                                    ),
+                                  ),
+                                )
+                              : null,
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 4),
+                            leading: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(
+                                  width: 30,
+                                  child: Center(child: _getRankIcon(position)),
+                                ),
+                                const SizedBox(width: 12),
+                                CircleAvatar(
+                                  radius: 20,
+                                  backgroundColor: isMe
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Colors.deepPurple.shade50,
+                                  child: Icon(
+                                    Icons.person,
+                                    color: isMe
+                                        ? Colors.white
+                                        : Colors.deepPurple.shade300,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            title: Text(
+                              isMe ? '${e.name} (Você)' : e.name,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text(
+                              t.leaderboard.entry.level(level: e.level),
+                            ),
+                            trailing: Text(
+                              t.leaderboard.entry.xp(value: e.xp),
+                              style: const TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w700,
                               ),
-                              const SizedBox(width: 12),
-                              CircleAvatar(
-                                radius: 20,
-                                backgroundColor: Colors.deepPurple.shade50,
-                                child: Icon(Icons.person,
-                                    color: Colors.deepPurple.shade300),
-                              ),
-                            ],
-                          ),
-                          title: Text(
-                            e.name,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text(
-                            t.leaderboard.entry.level(level: e.level),
-                          ),
-                          trailing: Text(
-                            t.leaderboard.entry.xp(value: e.xp),
-                            style: const TextStyle(
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
+
                         if (showPromoLineBelow)
                           _buildZoneDivider(t.leaderboard.zones.promotion,
                               const Color(0xFF43A047), Icons.arrow_upward),
@@ -201,6 +194,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
       ),
     );
   }
+
+  // --- WIDGETS AUXILIARES ---
 
   Widget _buildZoneDivider(String text, Color color, IconData icon) {
     return Container(

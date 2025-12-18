@@ -1,7 +1,8 @@
 enum XpAction {
   addWater(15, "Hidratação"),
   addMeal(30, "Refeição registrada"),
-  completeWorkout(100, "Treino concluído"),
+  completeExercise(10, "Exercício concluído"), 
+  completeWorkout(100, "Treino finalizado"),  
   updateProfile(50, "Perfil atualizado"),
   dailyLogin(20, "Login diário");
 

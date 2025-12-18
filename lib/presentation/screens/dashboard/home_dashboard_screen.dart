@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:strive/presentation/state/profile_providers.dart';
 import 'package:strive/presentation/state/stats_provider.dart';
 import 'package:strive/i18n/strings.g.dart'; 
+import 'package:strive/presentation/state/leaderboard_provider.dart';
 
 class HomeDashboardScreen extends ConsumerWidget {
   const HomeDashboardScreen({super.key});
@@ -160,16 +161,25 @@ class _Greeting extends ConsumerWidget {
   }
 }
 
-class _ClassificationCard extends StatelessWidget {
+class _ClassificationCard extends ConsumerWidget {
   const _ClassificationCard();
 
+  // Função auxiliar para calcular dias restantes até Domingo
+  int _getDaysRemaining() {
+    final now = DateTime.now();
+    // Domingo é dia 7 no DateTime do Dart
+    final daysUntilSunday = DateTime.sunday - now.weekday;
+    return daysUntilSunday <= 0 ? 0 : daysUntilSunday;
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
 
-    const int days = 4;
-    const int place = 3;
+    // Lógica Dinâmica
+    final days = _getDaysRemaining();
+    final myRank = ref.watch(myRankProvider); 
 
     return InkWell(
       onTap: () => context.push('/dashboard/leaderboard'),
@@ -202,11 +212,17 @@ class _ClassificationCard extends StatelessWidget {
                           icon: Icons.access_time_filled_rounded,
                         ),
                         const SizedBox(height: 8),
-                        _InfoChip(
-                          text:
-                              '$place${t.dashboard.classification.rank_suffix}',
-                          icon: Icons.emoji_events_rounded,
-                        ),
+                        
+                        if (myRank != null)
+                          _InfoChip(
+                            text: '$myRank${t.dashboard.classification.rank_suffix}',
+                            icon: Icons.emoji_events_rounded,
+                          )
+                        else
+                          const _InfoChip(
+                            text: '---',
+                            icon: Icons.emoji_events_rounded,
+                          ),
                       ],
                     ),
                   ),
