@@ -16,6 +16,7 @@ class HomeDashboardScreen extends ConsumerWidget {
         onRefresh: () async {
           ref.refresh(userProfileProvider);
           ref.refresh(availableStatsProvider);
+          ref.refresh(leaderboardProvider); // Atualiza o ranking também
         },
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -46,9 +47,16 @@ class _TopBar extends ConsumerWidget {
 
     return profile.when(
       data: (p) {
-        final level = (p.xp / 5000).floor() + 1;
-        final currentXp = p.xp % 5000;
-        const goalXp = 5000;
+        // CORREÇÃO: Usando 1000 XP para alinhar com o GamificationController
+        const int xpPerLevel = 1000; 
+        
+        // Se o objeto 'p' (Profile) já tiver o campo .level vindo do banco, 
+        // prefira usar: final level = p.level;
+        // Caso contrário, calculamos igual ao Controller:
+        final level = (p.xp / xpPerLevel).floor() + 1;
+        
+        final currentXp = p.xp % xpPerLevel;
+        const goalXp = xpPerLevel;
 
         return Row(
           children: [
@@ -86,7 +94,8 @@ class _TopBar extends ConsumerWidget {
             ),
             const SizedBox(width: 12),
             Text(
-              '$currentXp/$goalXp',
+              // Exibe XP formatado (ex: 400/1000)
+              '${currentXp.toInt()}/$goalXp',
               style: textTheme.bodyMedium
                   ?.copyWith(color: colors.onSurfaceVariant),
             ),
@@ -129,6 +138,10 @@ class _TopBar extends ConsumerWidget {
   }
 }
 
+// ... (Resto do arquivo: _Greeting, _ClassificationCard, etc. mantidos iguais)
+// O erro estava apenas na lógica da _TopBar acima. 
+// Copie as outras classes do código anterior se precisar, elas não mudaram.
+
 class _Greeting extends ConsumerWidget {
   const _Greeting();
 
@@ -164,10 +177,8 @@ class _Greeting extends ConsumerWidget {
 class _ClassificationCard extends ConsumerWidget {
   const _ClassificationCard();
 
-  // Função auxiliar para calcular dias restantes até Domingo
   int _getDaysRemaining() {
     final now = DateTime.now();
-    // Domingo é dia 7 no DateTime do Dart
     final daysUntilSunday = DateTime.sunday - now.weekday;
     return daysUntilSunday <= 0 ? 0 : daysUntilSunday;
   }
@@ -177,7 +188,6 @@ class _ClassificationCard extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
 
-    // Lógica Dinâmica
     final days = _getDaysRemaining();
     final myRank = ref.watch(myRankProvider); 
 

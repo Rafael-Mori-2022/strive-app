@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:strive/domain/entities/leaderboard_entry.dart';
 import 'package:strive/presentation/state/leaderboard_provider.dart';
-import 'package:strive/providers/auth_providers.dart'; // Importante para identificar o usuário
+import 'package:strive/providers/auth_providers.dart';
 import 'package:strive/i18n/strings.g.dart';
 
 class LeaderboardScreen extends ConsumerStatefulWidget {
@@ -14,7 +14,8 @@ class LeaderboardScreen extends ConsumerStatefulWidget {
 
 class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   late PageController _pageController;
-  final int _currentLeagueIndex = 4; // Exemplo: Usuário está na liga Ouro (index 4)
+  // O índice inicial será ajustado quando os dados carregarem
+  int _currentLeagueIndex = 0; 
 
   // Getter para as ligas (usa as traduções)
   List<Map<String, dynamic>> get _leagues => [
@@ -36,7 +37,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
     super.initState();
     _pageController = PageController(
       viewportFraction: 0.18,
-      initialPage: _currentLeagueIndex,
+      initialPage: 0, 
     );
   }
 
@@ -50,9 +51,9 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   Widget build(BuildContext context) {
     final board = ref.watch(leaderboardProvider);
     
-    // Obtém o usuário atual para destacar na lista
+    // Obtém o ID do usuário atual de forma segura
     final currentUserState = ref.watch(currentUserProvider);
-    final currentUserId = currentUserState.value?.uid;
+    final currentUserId = currentUserState.valueOrNull?.uid;
 
     final leaguesList = _leagues;
 
@@ -60,9 +61,35 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
       appBar: AppBar(title: Text(t.leaderboard.title)),
       body: board.when(
         data: (originalList) {
-          // Garante a ordenação por XP (Decrescente)
-          final sortedList = List<LeaderboardEntry>.from(originalList)
-            ..sort((a, b) => b.xp.compareTo(a.xp));
+          // 1. Encontrar o usuário atual para descobrir sua liga
+          // Se não achar (erro ou loading), assume a primeira liga (Madeira)
+          final me = originalList.firstWhere(
+            (e) => e.userId == currentUserId,
+            orElse: () => originalList.isNotEmpty 
+                ? originalList.first 
+                : const LeaderboardEntry(userId: '', name: '', totalXp: 0, weeklyXp: 0, level: 1, leagueTier: 0),
+          );
+
+          final myLeagueIndex = me.leagueTier;
+
+          // 2. Atualizar o controlador do PageView apenas se mudou
+          // Isso garante que o carrossel foque na liga correta
+          if (_currentLeagueIndex != myLeagueIndex) {
+             _currentLeagueIndex = myLeagueIndex;
+             WidgetsBinding.instance.addPostFrameCallback((_) {
+               if (_pageController.hasClients) {
+                 _pageController.jumpToPage(myLeagueIndex);
+               }
+             });
+          }
+
+          // 3. Filtrar e Ordenar:
+          // Mostra apenas usuários da MESMA liga que você
+          final leagueUsers = originalList.where((e) => e.leagueTier == myLeagueIndex).toList();
+          
+          // Ordena pelo XP SEMANAL (Esforço atual)
+          final sortedList = List<LeaderboardEntry>.from(leagueUsers)
+            ..sort((a, b) => b.weeklyXp.compareTo(a.weeklyXp));
 
           return Column(
             children: [
@@ -73,7 +100,9 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                   controller: _pageController,
                   itemCount: leaguesList.length,
                   itemBuilder: (context, index) {
-                    final isLocked = index > _currentLeagueIndex;
+                    // Ligas acima da atual aparecem "bloqueadas" visualmente
+                    final isLocked = index > myLeagueIndex;
+                    
                     return AnimatedBuilder(
                       animation: _pageController,
                       builder: (context, child) {
@@ -82,7 +111,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                           value = _pageController.page! - index;
                           value = (1 - (value.abs() * 0.4)).clamp(0.0, 1.0);
                         } else {
-                          value = index == _currentLeagueIndex ? 1.0 : 0.6;
+                          value = index == myLeagueIndex ? 1.0 : 0.6;
                         }
                         return Center(
                           child: Transform.scale(
@@ -102,89 +131,93 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
 
               // --- LISTA DE CLASSIFICAÇÃO ---
               Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  itemCount: sortedList.length,
-                  itemBuilder: (_, i) {
-                    final e = sortedList[i];
-                    final position = i + 1;
+                child: sortedList.isEmpty 
+                  ? Center(child: Text(t.common.empty_list)) 
+                  : ListView.builder(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      itemCount: sortedList.length,
+                      itemBuilder: (_, i) {
+                        final e = sortedList[i];
+                        final position = i + 1;
 
-                    // Lógica para destacar o próprio usuário
-                    final isMe = currentUserId != null && e.userId == currentUserId;
+                        // Lógica para destacar o próprio usuário
+                        final isMe = currentUserId != null && e.userId == currentUserId;
 
-                    // Lógica das linhas de zona (Promoção/Rebaixamento)
-                    final bool showPromoLineBelow = i == 4; // Top 5 sobem
-                    final bool showDemotionLineAbove =
-                        sortedList.length > 5 && i == sortedList.length - 5; // Bottom 5 descem
+                        // Zonas de Promoção/Rebaixamento (Regra: Top 5 sobem, Bottom 5 descem)
+                        // Ajuste conforme sua regra de negócio (ex: top 3, bottom 3)
+                        final bool showPromoLineBelow = i == 4 && myLeagueIndex < leaguesList.length - 1; 
+                        final bool showDemotionLineAbove = sortedList.length > 5 && i == sortedList.length - 5 && myLeagueIndex > 0;
 
-                    return Column(
-                      children: [
-                        if (showDemotionLineAbove)
-                          _buildZoneDivider(t.leaderboard.zones.demotion,
-                              Colors.redAccent, Icons.arrow_downward),
-                        
-                        Container(
-                          // Destaque visual se for o usuário logado
-                          decoration: isMe
-                              ? BoxDecoration(
-                                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
-                                  border: Border(
-                                    left: BorderSide(
-                                      color: Theme.of(context).colorScheme.primary,
-                                      width: 4,
+                        return Column(
+                          children: [
+                            if (showDemotionLineAbove)
+                              _buildZoneDivider(t.leaderboard.zones.demotion,
+                                  Colors.redAccent, Icons.arrow_downward),
+                            
+                            Container(
+                              // Destaque visual se for o usuário logado
+                              decoration: isMe
+                                  ? BoxDecoration(
+                                      color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.2),
+                                      border: Border(
+                                        left: BorderSide(
+                                          color: Theme.of(context).colorScheme.primary,
+                                          width: 4,
+                                        ),
+                                      ),
+                                    )
+                                  : null,
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 4),
+                                leading: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SizedBox(
+                                      width: 30,
+                                      child: Center(child: _getRankIcon(position)),
                                     ),
-                                  ),
-                                )
-                              : null,
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 4),
-                            leading: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SizedBox(
-                                  width: 30,
-                                  child: Center(child: _getRankIcon(position)),
+                                    const SizedBox(width: 12),
+                                    CircleAvatar(
+                                      radius: 20,
+                                      backgroundColor: isMe
+                                          ? Theme.of(context).colorScheme.primary
+                                          : Colors.deepPurple.shade50,
+                                      child: Icon(
+                                        Icons.person,
+                                        color: isMe
+                                            ? Colors.white
+                                            : Colors.deepPurple.shade300,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 12),
-                                CircleAvatar(
-                                  radius: 20,
-                                  backgroundColor: isMe
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Colors.deepPurple.shade50,
-                                  child: Icon(
-                                    Icons.person,
-                                    color: isMe
-                                        ? Colors.white
-                                        : Colors.deepPurple.shade300,
+                                title: Text(
+                                  isMe ? '${e.name} (Você)' : e.name,
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                subtitle: Text(
+                                  // Mostra Nível global, mas ordena por XP Semanal
+                                  t.leaderboard.entry.level(level: e.level),
+                                ),
+                                trailing: Text(
+                                  // Exibe XP SEMANAL
+                                  t.leaderboard.entry.xp(value: e.weeklyXp),
+                                  style: const TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
-                              ],
-                            ),
-                            title: Text(
-                              isMe ? '${e.name} (Você)' : e.name,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Text(
-                              t.leaderboard.entry.level(level: e.level),
-                            ),
-                            trailing: Text(
-                              t.leaderboard.entry.xp(value: e.xp),
-                              style: const TextStyle(
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                          ),
-                        ),
 
-                        if (showPromoLineBelow)
-                          _buildZoneDivider(t.leaderboard.zones.promotion,
-                              const Color(0xFF43A047), Icons.arrow_upward),
-                      ],
-                    );
-                  },
-                ),
+                            if (showPromoLineBelow)
+                              _buildZoneDivider(t.leaderboard.zones.promotion,
+                                  const Color(0xFF43A047), Icons.arrow_upward),
+                          ],
+                        );
+                      },
+                    ),
               ),
             ],
           );
@@ -203,7 +236,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          Expanded(child: Divider(color: color.withOpacity(0.5), thickness: 1)),
+          Expanded(child: Divider(color: color.withValues(alpha: 0.5), thickness: 1)),
           const SizedBox(width: 12),
           Icon(icon, size: 14, color: color),
           const SizedBox(width: 4),
@@ -217,7 +250,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
             ),
           ),
           const SizedBox(width: 12),
-          Expanded(child: Divider(color: color.withOpacity(0.5), thickness: 1)),
+          Expanded(child: Divider(color: color.withValues(alpha: 0.5), thickness: 1)),
         ],
       ),
     );

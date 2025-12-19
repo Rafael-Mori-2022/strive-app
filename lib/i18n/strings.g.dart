@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 6
-/// Strings: 1272 (212 per locale)
+/// Strings: 1273 (212 per locale)
 ///
-/// Built on 2025-12-07 at 17:16 UTC
+/// Built on 2025-12-18 at 23:35 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -189,6 +189,7 @@ class _StringsCommonPt {
 	String get xp_abbr => 'XP';
 	String get league => 'Liga';
 	String rank_pattern({required Object rank}) => 'Rank #${rank}';
+	String get empty_list => 'Lista vazia';
 }
 
 // Path: login
@@ -4246,6 +4247,7 @@ extension on Translations {
 			case 'common.xp_abbr': return 'XP';
 			case 'common.league': return 'Liga';
 			case 'common.rank_pattern': return ({required Object rank}) => 'Rank #${rank}';
+			case 'common.empty_list': return 'Lista vazia';
 			case 'login.tagline': return 'Seu esforço, seus dados,\nseus resultados.';
 			case 'login.google_button': return 'Entrar com Google';
 			case 'login.terms_disclaimer': return 'Ao continuar, você concorda com nossos Termos.';
