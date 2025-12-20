@@ -44,6 +44,59 @@ class CompletedDatesNotifier extends AsyncNotifier<Set<DateTime>> {
   }
 }
 
+// --- ESTADO DO RESUMO DIÁRIO (TEMPO E CALORIAS) ---
+
+class DailySummaryState {
+  final int durationMinutes;
+  final int caloriesBurned;
+
+  DailySummaryState({this.durationMinutes = 0, this.caloriesBurned = 0});
+}
+
+final dailySummaryProvider =
+    AsyncNotifierProvider<DailySummaryNotifier, DailySummaryState>(
+        DailySummaryNotifier.new);
+
+class DailySummaryNotifier extends AsyncNotifier<DailySummaryState> {
+  static const _kPrefix = 'daily_summary_';
+
+  // Gera uma chave única para o dia de hoje. Amanhã a chave muda, "resetando" o valor.
+  String _getKey() {
+    final now = DateTime.now();
+    return '$_kPrefix${now.year}-${now.month}-${now.day}';
+  }
+
+  @override
+  Future<DailySummaryState> build() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = _getKey();
+    
+    // Se não tiver dados para hoje, retorna zerado
+    final duration = prefs.getInt('${key}_duration') ?? 0;
+    final calories = prefs.getInt('${key}_calories') ?? 0;
+
+    return DailySummaryState(durationMinutes: duration, caloriesBurned: calories);
+  }
+
+  Future<void> updateStats({int? minutes, int? calories}) async {
+    final currentState = state.value ?? DailySummaryState();
+    
+    final newMinutes = minutes ?? currentState.durationMinutes;
+    final newCalories = calories ?? currentState.caloriesBurned;
+
+    state = AsyncData(DailySummaryState(
+      durationMinutes: newMinutes,
+      caloriesBurned: newCalories,
+    ));
+
+    // Salva no disco vinculado à data de hoje
+    final prefs = await SharedPreferences.getInstance();
+    final key = _getKey();
+    await prefs.setInt('${key}_duration', newMinutes);
+    await prefs.setInt('${key}_calories', newCalories);
+  }
+}
+
 class WorkoutScreen extends ConsumerStatefulWidget {
   const WorkoutScreen({super.key});
 
@@ -197,37 +250,119 @@ class _EmptyStateCard extends StatelessWidget {
   }
 }
 
-class _TodaySummary extends StatelessWidget {
+class _TodaySummary extends ConsumerWidget {
   const _TodaySummary();
 
+  void _showEditDialog(BuildContext context, WidgetRef ref, DailySummaryState current) {
+    final timeController = TextEditingController(text: current.durationMinutes.toString());
+    final calController = TextEditingController(text: current.caloriesBurned.toString());
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text("Editar Resumo de Hoje"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: timeController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: "Tempo de Treino (minutos)",
+                prefixIcon: Icon(Icons.timer_outlined),
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: calController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: "Calorias Queimadas (kcal)",
+                prefixIcon: Icon(Icons.local_fire_department),
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(t.common.cancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              final min = int.tryParse(timeController.text) ?? 0;
+              final cal = int.tryParse(calController.text) ?? 0;
+              
+              ref.read(dailySummaryProvider.notifier).updateStats(
+                minutes: min,
+                calories: cal,
+              );
+              Navigator.pop(ctx);
+            },
+            child: Text(t.common.save),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          t.workout.summary.today,
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium
-              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final summaryAsync = ref.watch(dailySummaryProvider);
+    final summary = summaryAsync.value ?? DailySummaryState();
+
+    final plansAsync = ref.watch(workoutPlansProvider);
+    
+    int totalExercises = 0;
+    int completedExercises = 0;
+
+    plansAsync.whenData((plans) {
+      for (var plan in plans) {
+        totalExercises += plan.exercises.length;
+        completedExercises += plan.exercises.where((e) => e.completed).length;
+      }
+    });
+
+    final hours = summary.durationMinutes ~/ 60;
+    final minutes = summary.durationMinutes % 60;
+    final timeString = hours > 0 ? '${hours}h ${minutes}m' : '${minutes}m';
+
+    return InkWell(
+      // Ao clicar em qualquer lugar do resumo, abre a edição
+      onTap: () => _showEditDialog(context, ref, summary),
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              t.workout.summary.today,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
+            _SummaryItem(
+              icon: Icons.timer_outlined,
+              text: timeString,
+              iconColor: const Color(0xFF63BC6A),
+            ),
+            _SummaryItem(
+              icon: Icons.local_fire_department,
+              text: '${summary.caloriesBurned} Kcal',
+              iconColor: const Color(0xFFFF8A65),
+            ),
+            _SummaryItem(
+              icon: Icons.track_changes,
+              text: '$completedExercises/$totalExercises',
+              iconColor: const Color(0xFFFACC15),
+            ),
+          ],
         ),
-        const _SummaryItem(
-          icon: Icons.timer_outlined,
-          text: '0h',
-          iconColor: Color(0xFF63BC6A),
-        ),
-        const _SummaryItem(
-          icon: Icons.local_fire_department,
-          text: '0 Kcal',
-          iconColor: Color(0xFFFF8A65),
-        ),
-        const _SummaryItem(
-          icon: Icons.track_changes,
-          text: '0/5',
-          iconColor: Color(0xFFFACC15),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -245,7 +380,12 @@ class _SummaryItem extends StatelessWidget {
       children: [
         Icon(icon, color: iconColor, size: 20),
         const SizedBox(width: 4),
-        Text(text, style: Theme.of(context).textTheme.bodyMedium),
+        Text(
+          text, 
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.bold
+          )
+        ),
       ],
     );
   }
@@ -414,6 +554,7 @@ class _PlanCard extends ConsumerWidget {
                   separatorBuilder: (_, __) => const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final exercise = plan.exercises[index];
+                    
                     return _ExerciseRow(
                       exercise: exercise,
                       onToggle: () async {
@@ -422,9 +563,33 @@ class _PlanCard extends ConsumerWidget {
                             .toggleExercise(plan.id, exercise.id);
 
                         if (!exercise.completed && context.mounted) {
-                          ref
-                              .read(gamificationControllerProvider)
-                              .earnXp(context, XpAction.completeWorkout);
+                          final gamification = ref.read(gamificationControllerProvider);
+
+                          gamification.earnXp(context, XpAction.completeExercise);
+
+                          final currentPlans = ref.read(workoutPlansProvider).valueOrNull ?? [];
+                          
+                          final updatedPlan = currentPlans.firstWhere(
+                            (p) => p.id == plan.id, 
+                            orElse: () => plan
+                          );
+
+                          final isWorkoutFinished = updatedPlan.exercises.every((e) => e.completed);
+
+                          if (isWorkoutFinished) {
+                            gamification.earnXp(context, XpAction.completeWorkout);
+                            
+                            Future.delayed(const Duration(seconds: 2), () {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Treino finalizado! Parabéns! 🔥"),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              }
+                            });
+                          }
                         }
                       },
                     );

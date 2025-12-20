@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 6
-/// Strings: 1272 (212 per locale)
+/// Strings: 1278 (213 per locale)
 ///
-/// Built on 2025-12-07 at 17:16 UTC
+/// Built on 2025-12-20 at 20:09 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -189,6 +189,7 @@ class _StringsCommonPt {
 	String get xp_abbr => 'XP';
 	String get league => 'Liga';
 	String rank_pattern({required Object rank}) => 'Rank #${rank}';
+	String get empty_list => 'Lista vazia';
 }
 
 // Path: login
@@ -873,6 +874,7 @@ class _StringsCommonEn extends _StringsCommonPt {
 	@override String get xp_abbr => 'XP';
 	@override String get league => 'League';
 	@override String rank_pattern({required Object rank}) => 'Rank #${rank}';
+	@override String get empty_list => 'Empty list';
 }
 
 // Path: login
@@ -1557,6 +1559,7 @@ class _StringsCommonEs extends _StringsCommonPt {
 	@override String get xp_abbr => 'XP';
 	@override String get league => 'Liga';
 	@override String rank_pattern({required Object rank}) => 'Rango #${rank}';
+	@override String get empty_list => 'Lista vacía';
 }
 
 // Path: login
@@ -2241,6 +2244,7 @@ class _StringsCommonFr extends _StringsCommonPt {
 	@override String get xp_abbr => 'XP';
 	@override String get league => 'Ligue';
 	@override String rank_pattern({required Object rank}) => 'Rang #${rank}';
+	@override String get empty_list => 'Liste vide';
 }
 
 // Path: login
@@ -2925,6 +2929,7 @@ class _StringsCommonIt extends _StringsCommonPt {
 	@override String get xp_abbr => 'XP';
 	@override String get league => 'Lega';
 	@override String rank_pattern({required Object rank}) => 'Rango #${rank}';
+	@override String get empty_list => 'Elenco vuoto';
 }
 
 // Path: login
@@ -3609,6 +3614,7 @@ class _StringsCommonZh extends _StringsCommonPt {
 	@override String get xp_abbr => 'XP';
 	@override String get league => '联赛';
 	@override String rank_pattern({required Object rank}) => '排名 #${rank}';
+	@override String get empty_list => '空列表';
 }
 
 // Path: login
@@ -4246,6 +4252,7 @@ extension on Translations {
 			case 'common.xp_abbr': return 'XP';
 			case 'common.league': return 'Liga';
 			case 'common.rank_pattern': return ({required Object rank}) => 'Rank #${rank}';
+			case 'common.empty_list': return 'Lista vazia';
 			case 'login.tagline': return 'Seu esforço, seus dados,\nseus resultados.';
 			case 'login.google_button': return 'Entrar com Google';
 			case 'login.terms_disclaimer': return 'Ao continuar, você concorda com nossos Termos.';
@@ -4466,6 +4473,7 @@ extension on _StringsEn {
 			case 'common.xp_abbr': return 'XP';
 			case 'common.league': return 'League';
 			case 'common.rank_pattern': return ({required Object rank}) => 'Rank #${rank}';
+			case 'common.empty_list': return 'Empty list';
 			case 'login.tagline': return 'Your effort, your data,\nyour results.';
 			case 'login.google_button': return 'Sign in with Google';
 			case 'login.terms_disclaimer': return 'By continuing, you agree to our Terms.';
@@ -4686,6 +4694,7 @@ extension on _StringsEs {
 			case 'common.xp_abbr': return 'XP';
 			case 'common.league': return 'Liga';
 			case 'common.rank_pattern': return ({required Object rank}) => 'Rango #${rank}';
+			case 'common.empty_list': return 'Lista vacía';
 			case 'login.tagline': return 'Tu esfuerzo, tus datos,\ntus resultados.';
 			case 'login.google_button': return 'Acceder con Google';
 			case 'login.terms_disclaimer': return 'Al continuar, aceptas nuestros Términos.';
@@ -4906,6 +4915,7 @@ extension on _StringsFr {
 			case 'common.xp_abbr': return 'XP';
 			case 'common.league': return 'Ligue';
 			case 'common.rank_pattern': return ({required Object rank}) => 'Rang #${rank}';
+			case 'common.empty_list': return 'Liste vide';
 			case 'login.tagline': return 'Vos efforts, vos données,\nvos résultats.';
 			case 'login.google_button': return 'Se connecter avec Google';
 			case 'login.terms_disclaimer': return 'En continuant, vous acceptez nos Conditions.';
@@ -5126,6 +5136,7 @@ extension on _StringsIt {
 			case 'common.xp_abbr': return 'XP';
 			case 'common.league': return 'Lega';
 			case 'common.rank_pattern': return ({required Object rank}) => 'Rango #${rank}';
+			case 'common.empty_list': return 'Elenco vuoto';
 			case 'login.tagline': return 'Il tuo impegno, i tuoi dati,\ni tuoi risultati.';
 			case 'login.google_button': return 'Accedi con Google';
 			case 'login.terms_disclaimer': return 'Continuando, accetti i nostri Termini.';
@@ -5346,6 +5357,7 @@ extension on _StringsZh {
 			case 'common.xp_abbr': return 'XP';
 			case 'common.league': return '联赛';
 			case 'common.rank_pattern': return ({required Object rank}) => '排名 #${rank}';
+			case 'common.empty_list': return '空列表';
 			case 'login.tagline': return '您的努力，您的数据，\n您的成果。';
 			case 'login.google_button': return '使用 Google 登录';
 			case 'login.terms_disclaimer': return '继续即表示您同意我们的条款。';

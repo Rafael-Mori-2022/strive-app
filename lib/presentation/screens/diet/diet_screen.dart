@@ -276,7 +276,7 @@ class _WaterCard extends ConsumerWidget {
                         icon: const Icon(Icons.add, size: 20),
                         onPressed: () {
                           final newVal =
-                              (currentWater + stepperValue).clamp(0, 10000);
+                              (currentWater + stepperValue).clamp(0, 12000);
                           ref.read(waterIntakeProvider.notifier).updateVolume(newVal);
                           if (context.mounted) {
                             ref

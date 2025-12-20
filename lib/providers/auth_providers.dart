@@ -17,8 +17,8 @@ final authStateStreamProvider = StreamProvider<User?>((ref) {
 });
 
 // Provider para o Usuário Atual
-final currentUserProvider = Provider<User?>((ref) {
-  return ref.watch(authServiceProvider).getCurrentUser();
+final currentUserProvider = StreamProvider<User?>((ref) {
+  return FirebaseAuth.instance.authStateChanges();
 });
 
 // Helper para GoRouter

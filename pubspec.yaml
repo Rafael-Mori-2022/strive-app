@@ -19,7 +19,12 @@ dependencies:
   injectable: ^2.0.0
   get_it: ^8.0.0
   flutter_riverpod: ^2.6.1
-  go_router: ^15.1.2
+  riverpod_annotation: ^2.3.5
+  go_router: ^17.0.1
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  google_fonts: ^6.1.0
 
   # Firebase
   firebase_core: ^3.8.0
@@ -44,21 +49,20 @@ dependencies:
     sdk: flutter
   slang: ^3.31.0
   slang_flutter: ^3.31.0
-
-  # Widgetbook
-  widgetbook: ^3.0.0
-  widgetbook_annotation: ^3.0.0
+  widgetbook: ^3.20.2
+  widgetbook_annotation: ^3.9.0
+  uuid: ^4.5.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-  
-  # TRAVADO: Mantido na 2.4.13 para compatibilidade com Dart 3.5.x
-  build_runner: 2.4.13
-  
+  build_runner: ^2.4.13
   slang_build_runner: ^3.31.0
-  widgetbook_generator: ^3.0.0
+  widgetbook_generator: ^3.14.0
+  riverpod_generator: ^2.6.3
+  custom_lint: ^0.7.0
+  riverpod_lint: ^2.6.3
 
 flutter:
   uses-material-design: true

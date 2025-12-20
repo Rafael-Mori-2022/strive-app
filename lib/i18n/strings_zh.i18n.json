@@ -9,7 +9,8 @@
     "not_authenticated": "用户未验证。",
     "xp_abbr": "XP",
     "league": "联赛",
-    "rank_pattern": "排名 #$rank"
+    "rank_pattern": "排名 #$rank",
+    "empty_list": "空列表"
   },
   "login": {
     "tagline": "您的努力，您的数据，\n您的成果。",
