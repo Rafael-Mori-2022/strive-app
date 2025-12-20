@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:strive/presentation/state/profile_providers.dart';
 import 'package:strive/presentation/state/stats_provider.dart';
 import 'package:strive/i18n/strings.g.dart'; 
+import 'package:strive/presentation/state/leaderboard_provider.dart';
 
 class HomeDashboardScreen extends ConsumerWidget {
   const HomeDashboardScreen({super.key});
@@ -15,6 +16,7 @@ class HomeDashboardScreen extends ConsumerWidget {
         onRefresh: () async {
           ref.refresh(userProfileProvider);
           ref.refresh(availableStatsProvider);
+          ref.refresh(leaderboardProvider); // Atualiza o ranking também
         },
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -45,9 +47,16 @@ class _TopBar extends ConsumerWidget {
 
     return profile.when(
       data: (p) {
-        final level = (p.xp / 5000).floor() + 1;
-        final currentXp = p.xp % 5000;
-        const goalXp = 5000;
+        // CORREÇÃO: Usando 1000 XP para alinhar com o GamificationController
+        const int xpPerLevel = 1000; 
+        
+        // Se o objeto 'p' (Profile) já tiver o campo .level vindo do banco, 
+        // prefira usar: final level = p.level;
+        // Caso contrário, calculamos igual ao Controller:
+        final level = (p.xp / xpPerLevel).floor() + 1;
+        
+        final currentXp = p.xp % xpPerLevel;
+        const goalXp = xpPerLevel;
 
         return Row(
           children: [
@@ -85,7 +94,8 @@ class _TopBar extends ConsumerWidget {
             ),
             const SizedBox(width: 12),
             Text(
-              '$currentXp/$goalXp',
+              // Exibe XP formatado (ex: 400/1000)
+              '${currentXp.toInt()}/$goalXp',
               style: textTheme.bodyMedium
                   ?.copyWith(color: colors.onSurfaceVariant),
             ),
@@ -128,6 +138,10 @@ class _TopBar extends ConsumerWidget {
   }
 }
 
+// ... (Resto do arquivo: _Greeting, _ClassificationCard, etc. mantidos iguais)
+// O erro estava apenas na lógica da _TopBar acima. 
+// Copie as outras classes do código anterior se precisar, elas não mudaram.
+
 class _Greeting extends ConsumerWidget {
   const _Greeting();
 
@@ -160,16 +174,22 @@ class _Greeting extends ConsumerWidget {
   }
 }
 
-class _ClassificationCard extends StatelessWidget {
+class _ClassificationCard extends ConsumerWidget {
   const _ClassificationCard();
 
+  int _getDaysRemaining() {
+    final now = DateTime.now();
+    final daysUntilSunday = DateTime.sunday - now.weekday;
+    return daysUntilSunday <= 0 ? 0 : daysUntilSunday;
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
 
-    const int days = 4;
-    const int place = 3;
+    final days = _getDaysRemaining();
+    final myRank = ref.watch(myRankProvider); 
 
     return InkWell(
       onTap: () => context.push('/dashboard/leaderboard'),
@@ -202,11 +222,17 @@ class _ClassificationCard extends StatelessWidget {
                           icon: Icons.access_time_filled_rounded,
                         ),
                         const SizedBox(height: 8),
-                        _InfoChip(
-                          text:
-                              '$place${t.dashboard.classification.rank_suffix}',
-                          icon: Icons.emoji_events_rounded,
-                        ),
+                        
+                        if (myRank != null)
+                          _InfoChip(
+                            text: '$myRank${t.dashboard.classification.rank_suffix}',
+                            icon: Icons.emoji_events_rounded,
+                          )
+                        else
+                          const _InfoChip(
+                            text: '---',
+                            icon: Icons.emoji_events_rounded,
+                          ),
                       ],
                     ),
                   ),

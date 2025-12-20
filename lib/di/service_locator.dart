@@ -1,7 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:strive/data/repositories/firestore_profile_repository.dart';
 import 'package:strive/data/repositories/mock_explore_repository.dart';
-import 'package:strive/data/repositories/mock_leaderboard_repository.dart';
+import 'package:strive/data/repositories/firestore_leaderboard_repository.dart';
 import 'package:strive/data/repositories/nutrition_repository_impl.dart.dart';
 import 'package:strive/data/repositories/mock_stats_repository.dart';
 import 'package:strive/data/repositories/workout_repository_impl.dart';
@@ -12,6 +12,7 @@ import 'package:strive/domain/repositories/profile_repository.dart';
 import 'package:strive/domain/repositories/stats_repository.dart';
 import 'package:strive/domain/repositories/workout_repository.dart';
 import 'package:strive/services/auth_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -27,7 +28,7 @@ Future<void> setupServiceLocator() async {
       () => NutritionRepositoryImpl());
   sl.registerLazySingleton<WorkoutRepository>(() => WorkoutRepositoryImpl());
   sl.registerLazySingleton<LeaderboardRepository>(
-      () => MockLeaderboardRepository());
+      () => FirestoreLeaderboardRepository(FirebaseFirestore.instance));
   sl.registerLazySingleton<ExploreRepository>(() => MockExploreRepository());
   sl.registerLazySingleton<StatsRepository>(() => MockStatsRepository());
 }
