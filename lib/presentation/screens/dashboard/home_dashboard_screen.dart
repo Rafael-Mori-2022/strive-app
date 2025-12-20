@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:strive/presentation/state/health_providers.dart';
 import 'package:strive/presentation/state/profile_providers.dart';
 import 'package:strive/presentation/state/stats_provider.dart';
-import 'package:strive/i18n/strings.g.dart'; 
+import 'package:strive/i18n/strings.g.dart';
 import 'package:strive/presentation/state/leaderboard_provider.dart';
 
 class HomeDashboardScreen extends ConsumerWidget {
@@ -49,13 +49,13 @@ class _TopBar extends ConsumerWidget {
     return profile.when(
       data: (p) {
         // CORREÇÃO: Usando 1000 XP para alinhar com o GamificationController
-        const int xpPerLevel = 1000; 
-        
-        // Se o objeto 'p' (Profile) já tiver o campo .level vindo do banco, 
+        const int xpPerLevel = 1000;
+
+        // Se o objeto 'p' (Profile) já tiver o campo .level vindo do banco,
         // prefira usar: final level = p.level;
         // Caso contrário, calculamos igual ao Controller:
         final level = (p.xp / xpPerLevel).floor() + 1;
-        
+
         final currentXp = p.xp % xpPerLevel;
         const goalXp = xpPerLevel;
 
@@ -140,7 +140,7 @@ class _TopBar extends ConsumerWidget {
 }
 
 // ... (Resto do arquivo: _Greeting, _ClassificationCard, etc. mantidos iguais)
-// O erro estava apenas na lógica da _TopBar acima. 
+// O erro estava apenas na lógica da _TopBar acima.
 // Copie as outras classes do código anterior se precisar, elas não mudaram.
 
 class _Greeting extends ConsumerWidget {
@@ -190,7 +190,7 @@ class _ClassificationCard extends ConsumerWidget {
     final colors = Theme.of(context).colorScheme;
 
     final days = _getDaysRemaining();
-    final myRank = ref.watch(myRankProvider); 
+    final myRank = ref.watch(myRankProvider);
 
     return InkWell(
       onTap: () => context.push('/dashboard/leaderboard'),
@@ -223,10 +223,10 @@ class _ClassificationCard extends ConsumerWidget {
                           icon: Icons.access_time_filled_rounded,
                         ),
                         const SizedBox(height: 8),
-                        
                         if (myRank != null)
                           _InfoChip(
-                            text: '$myRank${t.dashboard.classification.rank_suffix}',
+                            text:
+                                '$myRank${t.dashboard.classification.rank_suffix}',
                             icon: Icons.emoji_events_rounded,
                           )
                         else
@@ -445,7 +445,6 @@ class _LiveStatGridItem extends ConsumerWidget {
       ),
     );
   }
-<<<<<<< HEAD
 }
 
 // Pequena animação para indicar que o sensor está ativo (Opcional, mas clientes adoram)
@@ -485,6 +484,3 @@ class _PulsingDotState extends State<_PulsingDot>
     );
   }
 }
-=======
-}
->>>>>>> main
