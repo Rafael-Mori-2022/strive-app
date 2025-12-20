@@ -39,6 +39,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Precisamos dos seus dados para monitorar sua saúde cardíaca e passos.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Precisamos salvar dados de saúde no seu histórico.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

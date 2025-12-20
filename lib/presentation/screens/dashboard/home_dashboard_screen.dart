@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:strive/presentation/state/health_providers.dart';
 import 'package:strive/presentation/state/profile_providers.dart';
 import 'package:strive/presentation/state/stats_provider.dart';
-import 'package:strive/i18n/strings.g.dart'; 
+import 'package:strive/i18n/strings.g.dart';
 
 class HomeDashboardScreen extends ConsumerWidget {
   const HomeDashboardScreen({super.key});
@@ -224,6 +225,7 @@ class _StatisticsCard extends ConsumerWidget {
   const _StatisticsCard();
 
   Color _getColorForStat(String id) {
+    // ... (Mantenha sua lógica de cores atual)
     switch (id) {
       case 'water':
         return const Color(0xFF53A9FF);
@@ -243,6 +245,11 @@ class _StatisticsCard extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
 
+    // 1. INICIALIZA O MONITORAMENTO
+    // Ao assistir esse provider, ele dispara o 'initialize' e o 'startMonitoring'.
+    // O .autoDispose garante que pare quando sair da tela.
+    ref.watch(healthControllerProvider);
+
     final availableStats = ref.watch(availableStatsProvider);
     final selectedStats = ref.watch(selectedStatsProvider);
 
@@ -252,13 +259,11 @@ class _StatisticsCard extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // ... (Mantenha o cabeçalho Row com Título e Botão de Editar) ...
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  t.dashboard.stats.title,
-                  style: textTheme.titleLarge,
-                ),
+                Text(t.dashboard.stats.title, style: textTheme.titleLarge),
                 IconButton(
                   icon:
                       Icon(Icons.edit_outlined, color: colors.onSurfaceVariant),
@@ -266,6 +271,7 @@ class _StatisticsCard extends ConsumerWidget {
                 ),
               ],
             ),
+
             availableStats.when(
               data: (list) {
                 final selectedIds = selectedStats.valueOrNull ?? [];
@@ -275,15 +281,8 @@ class _StatisticsCard extends ConsumerWidget {
                     .toList();
 
                 if (statCards.isEmpty) {
-                  return Container(
-                    padding: const EdgeInsets.only(top: 16.0),
-                    alignment: Alignment.center,
-                    child: Text(
-                      t.dashboard.stats.empty,
-                      style: textTheme.bodyMedium
-                          ?.copyWith(color: colors.onSurfaceVariant),
-                    ),
-                  );
+                  // ... (Mantenha seu estado vazio) ...
+                  return Container(child: Text("Vazio"));
                 }
 
                 return GridView.builder(
@@ -299,8 +298,12 @@ class _StatisticsCard extends ConsumerWidget {
                   itemCount: statCards.length,
                   itemBuilder: (context, index) {
                     final stat = statCards[index];
-                    return _StatGridItem(
-                      text: stat.value,
+
+                    // AQUI É O PULO DO GATO:
+                    // Passamos o ID para o Item saber se deve buscar dados ao vivo
+                    return _LiveStatGridItem(
+                      id: stat.id,
+                      defaultText: stat.value, // Valor do banco (backup)
                       icon: stat.icon,
                       iconColor: _getColorForStat(stat.id),
                     );
@@ -308,14 +311,9 @@ class _StatisticsCard extends ConsumerWidget {
                 );
               },
               loading: () => const SizedBox(
-                height: 150,
-                child: Center(child: CircularProgressIndicator()),
-              ),
-              error: (e, st) => Container(
-                padding: const EdgeInsets.only(top: 16.0),
-                alignment: Alignment.center,
-                child: Text(t.common.error_stats),
-              ),
+                  height: 150,
+                  child: Center(child: CircularProgressIndicator())),
+              error: (e, st) => Text(t.common.error_stats),
             ),
           ],
         ),
@@ -352,17 +350,45 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
-class _StatGridItem extends StatelessWidget {
-  const _StatGridItem(
-      {required this.text, required this.icon, required this.iconColor});
-  final String text;
+class _LiveStatGridItem extends ConsumerWidget {
+  const _LiveStatGridItem({
+    required this.id,
+    required this.defaultText,
+    required this.icon,
+    required this.iconColor,
+  });
+
+  final String id;
+  final String defaultText;
   final IconData icon;
   final Color iconColor;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
+
+    String displayValue = defaultText;
+
+    // Lógica de Interceptação de Dados
+    if (id == 'heartRate') {
+      final heartRateAsync = ref.watch(heartRateProvider);
+
+      displayValue = heartRateAsync.when(
+        data: (bpm) => '$bpm BPM',
+        loading: () =>
+            'Measuring...', // Ou manter o defaultText enquanto carrega
+        error: (_, __) => '--',
+      );
+    } else if (id == 'steps') {
+      final stepsAsync = ref.watch(stepsProvider);
+
+      displayValue = stepsAsync.when(
+        data: (steps) => '$steps steps',
+        loading: () => defaultText,
+        error: (_, __) => defaultText,
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -374,10 +400,60 @@ class _StatGridItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 24, color: iconColor),
+          Row(
+            children: [
+              Icon(icon, size: 24, color: iconColor),
+              const Spacer(),
+              // Indicador visual de "Ao Vivo" para dar um charme
+              if (id == 'heartRate') _PulsingDot(),
+            ],
+          ),
           const SizedBox(height: 8),
-          Text(text, style: textTheme.titleSmall),
+          Text(
+            displayValue,
+            style: textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold, // Destaque para o número
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+// Pequena animação para indicar que o sensor está ativo (Opcional, mas clientes adoram)
+class _PulsingDot extends StatefulWidget {
+  @override
+  _PulsingDotState createState() => _PulsingDotState();
+}
+
+class _PulsingDotState extends State<_PulsingDot>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 1))
+          ..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _controller,
+      child: Container(
+        width: 8,
+        height: 8,
+        decoration:
+            const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
       ),
     );
   }
