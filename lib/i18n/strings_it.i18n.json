@@ -9,7 +9,8 @@
     "not_authenticated": "Utente non autenticato.",
     "xp_abbr": "XP",
     "league": "Lega",
-    "rank_pattern": "Rango #$rank"
+    "rank_pattern": "Rango #$rank",
+    "empty_list": "Elenco vuoto"
   },
   "login": {
     "tagline": "Il tuo impegno, i tuoi dati,\ni tuoi risultati.",
