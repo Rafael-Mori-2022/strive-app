@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'medicine_provider.dart';
+import 'package:strive/presentation/screens/medicine/medicine_provider.dart';
 
 class MedicineScreen extends ConsumerWidget {
   const MedicineScreen({super.key});
@@ -31,7 +31,14 @@ class MedicineScreen extends ConsumerWidget {
               centerTitle: true,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back),
-                onPressed: () => context.pop(),
+                onPressed: () {
+                  // CORREÇÃO: Evita o erro "Nothing to pop"
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/dashboard');
+                  }
+                },
               ),
             ),
 
@@ -55,22 +62,17 @@ class MedicineScreen extends ConsumerWidget {
                             ?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),
                     ...medicines.map((med) => _MedicineCard(medicine: med)),
-                    
-                    // Aumentamos o espaço final para garantir que o conteúdo role 
-                    // acima do botão e da barra de navegação
-                    const SizedBox(height: 180), 
+
+                    // Espaço extra no final
+                    const SizedBox(height: 180),
                   ]),
                 ),
               ),
           ],
         ),
       ),
-      
-      // ⬇️ AJUSTE DE PADDING PARA BARRA DE NAVEGAÇÃO ⬇️
-      // Usamos kBottomNavigationBarHeight (aprox 56) + um valor extra (40)
-      // para garantir que o botão flutue confortavelmente acima da barra.
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 100.0), 
+        padding: const EdgeInsets.only(bottom: 100.0),
         child: FloatingActionButton.extended(
           onPressed: () => showModalBottomSheet(
             context: context,
@@ -151,7 +153,9 @@ class _ProgressHeader extends StatelessWidget {
                         color: theme.colorScheme.onPrimaryContainer)),
                 const SizedBox(height: 4),
                 Text(
-                  taken == total ? "Tudo certo! 🎉" : "$taken de $total tomados",
+                  taken == total
+                      ? "Tudo certo! 🎉"
+                      : "$taken de $total tomados",
                   style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.onPrimaryContainer),
@@ -286,7 +290,6 @@ class _AddMedicineSheetState extends ConsumerState<_AddMedicineSheet> {
     final theme = Theme.of(context);
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
-    // Use SingleChildScrollView para garantir que o conteúdo seja rolável se o teclado aparecer
     return SingleChildScrollView(
       child: Container(
         padding: EdgeInsets.fromLTRB(24, 24, 24, bottomPadding + 100),
@@ -342,7 +345,8 @@ class _AddMedicineSheetState extends ConsumerState<_AddMedicineSheet> {
                             : theme.colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(16),
                         border: isSelected
-                            ? Border.all(color: theme.colorScheme.primary, width: 2)
+                            ? Border.all(
+                                color: theme.colorScheme.primary, width: 2)
                             : null,
                       ),
                       child: Column(
@@ -430,6 +434,9 @@ class _AddMedicineSheetState extends ConsumerState<_AddMedicineSheet> {
             FilledButton(
               onPressed: () {
                 if (_nameController.text.isNotEmpty) {
+                  // Fecha o teclado antes de sair para evitar bugs visuais
+                  FocusScope.of(context).unfocus();
+
                   ref.read(medicineProvider.notifier).addMedicine(
                         _nameController.text,
                         _dosageController.text.isEmpty
@@ -438,7 +445,7 @@ class _AddMedicineSheetState extends ConsumerState<_AddMedicineSheet> {
                         _selectedType,
                         _selectedTime,
                       );
-                  context.pop();
+                  context.pop(); // Fecha o modal
                 }
               },
               style: FilledButton.styleFrom(

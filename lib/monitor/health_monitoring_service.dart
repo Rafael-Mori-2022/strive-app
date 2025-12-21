@@ -5,56 +5,47 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class HealthMonitoringService {
-  // Singleton
   static final HealthMonitoringService _instance =
       HealthMonitoringService._internal();
   factory HealthMonitoringService() => _instance;
   HealthMonitoringService._internal();
 
-  // ATENÇÃO: Na versão 10+, a classe é apenas 'Health'
   final Health _health = Health();
 
-  // Limite para o alerta (ex: 120 bpm)
+  // Limites e Configurações
   final int _safeHeartRateLimit = 120;
 
-  // Stream para a UI
+  // COOLDOWN: Tempo mínimo entre dois alertas (ex: 1 minuto)
+  final Duration _alertCooldown = const Duration(minutes: 1);
+  DateTime? _lastAlertTime; // Guarda quando foi o último grito
+
   final _heartRateController = StreamController<int>.broadcast();
   Stream<int> get heartRateStream => _heartRateController.stream;
+
+  final _criticalAlertController = StreamController<int>.broadcast();
+  Stream<int> get criticalAlertStream => _criticalAlertController.stream;
 
   bool _isMonitoring = false;
   Timer? _pollingTimer;
 
-  // Definindo tipos específicos para iOS
   final List<HealthDataType> _types = [
     HealthDataType.STEPS,
     HealthDataType.HEART_RATE,
   ];
 
-  /// Inicializa permissões e notificações
   Future<bool> initialize() async {
-    // Mantém a tela ligada (Vital para iOS não matar o app)
     await WakelockPlus.enable();
-
-    // Configura notificações locais
     await _initNotifications();
-
-    // Requisita acesso ao HealthKit
-    // No iOS, se o usuário negar, o requestAuthorization retorna true mas não dá dados.
-    // É uma medida de privacidade da Apple (você não sabe que foi bloqueado).
     bool requested = await _health.requestAuthorization(_types);
-
     return requested;
   }
 
-  /// Inicia o loop de leitura
   void startVitalMonitoring() {
     if (_isMonitoring) return;
     _isMonitoring = true;
-    print("iOS Health Service: Iniciando monitoramento...");
+    print("Health Service: Iniciando monitoramento...");
 
-    // pollingTimer: HealthKit não envia stream em tempo real para apps terceiros
-    // passivamente. Precisamos perguntar "tem algo novo?" periodicamente.
-    // 5 segundos é um bom equilíbrio.
+    // Timer de 5 segundos para leitura
     _pollingTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
       await _fetchLatestHeartRate();
     });
@@ -63,76 +54,91 @@ class HealthMonitoringService {
   void stopMonitoring() {
     _isMonitoring = false;
     _pollingTimer?.cancel();
-    WakelockPlus.disable(); // Deixa a tela apagar
-    print("iOS Health Service: Parado.");
+    WakelockPlus.disable();
+    print("Health Service: Parado.");
   }
 
-  /// Busca o batimento mais recente no HealthKit
   Future<void> _fetchLatestHeartRate() async {
     try {
       final now = DateTime.now();
-      // Olha para os últimos 5 minutos
+      // Janela curta (5 min) para focar no "agora"
       final startTime = now.subtract(const Duration(minutes: 5));
 
-      // Busca dados
       List<HealthDataPoint> data = await _health.getHealthDataFromTypes(
         startTime: startTime,
         endTime: now,
         types: [HealthDataType.HEART_RATE],
       );
 
-      // Remove duplicatas e ordena
-      data = _health.removeDuplicates(data);
+      // IMPORTANTE: Removemos o removeDuplicates() para não perder dados rápidos
+      // data = _health.removeDuplicates(data);
 
       if (data.isNotEmpty) {
+        // Ordena pelo final da leitura (dateTo) decrescente
         data.sort((a, b) => b.dateTo.compareTo(a.dateTo));
-        final latestPoint = data.first;
 
-        // Extrai o valor (HealthValueNumeric)
-        // No iOS HealthKit, o valor geralmente vem como double
+        final latestPoint = data.first;
         final value = latestPoint.value as NumericHealthValue;
         final double bpm = value.numericValue.toDouble();
+        final bpmInt = bpm.toInt();
 
-        print("HealthKit LATEST BPM: $bpm");
+        // --- CORREÇÃO: LOG GERAL ---
+        // Agora este print roda SEMPRE, independente do valor
+        print(
+            "[Monitor] Leitura: $bpmInt BPM (Horário: ${latestPoint.dateTo.hour}:${latestPoint.dateTo.minute}:${latestPoint.dateTo.second})");
+        // ---------------------------
 
-        // Envia para a UI
-        _heartRateController.add(bpm.toInt());
+        // Atualiza a tela
+        _heartRateController.add(bpmInt);
 
-        // Lógica de Alerta
-        if (bpm > _safeHeartRateLimit) {
-          _triggerCriticalAlert(bpm.toInt());
+        // Só entra aqui se for CRÍTICO
+        if (bpmInt > _safeHeartRateLimit) {
+          _checkAndTriggerAlert(bpmInt);
         }
       } else {
-        // Debug: útil para saber se o HealthKit está vazio
-        // print("HealthKit: Nenhum batimento recente encontrado.");
+        // Log opcional para saber que o timer está rodando mas sem dados
+        // print("... (sem dados recentes no HealthKit)");
       }
     } catch (e) {
-      print("Erro HealthKit: $e");
+      print("Erro no HealthKit: $e");
     }
   }
 
-  /// Busca o total de passos do dia (HealthKit calcula automaticamente)
+  /// Verifica se pode alertar (Cooldown) antes de disparar
+  Future<void> _checkAndTriggerAlert(int bpm) async {
+    final now = DateTime.now();
+    if (_lastAlertTime == null ||
+        now.difference(_lastAlertTime!) > _alertCooldown) {
+      print("ALERTA CRÍTICO: $bpm BPM");
+
+      // 2. DISPARA O EVENTO PARA A UI (POPUP)
+      _criticalAlertController.add(bpm);
+
+      // Dispara a notificação do sistema (Banner)
+      await _triggerCriticalAlert(bpm);
+
+      _lastAlertTime = now;
+    }
+  }
+
   Future<int> getDailySteps() async {
     final now = DateTime.now();
     final midnight = DateTime(now.year, now.month, now.day);
-
     try {
       int? steps = await _health.getTotalStepsInInterval(midnight, now);
       return steps ?? 0;
     } catch (e) {
-      print("Erro ao ler passos: $e");
       return 0;
     }
   }
 
-  // --- Notificações Locais (Configuração Padrão) ---
+  // --- Notificações ---
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
 
   Future<void> _initNotifications() async {
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
-      requestBadgePermission: true,
       requestSoundPermission: true,
     );
     const settings = InitializationSettings(iOS: iosSettings);
@@ -140,21 +146,21 @@ class HealthMonitoringService {
   }
 
   Future<void> _triggerCriticalAlert(int bpm) async {
-    // Previne spam de notificações (opcional: adicionar lógica de debounce aqui)
     const iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentSound: true,
-      sound: 'default', // Ou um som de alarme customizado
-      interruptionLevel: InterruptionLevel
-          .critical, // Requer entitlement especial, use .active ou .timeSensitive se der erro
+      presentBanner: true,
+      sound: 'default',
+      interruptionLevel:
+          InterruptionLevel.active, // Fura o silêncio se possível
     );
 
     const details = NotificationDetails(iOS: iosDetails);
 
     await _notifications.show(
-      1, // ID fixo
-      'ALERTA CARDÍACO',
-      'Frequência alta detectada: $bpm BPM',
+      666,
+      'ALERTA DE TAQUICARDIA',
+      'Seus batimentos atingiram $bpm BPM. Diminua o ritmo.',
       details,
     );
   }

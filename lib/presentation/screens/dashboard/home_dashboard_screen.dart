@@ -12,12 +12,21 @@ class HomeDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // --- LÓGICA DO POPUP DE ALERTA CRÍTICO ---
+    // Escuta o stream do HealthService. Se chegar um valor (bpm), mostra o alerta.
+    ref.listen(criticalAlertStreamProvider, (previous, next) {
+      next.whenData((bpm) {
+        _showCriticalDialog(context, bpm);
+      });
+    });
+
     return SafeArea(
       child: RefreshIndicator(
         onRefresh: () async {
           ref.refresh(userProfileProvider);
           ref.refresh(availableStatsProvider);
-          ref.refresh(leaderboardProvider); // Atualiza o ranking também
+          ref.refresh(leaderboardProvider);
+          // O healthControllerProvider se auto-gerencia, não precisa dar refresh manual
         },
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -35,6 +44,80 @@ class HomeDashboardScreen extends ConsumerWidget {
       ),
     );
   }
+
+  // Função que desenha o Popup de Alerta
+  // Função que desenha o Popup de Alerta (Corrigida para Modo Escuro)
+  void _showCriticalDialog(BuildContext context, int bpm) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Cores adaptativas
+    final backgroundColor =
+        isDark ? const Color(0xFF590000) : Colors.red.shade50;
+    final titleColor = isDark ? Colors.red.shade100 : Colors.red.shade900;
+    final valueColor = isDark ? Colors.red.shade200 : Colors.red.shade800;
+    final bodyColor = isDark ? Colors.white70 : Colors.black87;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: backgroundColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: valueColor, size: 32),
+            const SizedBox(width: 12),
+            Text("ATENÇÃO!",
+                style:
+                    TextStyle(color: titleColor, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "Frequência Cardíaca Alta Detectada",
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: bodyColor // Cor corrigida
+                  ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "$bpm BPM",
+              style: TextStyle(
+                  fontSize: 48, fontWeight: FontWeight.w900, color: valueColor),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "Recomendamos que você pare o exercício imediatamente e respire fundo.",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: bodyColor), // Cor corrigida
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text("Dispensar", style: TextStyle(color: titleColor)),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: valueColor,
+              foregroundColor: isDark ? Colors.black : Colors.white,
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Entendi, vou parar"),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _TopBar extends ConsumerWidget {
@@ -48,14 +131,8 @@ class _TopBar extends ConsumerWidget {
 
     return profile.when(
       data: (p) {
-        // CORREÇÃO: Usando 1000 XP para alinhar com o GamificationController
         const int xpPerLevel = 1000;
-
-        // Se o objeto 'p' (Profile) já tiver o campo .level vindo do banco,
-        // prefira usar: final level = p.level;
-        // Caso contrário, calculamos igual ao Controller:
         final level = (p.xp / xpPerLevel).floor() + 1;
-
         final currentXp = p.xp % xpPerLevel;
         const goalXp = xpPerLevel;
 
@@ -95,7 +172,6 @@ class _TopBar extends ConsumerWidget {
             ),
             const SizedBox(width: 12),
             Text(
-              // Exibe XP formatado (ex: 400/1000)
               '${currentXp.toInt()}/$goalXp',
               style: textTheme.bodyMedium
                   ?.copyWith(color: colors.onSurfaceVariant),
@@ -138,10 +214,6 @@ class _TopBar extends ConsumerWidget {
     );
   }
 }
-
-// ... (Resto do arquivo: _Greeting, _ClassificationCard, etc. mantidos iguais)
-// O erro estava apenas na lógica da _TopBar acima.
-// Copie as outras classes do código anterior se precisar, elas não mudaram.
 
 class _Greeting extends ConsumerWidget {
   const _Greeting();
@@ -251,7 +323,6 @@ class _StatisticsCard extends ConsumerWidget {
   const _StatisticsCard();
 
   Color _getColorForStat(String id) {
-    // ... (Mantenha sua lógica de cores atual)
     switch (id) {
       case 'water':
         return const Color(0xFF53A9FF);
@@ -271,9 +342,9 @@ class _StatisticsCard extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
 
-    // 1. INICIALIZA O MONITORAMENTO
-    // Ao assistir esse provider, ele dispara o 'initialize' e o 'startMonitoring'.
-    // O .autoDispose garante que pare quando sair da tela.
+    // 1. INICIALIZA O MONITORAMENTO DE SAÚDE
+    // Ao assistir esse provider, ele dispara o 'initialize' e o 'startMonitoring' no Service.
+    // O .autoDispose no provider garante que o monitoramento pare quando sair da tela.
     ref.watch(healthControllerProvider);
 
     final availableStats = ref.watch(availableStatsProvider);
@@ -285,7 +356,6 @@ class _StatisticsCard extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // ... (Mantenha o cabeçalho Row com Título e Botão de Editar) ...
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -297,7 +367,6 @@ class _StatisticsCard extends ConsumerWidget {
                 ),
               ],
             ),
-
             availableStats.when(
               data: (list) {
                 final selectedIds = selectedStats.valueOrNull ?? [];
@@ -307,8 +376,9 @@ class _StatisticsCard extends ConsumerWidget {
                     .toList();
 
                 if (statCards.isEmpty) {
-                  // ... (Mantenha seu estado vazio) ...
-                  return Container(child: Text("Vazio"));
+                  return Container(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(t.dashboard.stats.empty));
                 }
 
                 return GridView.builder(
@@ -325,11 +395,10 @@ class _StatisticsCard extends ConsumerWidget {
                   itemBuilder: (context, index) {
                     final stat = statCards[index];
 
-                    // AQUI É O PULO DO GATO:
-                    // Passamos o ID para o Item saber se deve buscar dados ao vivo
+                    // Item Inteligente: Decide se mostra texto estático ou stream
                     return _LiveStatGridItem(
                       id: stat.id,
-                      defaultText: stat.value, // Valor do banco (backup)
+                      defaultText: stat.value,
                       icon: stat.icon,
                       iconColor: _getColorForStat(stat.id),
                     );
@@ -396,22 +465,19 @@ class _LiveStatGridItem extends ConsumerWidget {
 
     String displayValue = defaultText;
 
-    // Lógica de Interceptação de Dados
+    // Lógica de Interceptação de Dados (HealthKit)
     if (id == 'heartRate') {
       final heartRateAsync = ref.watch(heartRateProvider);
-
       displayValue = heartRateAsync.when(
         data: (bpm) => '$bpm BPM',
-        loading: () =>
-            'Measuring...', // Ou manter o defaultText enquanto carrega
+        loading: () => '...',
         error: (_, __) => '--',
       );
     } else if (id == 'steps') {
       final stepsAsync = ref.watch(stepsProvider);
-
       displayValue = stepsAsync.when(
         data: (steps) => '$steps steps',
-        loading: () => defaultText,
+        loading: () => defaultText, // Mostra o valor do banco enquanto carrega
         error: (_, __) => defaultText,
       );
     }
@@ -430,7 +496,7 @@ class _LiveStatGridItem extends ConsumerWidget {
             children: [
               Icon(icon, size: 24, color: iconColor),
               const Spacer(),
-              // Indicador visual de "Ao Vivo" para dar um charme
+              // Indicador visual de "Ao Vivo"
               if (id == 'heartRate') _PulsingDot(),
             ],
           ),
@@ -438,7 +504,7 @@ class _LiveStatGridItem extends ConsumerWidget {
           Text(
             displayValue,
             style: textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold, // Destaque para o número
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],
@@ -447,7 +513,6 @@ class _LiveStatGridItem extends ConsumerWidget {
   }
 }
 
-// Pequena animação para indicar que o sensor está ativo (Opcional, mas clientes adoram)
 class _PulsingDot extends StatefulWidget {
   @override
   _PulsingDotState createState() => _PulsingDotState();

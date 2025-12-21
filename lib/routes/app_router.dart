@@ -22,6 +22,8 @@ import 'package:strive/presentation/screens/basic/login_screen.dart';
 import 'package:strive/presentation/screens/basic/loading_screen.dart';
 import 'package:strive/presentation/screens/profile/profile_providers.dart';
 import 'package:strive/presentation/state/navigation_provider.dart';
+import 'package:strive/presentation/screens/medicine/medicine_screen.dart'; // Verifique se o caminho está correto
+import 'package:strive/presentation/screens/health/steps_screen.dart'; // A tela nova
 
 enum AppRoute {
   loading,
@@ -33,7 +35,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshNotifier = ref.watch(goRouterRefreshStreamProvider.notifier);
 
   final authState = ref.watch(authStateStreamProvider);
-  
+
   final lastRoute = ref.read(navigationStateProvider);
 
   final profileState = ref.watch(userProfileStreamProvider.select(
@@ -50,12 +52,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/loading',
         name: AppRoute.loading.name,
-        pageBuilder: (context, state) => const NoTransitionPage(child: LoadingScreen()),
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: LoadingScreen()),
       ),
       GoRoute(
         path: '/login',
         name: AppRoute.login.name,
-        pageBuilder: (context, state) => const NoTransitionPage(child: LoginScreen()),
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: LoginScreen()),
       ),
       GoRoute(
         path: '/onboarding',
@@ -70,7 +74,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             child: SuccessScreen(
                 message: 'Tudo Certo! Seus dados foram cadastrados!')),
       ),
-
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             AppShell(navigationShell: navigationShell),
@@ -97,7 +100,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ],
             ),
           ]),
-
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/diet',
@@ -123,7 +125,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ],
             ),
           ]),
-
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/workout',
@@ -132,7 +133,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   const NoTransitionPage(child: WorkoutScreen()),
               routes: [
                 GoRoute(
-                  path: 'editor/:planId', 
+                  path: 'editor/:planId',
                   name: 'workout-editor',
                   pageBuilder: (context, state) {
                     final planId = state.pathParameters['planId']!;
@@ -152,16 +153,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   pageBuilder: (context, state) {
                     final muscle =
                         state.uri.queryParameters['muscle'] ?? 'Peito';
-                    final planId = 
-                        state.uri.queryParameters['planId'] ?? '';
+                    final planId = state.uri.queryParameters['planId'] ?? '';
                     return NoTransitionPage(
-                        child: AddExerciseScreen(muscleGroup: muscle, planId: planId));
+                        child: AddExerciseScreen(
+                            muscleGroup: muscle, planId: planId));
                   },
                 ),
               ],
             ),
           ]),
-
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/explore',
@@ -172,7 +172,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ]),
         ],
       ),
-
+      GoRoute(
+        path: '/steps',
+        name: 'steps',
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: StepsScreen()),
+      ),
+      GoRoute(
+        path: '/medicine',
+        name: 'medicine',
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: MedicineScreen()),
+      ),
       GoRoute(
         path: '/profile',
         name: 'profile',
@@ -187,7 +198,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-
       GoRoute(
         path: '/404',
         name: 'under-construction',
@@ -195,9 +205,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             const NoTransitionPage(child: UnderConstructionScreen()),
       ),
     ],
-
     redirect: (BuildContext context, GoRouterState state) {
-      
       final isLoggingIn = state.matchedLocation == '/login';
       final isOnboarding = state.matchedLocation == '/onboarding';
       final isLoading = state.matchedLocation == '/loading';
@@ -220,21 +228,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       if (isLoggingIn || isLoading || isOnboarding) {
         if (lastRoute != null && lastRoute.isNotEmpty && lastRoute != '/') {
-           return lastRoute;
+          return lastRoute;
         }
         return '/dashboard';
       }
 
       return null;
     },
-
     errorPageBuilder: (context, state) =>
         const NoTransitionPage(child: UnderConstructionScreen()),
   );
 
   router.routerDelegate.addListener(() {
     final location = router.routerDelegate.currentConfiguration.uri.toString();
-    
+
     Future.microtask(() {
       ref.read(navigationStateProvider.notifier).saveLastRoute(location);
     });
