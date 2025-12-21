@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:strive/i18n/strings.g.dart'; 
+import 'package:strive/i18n/strings.g.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -19,40 +19,40 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
 
     final exploreItems = [
       {
-        'title': t.explore.categories.activity, 
+        'title': t.explore.categories.activity,
         'icon': Icons.local_fire_department,
         'color': const Color(0xFFFF8A65),
         'route': '/workout'
       },
       {
-        'title': t.explore.categories.nutrition, 
+        'title': t.explore.categories.nutrition,
         'icon': Icons.restaurant_rounded,
         'color': const Color(0xFFFACC15),
         'route': '/diet'
       },
       {
-        'title': t.explore.categories.sleep, 
+        'title': t.explore.categories.sleep,
         'icon': Icons.bed_rounded,
         'color': Colors.blue.shade300,
         'route': '/sleep'
       },
       {
-        'title': t.explore.categories.medication, 
+        'title': t.explore.categories.medication,
         'icon': Icons.medication_rounded,
         'color': Colors.cyan.shade300,
         'route': '/medicine'
       },
       {
-        'title': t.explore.categories.body_measurements, 
+        'title': t.explore.categories.body_measurements,
         'icon': Icons.accessibility_new_rounded,
         'color': Colors.red.shade300,
         'route': '/body'
       },
       {
-        'title': t.explore.categories.mobility, 
+        'title': t.explore.categories.mobility,
         'icon': Icons.directions_walk_rounded,
         'color': const Color(0xFFFACC15),
-        'route': '/activity'
+        'route': '/steps'
       },
     ];
 
@@ -63,7 +63,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background, 
+      backgroundColor: theme.colorScheme.background,
       body: SafeArea(
         bottom: false,
         child: ListView(
@@ -89,7 +89,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                 padding: const EdgeInsets.only(top: 32.0),
                 child: Center(
                   child: Text(
-                    t.explore.not_found, 
+                    t.explore.not_found,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -103,12 +103,11 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           title: item['title'] as String,
                           icon: item['icon'] as IconData,
                           iconColor: item['color'] as Color,
-                          onTap: () => context.go(item['route'] as String),
+                          onTap: () => context.push(item['route'] as String),
                         ))
                     .toList(),
               ),
-
-            const SizedBox(height: 100), 
+            const SizedBox(height: 100),
           ],
         ),
       ),
@@ -129,13 +128,12 @@ class _SearchBar extends StatelessWidget {
     return TextField(
       onChanged: onChanged,
       decoration: InputDecoration(
-        hintText: t.explore.search_hint, 
+        hintText: t.explore.search_hint,
         hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
         prefixIcon:
             Icon(Icons.search, color: theme.colorScheme.onSurfaceVariant),
         filled: true,
-        fillColor:
-            theme.colorScheme.surfaceContainerHighest, 
+        fillColor: theme.colorScheme.surfaceContainerHighest,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
@@ -170,7 +168,7 @@ class _CategoryRow extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerLow, 
+            color: theme.colorScheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(

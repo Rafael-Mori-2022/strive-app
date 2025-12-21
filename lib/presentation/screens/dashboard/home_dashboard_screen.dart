@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:strive/presentation/state/health_providers.dart';
 import 'package:strive/presentation/state/profile_providers.dart';
 import 'package:strive/presentation/state/stats_provider.dart';
-import 'package:strive/i18n/strings.g.dart'; 
+import 'package:strive/i18n/strings.g.dart';
 import 'package:strive/presentation/state/leaderboard_provider.dart';
 
 class HomeDashboardScreen extends ConsumerWidget {
@@ -11,12 +12,21 @@ class HomeDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // --- LÓGICA DO POPUP DE ALERTA CRÍTICO ---
+    // Escuta o stream do HealthService. Se chegar um valor (bpm), mostra o alerta.
+    ref.listen(criticalAlertStreamProvider, (previous, next) {
+      next.whenData((bpm) {
+        _showCriticalDialog(context, bpm);
+      });
+    });
+
     return SafeArea(
       child: RefreshIndicator(
         onRefresh: () async {
           ref.refresh(userProfileProvider);
           ref.refresh(availableStatsProvider);
-          ref.refresh(leaderboardProvider); // Atualiza o ranking também
+          ref.refresh(leaderboardProvider);
+          // O healthControllerProvider se auto-gerencia, não precisa dar refresh manual
         },
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -34,6 +44,80 @@ class HomeDashboardScreen extends ConsumerWidget {
       ),
     );
   }
+
+  // Função que desenha o Popup de Alerta
+  // Função que desenha o Popup de Alerta (Corrigida para Modo Escuro)
+  void _showCriticalDialog(BuildContext context, int bpm) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Cores adaptativas
+    final backgroundColor =
+        isDark ? const Color(0xFF590000) : Colors.red.shade50;
+    final titleColor = isDark ? Colors.red.shade100 : Colors.red.shade900;
+    final valueColor = isDark ? Colors.red.shade200 : Colors.red.shade800;
+    final bodyColor = isDark ? Colors.white70 : Colors.black87;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: backgroundColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: valueColor, size: 32),
+            const SizedBox(width: 12),
+            Text("ATENÇÃO!",
+                style:
+                    TextStyle(color: titleColor, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "Frequência Cardíaca Alta Detectada",
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: bodyColor // Cor corrigida
+                  ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "$bpm BPM",
+              style: TextStyle(
+                  fontSize: 48, fontWeight: FontWeight.w900, color: valueColor),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "Recomendamos que você pare o exercício imediatamente e respire fundo.",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: bodyColor), // Cor corrigida
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text("Dispensar", style: TextStyle(color: titleColor)),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: valueColor,
+              foregroundColor: isDark ? Colors.black : Colors.white,
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Entendi, vou parar"),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _TopBar extends ConsumerWidget {
@@ -47,14 +131,8 @@ class _TopBar extends ConsumerWidget {
 
     return profile.when(
       data: (p) {
-        // CORREÇÃO: Usando 1000 XP para alinhar com o GamificationController
-        const int xpPerLevel = 1000; 
-        
-        // Se o objeto 'p' (Profile) já tiver o campo .level vindo do banco, 
-        // prefira usar: final level = p.level;
-        // Caso contrário, calculamos igual ao Controller:
+        const int xpPerLevel = 1000;
         final level = (p.xp / xpPerLevel).floor() + 1;
-        
         final currentXp = p.xp % xpPerLevel;
         const goalXp = xpPerLevel;
 
@@ -94,7 +172,6 @@ class _TopBar extends ConsumerWidget {
             ),
             const SizedBox(width: 12),
             Text(
-              // Exibe XP formatado (ex: 400/1000)
               '${currentXp.toInt()}/$goalXp',
               style: textTheme.bodyMedium
                   ?.copyWith(color: colors.onSurfaceVariant),
@@ -137,10 +214,6 @@ class _TopBar extends ConsumerWidget {
     );
   }
 }
-
-// ... (Resto do arquivo: _Greeting, _ClassificationCard, etc. mantidos iguais)
-// O erro estava apenas na lógica da _TopBar acima. 
-// Copie as outras classes do código anterior se precisar, elas não mudaram.
 
 class _Greeting extends ConsumerWidget {
   const _Greeting();
@@ -189,7 +262,7 @@ class _ClassificationCard extends ConsumerWidget {
     final colors = Theme.of(context).colorScheme;
 
     final days = _getDaysRemaining();
-    final myRank = ref.watch(myRankProvider); 
+    final myRank = ref.watch(myRankProvider);
 
     return InkWell(
       onTap: () => context.push('/dashboard/leaderboard'),
@@ -222,10 +295,10 @@ class _ClassificationCard extends ConsumerWidget {
                           icon: Icons.access_time_filled_rounded,
                         ),
                         const SizedBox(height: 8),
-                        
                         if (myRank != null)
                           _InfoChip(
-                            text: '$myRank${t.dashboard.classification.rank_suffix}',
+                            text:
+                                '$myRank${t.dashboard.classification.rank_suffix}',
                             icon: Icons.emoji_events_rounded,
                           )
                         else
@@ -269,6 +342,11 @@ class _StatisticsCard extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
 
+    // 1. INICIALIZA O MONITORAMENTO DE SAÚDE
+    // Ao assistir esse provider, ele dispara o 'initialize' e o 'startMonitoring' no Service.
+    // O .autoDispose no provider garante que o monitoramento pare quando sair da tela.
+    ref.watch(healthControllerProvider);
+
     final availableStats = ref.watch(availableStatsProvider);
     final selectedStats = ref.watch(selectedStatsProvider);
 
@@ -281,10 +359,7 @@ class _StatisticsCard extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  t.dashboard.stats.title,
-                  style: textTheme.titleLarge,
-                ),
+                Text(t.dashboard.stats.title, style: textTheme.titleLarge),
                 IconButton(
                   icon:
                       Icon(Icons.edit_outlined, color: colors.onSurfaceVariant),
@@ -302,14 +377,8 @@ class _StatisticsCard extends ConsumerWidget {
 
                 if (statCards.isEmpty) {
                   return Container(
-                    padding: const EdgeInsets.only(top: 16.0),
-                    alignment: Alignment.center,
-                    child: Text(
-                      t.dashboard.stats.empty,
-                      style: textTheme.bodyMedium
-                          ?.copyWith(color: colors.onSurfaceVariant),
-                    ),
-                  );
+                      padding: const EdgeInsets.all(16),
+                      child: Text(t.dashboard.stats.empty));
                 }
 
                 return GridView.builder(
@@ -325,8 +394,11 @@ class _StatisticsCard extends ConsumerWidget {
                   itemCount: statCards.length,
                   itemBuilder: (context, index) {
                     final stat = statCards[index];
-                    return _StatGridItem(
-                      text: stat.value,
+
+                    // Item Inteligente: Decide se mostra texto estático ou stream
+                    return _LiveStatGridItem(
+                      id: stat.id,
+                      defaultText: stat.value,
                       icon: stat.icon,
                       iconColor: _getColorForStat(stat.id),
                     );
@@ -334,14 +406,9 @@ class _StatisticsCard extends ConsumerWidget {
                 );
               },
               loading: () => const SizedBox(
-                height: 150,
-                child: Center(child: CircularProgressIndicator()),
-              ),
-              error: (e, st) => Container(
-                padding: const EdgeInsets.only(top: 16.0),
-                alignment: Alignment.center,
-                child: Text(t.common.error_stats),
-              ),
+                  height: 150,
+                  child: Center(child: CircularProgressIndicator())),
+              error: (e, st) => Text(t.common.error_stats),
             ),
           ],
         ),
@@ -378,17 +445,42 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
-class _StatGridItem extends StatelessWidget {
-  const _StatGridItem(
-      {required this.text, required this.icon, required this.iconColor});
-  final String text;
+class _LiveStatGridItem extends ConsumerWidget {
+  const _LiveStatGridItem({
+    required this.id,
+    required this.defaultText,
+    required this.icon,
+    required this.iconColor,
+  });
+
+  final String id;
+  final String defaultText;
   final IconData icon;
   final Color iconColor;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
+
+    String displayValue = defaultText;
+
+    // Lógica de Interceptação de Dados (HealthKit)
+    if (id == 'heartRate') {
+      final heartRateAsync = ref.watch(heartRateProvider);
+      displayValue = heartRateAsync.when(
+        data: (bpm) => '$bpm BPM',
+        loading: () => '...',
+        error: (_, __) => '--',
+      );
+    } else if (id == 'steps') {
+      final stepsAsync = ref.watch(stepsProvider);
+      displayValue = stepsAsync.when(
+        data: (steps) => '$steps steps',
+        loading: () => defaultText, // Mostra o valor do banco enquanto carrega
+        error: (_, __) => defaultText,
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -400,10 +492,59 @@ class _StatGridItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 24, color: iconColor),
+          Row(
+            children: [
+              Icon(icon, size: 24, color: iconColor),
+              const Spacer(),
+              // Indicador visual de "Ao Vivo"
+              if (id == 'heartRate') _PulsingDot(),
+            ],
+          ),
           const SizedBox(height: 8),
-          Text(text, style: textTheme.titleSmall),
+          Text(
+            displayValue,
+            style: textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _PulsingDot extends StatefulWidget {
+  @override
+  _PulsingDotState createState() => _PulsingDotState();
+}
+
+class _PulsingDotState extends State<_PulsingDot>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 1))
+          ..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _controller,
+      child: Container(
+        width: 8,
+        height: 8,
+        decoration:
+            const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
       ),
     );
   }
